@@ -1,15 +1,14 @@
 package one.pouekdev.coordinatelist;
 
 import com.google.common.collect.Lists;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.WorldSavePath;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.*;
 import java.util.List;
 
 public class CListData {
-    public static void saveListToFile(ServerWorld world, String fileName, List<String> stringList) {
-        File dataDir = world.getServer().getSavePath(WorldSavePath.ROOT).toFile();
+    public static void saveListToFile(String fileName, List<String> stringList) {
+        File dataDir = FabricLoader.getInstance().getConfigDir().resolve("coordinatelist").toFile();
         File file = new File(dataDir, fileName);
 
         try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(file)))) {
@@ -21,8 +20,8 @@ public class CListData {
         }
     }
 
-    public static List<String> loadListFromFile(ServerWorld world, String fileName) {
-        File dataDir = world.getServer().getSavePath(WorldSavePath.ROOT).toFile();
+    public static List<String> loadListFromFile(String fileName) {
+        File dataDir = FabricLoader.getInstance().getConfigDir().resolve("CList").toFile();
         File file = new File(dataDir, fileName);
 
         if (!file.exists()) {
