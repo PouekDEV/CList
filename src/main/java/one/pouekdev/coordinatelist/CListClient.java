@@ -44,6 +44,8 @@ public class CListClient implements ClientModInitializer {
                 variables.waypoints.clear();
                 variables.names.clear();
                 variables.dimensions.clear();
+                variables.worldName = null;
+                variables.last_world = null;
             }
             else{
                 variables.last_world = client.world;
@@ -63,7 +65,7 @@ public class CListClient implements ClientModInitializer {
         variables.waypoints.add(name);
         CList.LOGGER.info("New waypoint for dimension " + variables.last_world.getDimension().effects());
         variables.dimensions.add(String.valueOf(variables.last_world.getDimension().effects()));
-        variables.names.add("");
+        variables.names.add("New Waypoint");
         variables.saved_since_last_update = false;
     }
     public static void deleteWaypoint(int position){

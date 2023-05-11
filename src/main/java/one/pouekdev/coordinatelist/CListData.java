@@ -4,10 +4,18 @@ import com.google.common.collect.Lists;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.List;
 
 public class CListData {
     public static void saveListToFile(String fileName, List<String> stringList) {
+        if (!Files.exists(FabricLoader.getInstance().getConfigDir().resolve("coordinatelist"))) {
+            try {
+                Files.createDirectories(FabricLoader.getInstance().getConfigDir().resolve("coordinatelist"));
+            } catch (IOException e) {
+                // empty catch
+            }
+        }
         File dataDir = FabricLoader.getInstance().getConfigDir().resolve("coordinatelist").toFile();
         File file = new File(dataDir, fileName);
 
@@ -21,7 +29,7 @@ public class CListData {
     }
 
     public static List<String> loadListFromFile(String fileName) {
-        File dataDir = FabricLoader.getInstance().getConfigDir().resolve("CList").toFile();
+        File dataDir = FabricLoader.getInstance().getConfigDir().resolve("coordinatelist").toFile();
         File file = new File(dataDir, fileName);
 
         if (!file.exists()) {

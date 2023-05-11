@@ -9,7 +9,10 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
+
 import java.util.List;
 
 public class CListWaypointScreen extends Screen {
@@ -60,7 +63,7 @@ public class CListWaypointScreen extends Screen {
     }
     public class ScrollList extends EntryListWidget<ScrollList.ScrollListEntry> {
         public ScrollList(){
-            super(CListWaypointScreen.this.client, CListWaypointScreen.this.width, CListWaypointScreen.this.height, 32, CListWaypointScreen.this.height - 32, 25);
+            super(CListWaypointScreen.this.client, CListWaypointScreen.this.width, CListWaypointScreen.this.height, 32, CListWaypointScreen.this.height - 32, 50);
         }
         public void SetupElements(){
             for(int i = 0; i < CListClient.variables.waypoints.size(); i++){
@@ -80,33 +83,82 @@ public class CListWaypointScreen extends Screen {
         public int getRowWidth() {
             return 150;
         }
+        @Override
+        public void drawSelectionHighlight(MatrixStack matrices, int y, int entryWidth, int entryHeight, int borderColor, int fillColor){}
         public void appendNarrations(NarrationMessageBuilder builder){}
         public class ScrollListEntry extends EntryListWidget.Entry<ScrollListEntry>{
             public final ButtonWidget button;
             public final ButtonWidget delete_button;
+            public final TextFieldWidget waypoint_name;
+            public final List<Element> children;
+            public final int id;
             public ScrollListEntry(ButtonWidget e, int id, ScrollList list){
+                this.id = id;
                 this.button = e;
                 this.delete_button = ButtonWidget.builder(Text.literal("Delete"), button -> {CListClient.deleteWaypoint(id);list.RefreshElements();}).width(70).build();
+                this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 300, 20, Text.literal("type here"));
+                this.waypoint_name.setFocusUnlocked(true);
+                this.waypoint_name.setFocused(true);
+                this.waypoint_name.setMaxLength(69); // nice
+                this.waypoint_name.setText(CListClient.variables.names.get(id));
+                this.children = Lists.newArrayList();
+                this.children.add(button);
+                this.children.add(delete_button);
+                this.children.add(waypoint_name);
             }
             @Override
             public void render(MatrixStack matrices, int index, int y, int x, int width, int height, int mouseX, int mouseY, boolean hovered, float delta) {
                 button.setX(x-50);
                 button.setY(y+4);
-                delete_button.setX(x+120);
+                delete_button.setX(x+100);
                 delete_button.setY(y+4);
+                waypoint_name.setY(y+29);
+                waypoint_name.setX(x-20);
+                waypoint_name.setWidth(width);
                 button.render(matrices, mouseX, mouseY, delta);
                 delete_button.render(matrices, mouseX, mouseY, delta);
+                waypoint_name.render(matrices, mouseX, mouseY, delta);
             }
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                return this.delete_button.mouseClicked(mouseX, mouseY, button);
+                for (int i = 0; i < children.size(); i++) {
+                    if (children.get(i).mouseClicked(mouseX, mouseY, button)) {
+                        return children.get(i).mouseClicked(mouseX, mouseY, button);
+                    }
+                }
+                return false;
             }
             @Override
             public boolean mouseReleased(double mouseX, double mouseY, int button) {
-                return this.delete_button.mouseReleased(mouseX, mouseY, button);
+                for (int i = 0; i < children.size(); i++) {
+                    if (children.get(i).mouseClicked(mouseX, mouseY, button)) {
+                        return children.get(i).mouseReleased(mouseX, mouseY, button);
+                    }
+                }
+                return false;
             }
             public List<? extends Element> children() {
                 return ImmutableList.of(button);
+            }
+            @Override
+            public boolean charTyped(char chr, int keyCode) {
+                boolean result = super.charTyped(chr, keyCode);
+                waypoint_name.setText(waypoint_name.getText() + chr);
+                CListClient.variables.names.set(id,waypoint_name.getText());
+                CListClient.variables.saved_since_last_update = false;
+                return true;
+            }
+            @Override
+            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
+                    if (waypoint_name.getText().length() > 0) {
+                        waypoint_name.setText(waypoint_name.getText().substring(0, waypoint_name.getText().length() - 1));
+                        CListClient.variables.names.set(id,waypoint_name.getText());
+                        CListClient.variables.saved_since_last_update = false;
+                    }
+                    return true;
+                }
+                return super.keyPressed(keyCode, scanCode, modifiers);
             }
         }
     }
