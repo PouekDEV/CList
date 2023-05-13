@@ -24,9 +24,9 @@ public abstract class MenuMixin extends Screen {
 		adder.add(ButtonWidget.builder(Text.literal("CList"), button -> {
 			this.client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
 		}).width(204).build(),2, gridWidget.copyPositioner().marginTop(180));
-		gridWidget.refreshPositions();
+		gridWidget.recalculateDimensions();// 1.19.4 gridWidget.refreshPositions();
 		SimplePositioningWidget.setPos(gridWidget, 0, 0, this.width, this.height, 0.5f, 0.25f);
-		gridWidget.forEachChild(this::addDrawableChild);
+		addDrawableChild(gridWidget); // 1.19.4 gridWidget.forEachChild(this::addDrawableChild);
 	}
 }
 

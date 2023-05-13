@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.Text;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.compress.utils.Lists;
@@ -33,9 +34,9 @@ public class CListWaypointScreen extends Screen {
         list = new ScrollList();
         list.SetupElements();
         addDrawableChild(list);
-        gridWidget.refreshPositions();
+        gridWidget.recalculateDimensions();// 1.19.4 gridWidget.refreshPositions();
         SimplePositioningWidget.setPos(gridWidget, 0, 0, this.width, this.height, 0.5f, 0f);
-        gridWidget.forEachChild(this::addDrawableChild);
+        addDrawableChild(gridWidget);// 1.19.4 gridWidget.forEachChild(this::addDrawableChild);
     }
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -67,13 +68,17 @@ public class CListWaypointScreen extends Screen {
         }
         public void SetupElements(){
             for(int i = 0; i < CListClient.variables.waypoints.size(); i++){
-                ScrollList.ScrollListEntry Coordinate = new ScrollList.ScrollListEntry(ButtonWidget.builder(Text.literal(CListClient.variables.waypoints.get(i)), button -> {}).width(150).build(),i,this);
+                final int f_i = i;
+                ScrollList.ScrollListEntry Coordinate = new ScrollList.ScrollListEntry(ButtonWidget.builder(Text.literal(CListClient.variables.waypoints.get(i)), button -> {
+                    long window = MinecraftClient.getInstance().getWindow().getHandle();
+                    GLFW.glfwSetClipboardString(window, CListClient.variables.waypoints.get(f_i));
+                }).width(150).build(),i,this);
                 list.addEntry(Coordinate);
             }
         }
         public void RefreshElements(){
-            this.clearEntries();
-            this.SetupElements();
+            clearEntries();
+            SetupElements();
         }
         @Override
         public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -81,7 +86,7 @@ public class CListWaypointScreen extends Screen {
         }
         @Override
         public int getRowWidth() {
-            return 150;
+            return 220;
         }
         @Override
         public void drawSelectionHighlight(MatrixStack matrices, int y, int entryWidth, int entryHeight, int borderColor, int fillColor){}
@@ -90,6 +95,7 @@ public class CListWaypointScreen extends Screen {
             public final ButtonWidget button;
             public final ButtonWidget delete_button;
             public final TextFieldWidget waypoint_name;
+            public final Text dimension;
             public final List<Element> children;
             public final int id;
             public ScrollListEntry(ButtonWidget e, int id, ScrollList list){
@@ -98,9 +104,9 @@ public class CListWaypointScreen extends Screen {
                 this.delete_button = ButtonWidget.builder(Text.literal("Delete"), button -> {CListClient.deleteWaypoint(id);list.RefreshElements();}).width(70).build();
                 this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 300, 20, Text.literal("type here"));
                 this.waypoint_name.setFocusUnlocked(true);
-                this.waypoint_name.setFocused(true);
-                this.waypoint_name.setMaxLength(69); // nice
+                this.waypoint_name.setMaxLength(25);
                 this.waypoint_name.setText(CListClient.variables.names.get(id));
+                this.dimension = CListClient.getDimension(id);
                 this.children = Lists.newArrayList();
                 this.children.add(button);
                 this.children.add(delete_button);
@@ -108,34 +114,39 @@ public class CListWaypointScreen extends Screen {
             }
             @Override
             public void render(MatrixStack matrices, int index, int y, int x, int width, int height, int mouseX, int mouseY, boolean hovered, float delta) {
-                button.setX(x-50);
+                button.setX(x-10);
                 button.setY(y+4);
-                delete_button.setX(x+100);
+                delete_button.setX(x+140);
                 delete_button.setY(y+4);
                 waypoint_name.setY(y+29);
-                waypoint_name.setX(x-20);
-                waypoint_name.setWidth(width);
+                waypoint_name.setX(x-8);
+                waypoint_name.setWidth(width-70);
                 button.render(matrices, mouseX, mouseY, delta);
                 delete_button.render(matrices, mouseX, mouseY, delta);
                 waypoint_name.render(matrices, mouseX, mouseY, delta);
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, dimension.getString(), x+150, y+35, 0xFFFFFF);
             }
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                for (int i = 0; i < children.size(); i++) {
-                    if (children.get(i).mouseClicked(mouseX, mouseY, button)) {
-                        return children.get(i).mouseClicked(mouseX, mouseY, button);
+                boolean handled = false;
+                for (Element E : children) {
+                    if (E.mouseClicked(mouseX, mouseY, button)) {
+                        handled = true;
+                        break;
                     }
                 }
-                return false;
+                return handled || super.mouseClicked(mouseX, mouseY, button);
             }
             @Override
             public boolean mouseReleased(double mouseX, double mouseY, int button) {
-                for (int i = 0; i < children.size(); i++) {
-                    if (children.get(i).mouseClicked(mouseX, mouseY, button)) {
-                        return children.get(i).mouseReleased(mouseX, mouseY, button);
+                boolean handled = false;
+                for (Element E : children) {
+                    if (E.mouseReleased(mouseX, mouseY, button)) {
+                        handled = true;
+                        break;
                     }
                 }
-                return false;
+                return handled || super.mouseReleased(mouseX, mouseY, button);
             }
             public List<? extends Element> children() {
                 return ImmutableList.of(button);

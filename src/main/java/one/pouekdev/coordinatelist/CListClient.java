@@ -8,7 +8,10 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.Text;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -69,10 +72,22 @@ public class CListClient implements ClientModInitializer {
         variables.saved_since_last_update = false;
     }
     public static void deleteWaypoint(int position){
-        variables.waypoints.remove(position);
-        variables.names.remove(position);
-        variables.dimensions.remove(position);
-        variables.saved_since_last_update = false;
+        try {
+            variables.waypoints.remove(position);
+            variables.names.remove(position);
+            variables.dimensions.remove(position);
+            variables.saved_since_last_update = false;
+        }
+        catch (IndexOutOfBoundsException e){
+            //CList.LOGGER.info("WTF");
+        }
+    }
+    public static Text getDimension(int position){
+        String s = variables.dimensions.get(position);
+        s = s.replace("minecraft:","");
+        s = s.replace("_"," ");
+        s = StringUtils.capitalize(s);
+        return Text.literal(s);
     }
     public static void checkForWorldChanges(ClientWorld current_world){
         if(!variables.loaded_last_world && variables.worldName != null){

@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "CList",
-  "description": "Coordinate List (CList for short) is a simple minimalistic fabric mod for saving your coordinates. No minimaps or waypoints just a bare bone list for adding coordinates.",
+  "description": "Coordinate List (CList for short) is a simple minimalistic fabric mod for saving your coordinates. No minimaps or waypoints. Just a bare bone list for adding coordinates.",
   "authors": [
     "PouekDEV"
   ],
@@ -32,7 +32,7 @@
   "depends": {
     "fabricloader": ">=0.14.19",
     "fabric-api": "*",
-    "minecraft": "~1.19.4",
+    "minecraft": "~1.19.3",
     "java": ">=17"
   },
   "suggests": {
