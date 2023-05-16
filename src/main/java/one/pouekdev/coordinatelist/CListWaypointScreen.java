@@ -7,7 +7,6 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.Text;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.compress.utils.Lists;
@@ -28,7 +27,7 @@ public class CListWaypointScreen extends Screen {
         GridWidget.Adder adder = gridWidget.createAdder(2);
         adder.add(ButtonWidget.builder(Text.literal("Add a new waypoint in current position"), button -> {
             PlayerEntity player = MinecraftClient.getInstance().player;
-            CListClient.addNewWaypoint("X:"+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()));
+            CListClient.addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()));
             list.RefreshElements();
         }).width(300).build(),2, gridWidget.copyPositioner().marginTop(10));
         list = new ScrollList();
@@ -120,7 +119,7 @@ public class CListWaypointScreen extends Screen {
                 delete_button.setY(y+4);
                 waypoint_name.setY(y+29);
                 waypoint_name.setX(x-8);
-                waypoint_name.setWidth(width-70);
+                waypoint_name.setWidth(width-73);
                 button.render(matrices, mouseX, mouseY, delta);
                 delete_button.render(matrices, mouseX, mouseY, delta);
                 waypoint_name.render(matrices, mouseX, mouseY, delta);
@@ -155,7 +154,10 @@ public class CListWaypointScreen extends Screen {
             public boolean charTyped(char chr, int keyCode) {
                 boolean result = super.charTyped(chr, keyCode);
                 waypoint_name.setText(waypoint_name.getText() + chr);
-                CListClient.variables.names.set(id,waypoint_name.getText());
+                try{
+                    CListClient.variables.names.set(id,waypoint_name.getText());
+                }
+                catch(IndexOutOfBoundsException ignored){}
                 CListClient.variables.saved_since_last_update = false;
                 return true;
             }

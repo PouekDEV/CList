@@ -3,15 +3,18 @@ package one.pouekdev.coordinatelist;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.LiteralTextContent;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -20,6 +23,13 @@ public class CListClient implements ClientModInitializer {
     public static CListVariables variables = new CListVariables();
     KeyBinding open_waypoints_keybind;
     KeyBinding add_a_waypoint;
+    KeyBinding show_hud;
+    //public float distanceTo(int index, MinecraftClient client) {
+    //    float f = (float)(client.getInstance().player.getX() - CListClient.getX(index));
+    //    float g = (float)(client.getInstance().player.getY() - CListClient.getY(index));
+    //    float h = (float)(client.getInstance().player.getZ() - CListClient.getZ(index));
+    //    return MathHelper.sqrt(f * f + g * g + h * h);
+    //}
     @Override
     public void onInitializeClient() {
         open_waypoints_keybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -34,13 +44,32 @@ public class CListClient implements ClientModInitializer {
                 GLFW.GLFW_KEY_B,
                 "CList Keybinds"
         ));
+        show_hud = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "Show waypoints",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_G,
+                "CList Keybinds"
+        ));
+        WorldRenderEvents.AFTER_ENTITIES.register((ctx) -> {
+            if (!variables.waypoints.isEmpty()) {
+                for(int i = 0; i < variables.waypoints.size(); i++){
+                    ParticleEffect particle = ParticleTypes.FLAME;
+                    ParticleManager particleManager = MinecraftClient.getInstance().particleManager;
+                    particleManager.addParticle(particle, getX(i), getY(i), getZ(i), 0.0, 0.0, 0.0);
+                    // Here will go the code for rendering the actual waypoint
+                }
+            }
+        });
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (open_waypoints_keybind.wasPressed()) {
                 client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
             }
             while(add_a_waypoint.wasPressed()){
                 PlayerEntity player = MinecraftClient.getInstance().player;
-                addNewWaypoint("X:"+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()));
+                addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()));
+            }
+            while(show_hud.wasPressed()){
+                client.setScreen(new CListWaypointHUD(Text.literal("hud"),MinecraftClient.getInstance()));
             }
             if (client.world == null) {
                 variables.loaded_last_world = false;
@@ -88,6 +117,40 @@ public class CListClient implements ClientModInitializer {
         s = s.replace("_"," ");
         s = StringUtils.capitalize(s);
         return Text.literal(s);
+    }
+    public static Text getDimension(String string){
+        String s = string;
+        s = s.replace("minecraft:","");
+        s = s.replace("_"," ");
+        s = StringUtils.capitalize(s);
+        return Text.literal(s);
+    }
+    public static int getX(int position){
+        String s = variables.waypoints.get(position);
+        s = s.replace("X","");
+        s = s.replace("Y","");
+        s = s.replace("Z","");
+        s = s.replace(" ","");
+        String[] segments = s.split(":");
+        return Integer.parseInt(segments[1]);
+    }
+    public static int getY(int position){
+        String s = variables.waypoints.get(position);
+        s = s.replace("X","");
+        s = s.replace("Y","");
+        s = s.replace("Z","");
+        s = s.replace(" ","");
+        String[] segments = s.split(":");
+        return Integer.parseInt(segments[2]);
+    }
+    public static int getZ(int position){
+        String s = variables.waypoints.get(position);
+        s = s.replace("X","");
+        s = s.replace("Y","");
+        s = s.replace("Z","");
+        s = s.replace(" ","");
+        String[] segments = s.split(":");
+        return Integer.parseInt(segments[3]);
     }
     public static void checkForWorldChanges(ClientWorld current_world){
         if(!variables.loaded_last_world && variables.worldName != null){
