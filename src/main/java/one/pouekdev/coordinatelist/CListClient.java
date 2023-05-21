@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 
 import java.util.List;
 import java.util.Objects;
@@ -64,6 +65,8 @@ public class CListClient implements ClientModInitializer {
         ));
         WorldRenderEvents.END.register(context -> {
             if (!variables.waypoints.isEmpty()) {
+                RenderSystem.disableCull();
+                RenderSystem.depthFunc(GL30.GL_ALWAYS);
                 for(int i = 0; i < variables.waypoints.size(); i++){
                     if(Objects.equals(getDimensionString(i), getDimension(String.valueOf(variables.last_world.getDimension().effects())))) {
                         Camera camera = context.camera();
@@ -87,12 +90,9 @@ public class CListClient implements ClientModInitializer {
                         RenderSystem.setShader(GameRenderer::getPositionColorTexProgram);
                         RenderSystem.setShaderTexture(0, new Identifier("coordinatelist", "waypoint_icon.png"));
                         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-                        RenderSystem.disableCull();
-                        RenderSystem.depthMask(false);
-                        RenderSystem.disableDepthTest();
-                        RenderSystem.enableBlend();
-                        RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
                         tessellator.draw();
+                        RenderSystem.enableBlend();
+                        RenderSystem.defaultBlendFunc();
                         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
                         int distance_without_decimal_places = (int) distanceTo(i, MinecraftClient.getInstance());
                         String labelText = variables.names.get(i) + " (" + distance_without_decimal_places + " m)";
@@ -104,18 +104,16 @@ public class CListClient implements ClientModInitializer {
                         if (distanceTo(i, MinecraftClient.getInstance()) < 20) {
                             modified_size = modified_size * 30;
                         }
-                        matrixStack.translate(-textWidth / 2.0, -60 - modified_size, 0);
+                        matrixStack.translate(-textWidth / 2.0, -60 - (modified_size*2), 0);
                         matrixStack.scale((float) Math.log(modified_size * 4), (float) Math.log(modified_size * 4), (float) Math.log(modified_size * 4));
                         DrawableHelper.fill(matrixStack, (int) (-11-modified_size), 0, (int) (-11-modified_size + textWidth - 1), textHeight - 1, 0x90000000);
-                        textRenderer.draw(matrixStack, labelText, -10 - modified_size, 0, 0xFFFFFF);
+                        textRenderer.draw(matrixStack, labelText, -10 - (modified_size), 0, 0xFFFFFF);
                         matrixStack.pop();
-                        RenderSystem.depthFunc(GL11.GL_LEQUAL);
-                        RenderSystem.enableCull();
-                        RenderSystem.depthMask(true);
                         RenderSystem.disableBlend();
-                        RenderSystem.enableDepthTest();
                     }
                 }
+                RenderSystem.depthFunc(GL11.GL_LEQUAL);
+                RenderSystem.enableCull();
             }
         });
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
