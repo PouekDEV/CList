@@ -52,16 +52,16 @@ public class CListClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         open_waypoints_keybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Open waypoints menu",
+                "keybinds.waypoints.menu",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_M,
-                "CList Keybinds"
+                "keybinds.category.name"
         ));
         add_a_waypoint = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Add a waypoint in current position",
+                "keybinds.waypoint.add",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_B,
-                "CList Keybinds"
+                "keybinds.category.name"
         ));
         WorldRenderEvents.END.register(context -> {
             if (!variables.waypoints.isEmpty()) {
@@ -88,11 +88,17 @@ public class CListClient implements ClientModInitializer {
                         buffer.vertex(positionMatrix, 1, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 1).next();
                         buffer.vertex(positionMatrix, 1, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 0f).next();
                         RenderSystem.setShader(GameRenderer::getPositionColorTexProgram);
-                        RenderSystem.setShaderTexture(0, new Identifier("coordinatelist", "waypoint_icon.png"));
+                        if(variables.names.get(i).contains((Text.translatable("waypoint.death")).getString().toLowerCase())){
+                            RenderSystem.setShaderTexture(0, new Identifier("coordinatelist", "skull.png"));
+                        }
+                        else {
+                            RenderSystem.setShaderTexture(0, new Identifier("coordinatelist", "waypoint_icon.png"));
+                        }
                         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
                         tessellator.draw();
                         RenderSystem.enableBlend();
-                        RenderSystem.defaultBlendFunc();
+                        RenderSystem.depthMask(true);
+                        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
                         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
                         int distance_without_decimal_places = (int) distanceTo(i, MinecraftClient.getInstance());
                         String labelText = variables.names.get(i) + " (" + distance_without_decimal_places + " m)";
@@ -104,10 +110,10 @@ public class CListClient implements ClientModInitializer {
                         if (distanceTo(i, MinecraftClient.getInstance()) < 20) {
                             modified_size = modified_size * 30;
                         }
-                        matrixStack.translate(-textWidth / 2.0, -60 - (modified_size*2), 0);
+                        matrixStack.translate(-textWidth / 1.2, -60 - (modified_size*2), 0);
                         matrixStack.scale((float) Math.log(modified_size * 4), (float) Math.log(modified_size * 4), (float) Math.log(modified_size * 4));
                         DrawableHelper.fill(matrixStack, (int) (-11-modified_size), 0, (int) (-11-modified_size + textWidth - 1), textHeight - 1, 0x90000000);
-                        textRenderer.draw(matrixStack, labelText, -10 - (modified_size), 0, 0xFFFFFF);
+                        textRenderer.draw(matrixStack, labelText, (-11 -modified_size), 0, 0xFFFFFF);
                         matrixStack.pop();
                         RenderSystem.disableBlend();
                     }
@@ -121,8 +127,10 @@ public class CListClient implements ClientModInitializer {
                 client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
             }
             while(add_a_waypoint.wasPressed()){
-                PlayerEntity player = MinecraftClient.getInstance().player;
-                addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()));
+                if(!Objects.equals(client.currentScreen, new CListWaypointScreen(Text.literal("Waypoints")))){
+                    PlayerEntity player = MinecraftClient.getInstance().player;
+                    addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()),false);
+                }
             }
             if (client.world == null) {
                 variables.loaded_last_world = false;
@@ -141,16 +149,28 @@ public class CListClient implements ClientModInitializer {
                 } else {
                     variables.worldName = client.getCurrentServerEntry().name;
                 }
+                if(!client.player.isAlive() && !variables.had_death_waypoint_placed){
+                    PlayerEntity player = client.player;
+                    addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()),true);
+                    variables.had_death_waypoint_placed = true;
+                } else if (client.player.isAlive() && variables.had_death_waypoint_placed) {
+                    variables.had_death_waypoint_placed = false;
+                }
             }
         });
         variables.saved_since_last_update = true;
         variables.loaded_last_world = false;
     }
-    public static void addNewWaypoint(String name){
+    public static void addNewWaypoint(String name, boolean death){
         variables.waypoints.add(name);
         CList.LOGGER.info("New waypoint for dimension " + variables.last_world.getDimension().effects());
         variables.dimensions.add(String.valueOf(variables.last_world.getDimension().effects()));
-        variables.names.add("New Waypoint");
+        if(death){
+            variables.names.add((Text.translatable("waypoint.last.death")).getString());
+        }
+        else{
+            variables.names.add((Text.translatable("waypoint.new.waypoint")).getString());
+        }
         variables.colors.add(new CListWaypointColor(rand.nextFloat(),rand.nextFloat(),rand.nextFloat()));
         variables.saved_since_last_update = false;
     }

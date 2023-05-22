@@ -13,4 +13,5 @@ public class CListVariables {
     public ClientWorld last_world;
     public boolean saved_since_last_update;
     public boolean loaded_last_world;
+    public boolean had_death_waypoint_placed;
 }
