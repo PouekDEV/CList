@@ -8,8 +8,10 @@ public class CListVariables {
     public List<String> waypoints = Lists.newArrayList();
     public List<String> names = Lists.newArrayList();
     public List<String> dimensions = Lists.newArrayList();
+    public List<CListWaypointColor> colors = Lists.newArrayList();
     public String worldName;
     public ClientWorld last_world;
     public boolean saved_since_last_update;
     public boolean loaded_last_world;
+    public boolean had_death_waypoint_placed;
 }

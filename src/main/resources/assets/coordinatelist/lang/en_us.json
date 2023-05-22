@@ -1,0 +1,10 @@
+{
+  "keybinds.category.name": "CList Keybinds",
+  "keybinds.waypoint.add": "Add a waypoint in current position",
+  "keybinds.waypoints.menu": "Open waypoints menu",
+  "waypoint.last.death": "Last death",
+  "waypoint.new.waypoint": "New Waypoint",
+  "buttons.add.new.waypoint": "Add a new waypoint in current position",
+  "buttons.delete.waypoint": "Delete",
+  "waypoint.death": "death"
+}

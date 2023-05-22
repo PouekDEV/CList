@@ -7,17 +7,15 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.Text;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.compress.utils.Lists;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
 public class CListWaypointScreen extends Screen {
-    public CListWaypointScreen(@Nullable Text title) {
+    public CListWaypointScreen(Text title) {
         super(title);
     }
     public ScrollList list;
@@ -26,9 +24,9 @@ public class CListWaypointScreen extends Screen {
         GridWidget gridWidget = new GridWidget();
         gridWidget.getMainPositioner().margin(4, 4, 4, 0);
         GridWidget.Adder adder = gridWidget.createAdder(2);
-        adder.add(ButtonWidget.builder(Text.literal("Add a new waypoint in current position"), button -> {
+        adder.add(ButtonWidget.builder(Text.translatable("buttons.add.new.waypoint"), button -> {
             PlayerEntity player = MinecraftClient.getInstance().player;
-            CListClient.addNewWaypoint("X:"+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()));
+            CListClient.addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()),false);
             list.RefreshElements();
         }).width(300).build(),2, gridWidget.copyPositioner().marginTop(10));
         list = new ScrollList();
@@ -101,7 +99,7 @@ public class CListWaypointScreen extends Screen {
             public ScrollListEntry(ButtonWidget e, int id, ScrollList list){
                 this.id = id;
                 this.button = e;
-                this.delete_button = ButtonWidget.builder(Text.literal("Delete"), button -> {CListClient.deleteWaypoint(id);list.RefreshElements();}).width(70).build();
+                this.delete_button = ButtonWidget.builder(Text.translatable("buttons.delete.waypoint"), button -> {CListClient.deleteWaypoint(id);list.RefreshElements();}).width(70).build();
                 this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 300, 20, Text.literal("type here"));
                 this.waypoint_name.setFocusUnlocked(true);
                 this.waypoint_name.setMaxLength(25);
@@ -120,7 +118,7 @@ public class CListWaypointScreen extends Screen {
                 delete_button.setY(y+4);
                 waypoint_name.setY(y+29);
                 waypoint_name.setX(x-8);
-                waypoint_name.setWidth(width-70);
+                waypoint_name.setWidth(width-73);
                 button.render(matrices, mouseX, mouseY, delta);
                 delete_button.render(matrices, mouseX, mouseY, delta);
                 waypoint_name.render(matrices, mouseX, mouseY, delta);
@@ -155,7 +153,10 @@ public class CListWaypointScreen extends Screen {
             public boolean charTyped(char chr, int keyCode) {
                 boolean result = super.charTyped(chr, keyCode);
                 waypoint_name.setText(waypoint_name.getText() + chr);
-                CListClient.variables.names.set(id,waypoint_name.getText());
+                try{
+                    CListClient.variables.names.set(id,waypoint_name.getText());
+                }
+                catch(IndexOutOfBoundsException ignored){}
                 CListClient.variables.saved_since_last_update = false;
                 return true;
             }

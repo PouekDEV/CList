@@ -12,9 +12,7 @@ public class CListData {
         if (!Files.exists(FabricLoader.getInstance().getConfigDir().resolve("coordinatelist"))) {
             try {
                 Files.createDirectories(FabricLoader.getInstance().getConfigDir().resolve("coordinatelist"));
-            } catch (IOException e) {
-                // empty catch
-            }
+            } catch (IOException ignored) {}
         }
         File dataDir = FabricLoader.getInstance().getConfigDir().resolve("coordinatelist").toFile();
         File file = new File(dataDir, fileName);
@@ -23,9 +21,7 @@ public class CListData {
             for (String str : stringList) {
                 writer.println(str);
             }
-        } catch (IOException e) {
-            // empty catch
-        }
+        } catch (IOException ignored) {}
     }
 
     public static List<String> loadListFromFile(String fileName) {
@@ -45,9 +41,7 @@ public class CListData {
             }
 
             return stringList;
-        } catch (IOException e) {
-            // empty catch
-        }
+        } catch (IOException ignored) {}
 
         return null;
     }
