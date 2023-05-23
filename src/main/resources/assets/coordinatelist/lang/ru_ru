@@ -1,0 +1,10 @@
+{
+  "keybinds.category.name": "Сочетания Клавиш CList",
+  "keybinds.waypoint.add": "Добавить путевую точку в текущей позиции",
+  "keybinds.waypoints.menu": "Открыть меню путевых точек",
+  "waypoint.last.death": "Последняя смерть",
+  "waypoint.new.waypoint": "Новая Путевая Точка",
+  "buttons.add.new.waypoint": "Создать новую путевую точку в текущей позиции",
+  "buttons.delete.waypoint": "Удалить",
+  "waypoint.death": "смерть"
+}
