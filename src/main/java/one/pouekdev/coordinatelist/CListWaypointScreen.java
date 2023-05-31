@@ -67,9 +67,9 @@ public class CListWaypointScreen extends Screen {
         public void SetupElements(){
             for(int i = 0; i < CListClient.variables.waypoints.size(); i++){
                 final int f_i = i;
-                ScrollList.ScrollListEntry Coordinate = new ScrollList.ScrollListEntry(ButtonWidget.builder(Text.literal(CListClient.variables.waypoints.get(i)), button -> {
+                ScrollList.ScrollListEntry Coordinate = new ScrollList.ScrollListEntry(ButtonWidget.builder(Text.literal(CListClient.variables.waypoints.get(i).getCoordinates()), button -> {
                     long window = MinecraftClient.getInstance().getWindow().getHandle();
-                    GLFW.glfwSetClipboardString(window, CListClient.variables.waypoints.get(f_i));
+                    GLFW.glfwSetClipboardString(window, CListClient.variables.waypoints.get(f_i).getCoordinates());
                 }).width(150).build(),i,this);
                 list.addEntry(Coordinate);
             }
@@ -103,8 +103,8 @@ public class CListWaypointScreen extends Screen {
                 this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 300, 20, Text.literal("type here"));
                 this.waypoint_name.setFocusUnlocked(true);
                 this.waypoint_name.setMaxLength(25);
-                this.waypoint_name.setText(CListClient.variables.names.get(id));
-                this.dimension = CListClient.getDimension(id);
+                this.waypoint_name.setText(CListClient.variables.waypoints.get(id).getName());
+                this.dimension = CListClient.variables.waypoints.get(id).getDimension();
                 this.children = Lists.newArrayList();
                 this.children.add(button);
                 this.children.add(delete_button);
@@ -154,7 +154,7 @@ public class CListWaypointScreen extends Screen {
                 boolean result = super.charTyped(chr, keyCode);
                 waypoint_name.setText(waypoint_name.getText() + chr);
                 try{
-                    CListClient.variables.names.set(id,waypoint_name.getText());
+                    CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
                 }
                 catch(IndexOutOfBoundsException ignored){}
                 CListClient.variables.saved_since_last_update = false;
@@ -165,7 +165,7 @@ public class CListWaypointScreen extends Screen {
                 if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
                     if (waypoint_name.getText().length() > 0) {
                         waypoint_name.setText(waypoint_name.getText().substring(0, waypoint_name.getText().length() - 1));
-                        CListClient.variables.names.set(id,waypoint_name.getText());
+                        CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
                         CListClient.variables.saved_since_last_update = false;
                     }
                     return true;
