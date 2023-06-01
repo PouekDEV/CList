@@ -6,7 +6,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CListData {
@@ -22,7 +21,7 @@ public class CListData {
 
         try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)))) {
             for (CListWaypoint cListWaypoint : waypointList) {
-                writer.println(cListWaypoint.getCoordinates() + ":" + cListWaypoint.getName() + ":" + cListWaypoint.getDimensionValue());
+                writer.println(cListWaypoint.getCoordinates() + "~" + cListWaypoint.getName() + "~" + cListWaypoint.getDimensionValue());
             }
         } catch (IOException ignored) {
         }
@@ -37,11 +36,11 @@ public class CListData {
         }
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
-            List<CListWaypoint> waypointList = new ArrayList<>();
+            List<CListWaypoint> waypointList = Lists.newArrayList();
             String line;
 
             while ((line = reader.readLine()) != null) {
-                String[] segments = line.split(":");
+                String[] segments = line.split("~");
                 if (segments.length == 3) {
                     String coords = segments[0];
                     String name = segments[1];

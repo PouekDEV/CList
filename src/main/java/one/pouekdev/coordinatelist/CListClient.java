@@ -118,8 +118,9 @@ public class CListClient implements ClientModInitializer {
                         matrixStack.scale(-0.025f, -0.025f, 0.025f);
                         matrixStack.translate(-textWidth / 1.2, -60 - (size *2), 0);
                         matrixStack.scale((float) Math.log(size * 4), (float) Math.log(size * 4), (float) Math.log(size * 4));
-                        DrawableHelper.fill(matrixStack, (int) (-11- size), 0, (int) (-11- size + textWidth - 1), textHeight - 1, 0x90000000);
-                        textRenderer.draw(matrixStack, labelText, (-11 - size), 0, 0xFFFFFF);
+                        DrawableHelper.fill(matrixStack, (int) (-14- size), -2, (int) (-10- size + textWidth), textHeight-1, 0x90000000);
+                        matrixStack.translate(0,0,-1f);
+                        textRenderer.draw(matrixStack, labelText, (-11 - size), (size/15)*-1, 0xFFFFFF);
                         matrixStack.pop();
                         RenderSystem.disableBlend();
                     }
@@ -201,12 +202,11 @@ public class CListClient implements ClientModInitializer {
             CList.LOGGER.info("New world " + variables.worldName);
             variables.last_world = current_world;
             // Check for old 1.0 saves and convert them
-            List<String> temp = CListData.loadListFromFileLegacy("clist_"+variables.worldName);
             List<String> names = CListData.loadListFromFileLegacy("clist_names_"+variables.worldName);
             List<String> dimensions = CListData.loadListFromFileLegacy("clist_dimensions_"+variables.worldName);
             if(names != null && names.size()>0){
+                List<String> temp = CListData.loadListFromFileLegacy("clist_"+variables.worldName);
                 for(int i = 0; i < names.size(); i++){
-                    CList.LOGGER.info(temp.get(i),names.get(i),dimensions.get(i));
                     variables.waypoints.add(new CListWaypoint(temp.get(i),names.get(i),dimensions.get(i)));
                 }
                 for(int i = 0; i < variables.waypoints.size(); i++){
@@ -223,6 +223,9 @@ public class CListClient implements ClientModInitializer {
                 List<CListWaypoint> ways = CListData.loadListFromFile("clist_"+variables.worldName);
                 if(ways != null && ways.size() > 0){
                     variables.waypoints = ways;
+                    for(int i = 0; i < variables.waypoints.size(); i++){
+                        variables.colors.add(new CListWaypointColor(rand.nextFloat(),rand.nextFloat(),rand.nextFloat()));
+                    }
                     CList.LOGGER.info("Loaded data for world " + variables.worldName);
                 }
                 else {
