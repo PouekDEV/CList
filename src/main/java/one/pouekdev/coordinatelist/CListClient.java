@@ -34,19 +34,28 @@ public class CListClient implements ClientModInitializer {
     static Random rand = new Random();
     KeyBinding open_waypoints_keybind;
     KeyBinding add_a_waypoint;
-    public float calculateSize(int index, MinecraftClient client){
+    public float calculateSizeWaypoint(int index, MinecraftClient client){
         float distance = distanceTo(index,client);
-        if(distance < 12){
+        if(distance < 30){
             return 0.5f;
         }
         else{
-            return (float) (0.5 * (distance / 12));
+            return (float) (0.5 + (distance - 30)/15);
+        }
+    }
+    public float calculateSizeText(int index, MinecraftClient client){
+        float distance = distanceTo(index,client);
+        if(distance < 30){
+            return 15f;
+        }
+        else{
+            return (15 + (distance - 30)/15);
         }
     }
     public float distanceTo(int index, MinecraftClient client) {
-        float f = (float)(client.getInstance().player.getX() - CListClient.getX(index));
-        float g = (float)(client.getInstance().player.getY() - CListClient.getY(index));
-        float h = (float)(client.getInstance().player.getZ() - CListClient.getZ(index));
+        float f = (float)(client.getInstance().player.getX() - variables.waypoints.get(index).getX());
+        float g = (float)(client.getInstance().player.getY() - variables.waypoints.get(index).getY());
+        float h = (float)(client.getInstance().player.getZ() - variables.waypoints.get(index).getZ());
         return Math.round(MathHelper.sqrt(f * f + g * g + h * h));
     }
     @Override
@@ -68,10 +77,10 @@ public class CListClient implements ClientModInitializer {
                 RenderSystem.disableCull();
                 RenderSystem.depthFunc(GL30.GL_ALWAYS);
                 for(int i = 0; i < variables.waypoints.size(); i++){
-                    if(Objects.equals(getDimensionString(i), getDimension(String.valueOf(variables.last_world.getDimension().effects())))) {
+                    if(Objects.equals(variables.waypoints.get(i).getDimensionString(), getDimension(String.valueOf(variables.last_world.getDimension().effects())))) {
                         Camera camera = context.camera();
-                        float size = calculateSize(i, MinecraftClient.getInstance());
-                        Vec3d targetPosition = new Vec3d(CListClient.getX(i), CListClient.getY(i) + 1, CListClient.getZ(i));
+                        float size = calculateSizeWaypoint(i, MinecraftClient.getInstance());
+                        Vec3d targetPosition = new Vec3d(variables.waypoints.get(i).getX(), variables.waypoints.get(i).getY() + 1, variables.waypoints.get(i).getZ());
                         Vec3d transformedPosition = targetPosition.subtract(camera.getPos());
                         MatrixStack matrixStack = new MatrixStack();
                         matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
@@ -88,7 +97,7 @@ public class CListClient implements ClientModInitializer {
                         buffer.vertex(positionMatrix, 1, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 1).next();
                         buffer.vertex(positionMatrix, 1, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 0f).next();
                         RenderSystem.setShader(GameRenderer::getPositionColorTexProgram);
-                        if(variables.names.get(i).contains((Text.translatable("waypoint.death")).getString().toLowerCase())){
+                        if(variables.waypoints.get(i).getName().contains((Text.translatable("waypoint.death")).getString().toLowerCase())){
                             RenderSystem.setShaderTexture(0, new Identifier("coordinatelist", "skull.png"));
                         }
                         else {
@@ -99,21 +108,19 @@ public class CListClient implements ClientModInitializer {
                         RenderSystem.enableBlend();
                         RenderSystem.depthMask(true);
                         RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
+                        size = calculateSizeText(i,MinecraftClient.getInstance());
                         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
                         int distance_without_decimal_places = (int) distanceTo(i, MinecraftClient.getInstance());
-                        String labelText = variables.names.get(i) + " (" + distance_without_decimal_places + " m)";
+                        String labelText = variables.waypoints.get(i).getName() + " (" + distance_without_decimal_places + " m)";
                         int textWidth = textRenderer.getWidth(labelText);
                         int textHeight = textRenderer.fontHeight;
                         matrixStack.push();
                         matrixStack.scale(-0.025f, -0.025f, 0.025f);
-                        float modified_size = size;
-                        if (distanceTo(i, MinecraftClient.getInstance()) < 20) {
-                            modified_size = modified_size * 30;
-                        }
-                        matrixStack.translate(-textWidth / 1.2, -60 - (modified_size*2), 0);
-                        matrixStack.scale((float) Math.log(modified_size * 4), (float) Math.log(modified_size * 4), (float) Math.log(modified_size * 4));
-                        DrawableHelper.fill(matrixStack, (int) (-11-modified_size), 0, (int) (-11-modified_size + textWidth - 1), textHeight - 1, 0x90000000);
-                        textRenderer.draw(matrixStack, labelText, (-11 -modified_size), 0, 0xFFFFFF);
+                        matrixStack.translate(-textWidth / 1.2, -60 - (size *2), 0);
+                        matrixStack.scale((float) Math.log(size * 4), (float) Math.log(size * 4), (float) Math.log(size * 4));
+                        DrawableHelper.fill(matrixStack, (int) (-14- size), -2, (int) (-10- size + textWidth), textHeight-1, 0x90000000);
+                        matrixStack.translate(0,0,-1f);
+                        textRenderer.draw(matrixStack, labelText, (-11 - size), (size/15)*-1, 0xFFFFFF);
                         matrixStack.pop();
                         RenderSystem.disableBlend();
                     }
@@ -135,15 +142,14 @@ public class CListClient implements ClientModInitializer {
             if (client.world == null) {
                 variables.loaded_last_world = false;
                 variables.waypoints.clear();
-                variables.names.clear();
-                variables.dimensions.clear();
+                variables.colors.clear();
                 variables.worldName = null;
                 variables.last_world = null;
             }
             else{
                 variables.last_world = client.world;
                 checkForWorldChanges(variables.last_world);
-                checkIfSaveIsNeeded();
+                checkIfSaveIsNeeded(false);
                 if (client.isInSingleplayer()) {
                     variables.worldName = client.getServer().getSaveProperties().getLevelName();
                 } else {
@@ -162,36 +168,27 @@ public class CListClient implements ClientModInitializer {
         variables.loaded_last_world = false;
     }
     public static void addNewWaypoint(String name, boolean death){
-        variables.waypoints.add(name);
         CList.LOGGER.info("New waypoint for dimension " + variables.last_world.getDimension().effects());
-        variables.dimensions.add(String.valueOf(variables.last_world.getDimension().effects()));
+        String waypoint_name;
         if(death){
-            variables.names.add((Text.translatable("waypoint.last.death")).getString());
+            waypoint_name = (Text.translatable("waypoint.last.death")).getString();
         }
         else{
-            variables.names.add((Text.translatable("waypoint.new.waypoint")).getString());
+            waypoint_name = (Text.translatable("waypoint.new.waypoint")).getString();
         }
+        variables.waypoints.add(new CListWaypoint(name,waypoint_name,String.valueOf(variables.last_world.getDimension().effects())));
         variables.colors.add(new CListWaypointColor(rand.nextFloat(),rand.nextFloat(),rand.nextFloat()));
         variables.saved_since_last_update = false;
     }
     public static void deleteWaypoint(int position){
         try {
             variables.waypoints.remove(position);
-            variables.names.remove(position);
-            variables.dimensions.remove(position);
             variables.colors.remove(position);
             variables.saved_since_last_update = false;
         }
         catch (IndexOutOfBoundsException e){
             //CList.LOGGER.info("WTF");
         }
-    }
-    public static Text getDimension(int position){
-        String s = variables.dimensions.get(position);
-        s = s.replace("minecraft:","");
-        s = s.replace("_"," ");
-        s = StringUtils.capitalize(s);
-        return Text.literal(s);
     }
     public static String getDimension(String text){
         String s = text;
@@ -200,68 +197,48 @@ public class CListClient implements ClientModInitializer {
         s = StringUtils.capitalize(s);
         return s;
     }
-    public static String getDimensionString(int position){
-        String s = variables.dimensions.get(position);
-        s = s.replace("minecraft:","");
-        s = s.replace("_"," ");
-        s = StringUtils.capitalize(s);
-        return s;
-    }
-    public static int getX(int position){
-        String s = variables.waypoints.get(position);
-        s = s.replace("X","");
-        s = s.replace("Y","");
-        s = s.replace("Z","");
-        s = s.replace(" ","");
-        String[] segments = s.split(":");
-        return Integer.parseInt(segments[1]);
-    }
-    public static int getY(int position){
-        String s = variables.waypoints.get(position);
-        s = s.replace("X","");
-        s = s.replace("Y","");
-        s = s.replace("Z","");
-        s = s.replace(" ","");
-        String[] segments = s.split(":");
-        return Integer.parseInt(segments[2]);
-    }
-    public static int getZ(int position){
-        String s = variables.waypoints.get(position);
-        s = s.replace("X","");
-        s = s.replace("Y","");
-        s = s.replace("Z","");
-        s = s.replace(" ","");
-        String[] segments = s.split(":");
-        return Integer.parseInt(segments[3]);
-    }
     public static void checkForWorldChanges(ClientWorld current_world){
         if(!variables.loaded_last_world && variables.worldName != null){
             CList.LOGGER.info("New world " + variables.worldName);
             variables.last_world = current_world;
-            List<String> temp = CListData.loadListFromFile("clist_"+variables.worldName);
-            List<String> names = CListData.loadListFromFile("clist_names_"+variables.worldName);
-            List<String> dimensions = CListData.loadListFromFile("clist_dimensions_"+variables.worldName);
-            if(temp != null && temp.size()>0){
-                variables.waypoints = temp;
-                variables.names = names;
-                variables.dimensions = dimensions;
+            // Check for old 1.0 saves and convert them
+            List<String> names = CListData.loadListFromFileLegacy("clist_names_"+variables.worldName);
+            List<String> dimensions = CListData.loadListFromFileLegacy("clist_dimensions_"+variables.worldName);
+            if(names != null && names.size()>0){
+                List<String> temp = CListData.loadListFromFileLegacy("clist_"+variables.worldName);
+                for(int i = 0; i < names.size(); i++){
+                    variables.waypoints.add(new CListWaypoint(temp.get(i),names.get(i),dimensions.get(i)));
+                }
                 for(int i = 0; i < variables.waypoints.size(); i++){
                     variables.colors.add(new CListWaypointColor(rand.nextFloat(),rand.nextFloat(),rand.nextFloat()));
                 }
-                CList.LOGGER.info("Loaded data for world " + variables.worldName);
+                CListData.deleteLegacyFile("clist_names_"+variables.worldName);
+                CListData.deleteLegacyFile("clist_dimensions_"+variables.worldName);
+                CList.LOGGER.info("Loaded old 1.0 data for world " + variables.worldName);
+                // Force save converting it to a new format
+                checkIfSaveIsNeeded(true);
             }
             else{
-                CList.LOGGER.info("The file for " + variables.worldName + " doesn't exist");
+                // Check for post 1.0 saves
+                List<CListWaypoint> ways = CListData.loadListFromFile("clist_"+variables.worldName);
+                if(ways != null && ways.size() > 0){
+                    variables.waypoints = ways;
+                    for(int i = 0; i < variables.waypoints.size(); i++){
+                        variables.colors.add(new CListWaypointColor(rand.nextFloat(),rand.nextFloat(),rand.nextFloat()));
+                    }
+                    CList.LOGGER.info("Loaded data for world " + variables.worldName);
+                }
+                else {
+                    CList.LOGGER.info("The file for " + variables.worldName + " doesn't exist");
+                }
             }
             variables.loaded_last_world = true;
         }
     }
-    public static void checkIfSaveIsNeeded(){
-        if(!variables.saved_since_last_update){
+    public static void checkIfSaveIsNeeded(boolean force){
+        if(!variables.saved_since_last_update || force){
             CList.LOGGER.info("Saving data for world " + variables.worldName);
             CListData.saveListToFile("clist_"+variables.worldName, variables.waypoints);
-            CListData.saveListToFile("clist_names_"+variables.worldName, variables.names);
-            CListData.saveListToFile("clist_dimensions_"+variables.worldName, variables.dimensions);
             variables.saved_since_last_update = true;
         }
     }

@@ -1,10 +1,10 @@
 {
   "keybinds.category.name": "Skróty klawiszowe CList",
-  "keybinds.waypoint.add": "Dodaj waypointa w obecnym miejscu",
-  "keybinds.waypoints.menu": "Otwórz menu waypointów",
+  "keybinds.waypoint.add": "Dodaj punkt orientacyjny w obecnym miejscu",
+  "keybinds.waypoints.menu": "Otwórz menu punktów orientacyjnych",
   "waypoint.last.death": "Ostatnia śmierć",
-  "waypoint.new.waypoint": "Nowy Waypoint",
-  "buttons.add.new.waypoint": "Dodaj nowego waypointa w obecnym miejscu",
+  "waypoint.new.waypoint": "Nowy Punkt Orientacyjny",
+  "buttons.add.new.waypoint": "Dodaj nowy punkt orientacyjny w obecnym miejscu",
   "buttons.delete.waypoint": "Usuń",
   "waypoint.death": "śmierć"
 }

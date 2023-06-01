@@ -5,9 +5,7 @@ import org.apache.commons.compress.utils.Lists;
 import java.util.List;
 
 public class CListVariables {
-    public List<String> waypoints = Lists.newArrayList();
-    public List<String> names = Lists.newArrayList();
-    public List<String> dimensions = Lists.newArrayList();
+    public List<CListWaypoint> waypoints = Lists.newArrayList();
     public List<CListWaypointColor> colors = Lists.newArrayList();
     public String worldName;
     public ClientWorld last_world;
