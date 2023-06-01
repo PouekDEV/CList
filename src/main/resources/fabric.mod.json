@@ -10,7 +10,8 @@
   ],
   "contact": {
     "homepage": "https://modrinth.com/mod/clist",
-    "sources": "https://github.com/PouekDEV/CList"
+    "sources": "https://github.com/PouekDEV/CList",
+    "issues": "https://github.com/PouekDEV/CList/issues"
   },
 
   "license": "MIT License",
