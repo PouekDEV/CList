@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,22 +33,23 @@ public class CListClient implements ClientModInitializer {
     static Random rand = new Random();
     KeyBinding open_waypoints_keybind;
     KeyBinding add_a_waypoint;
+    KeyBinding toggle_visibility;
     public float calculateSizeWaypoint(int index, MinecraftClient client){
         float distance = distanceTo(index,client);
         if(distance < 30){
-            return 0.5f;
+            return 0.5f * (CListConfig.multiplier/10.0f);
         }
         else{
-            return (float) (0.5 + (distance - 30)/15);
+            return (0.5f + (distance - 30)/15) * (CListConfig.multiplier/10.0f);
         }
     }
     public float calculateSizeText(int index, MinecraftClient client){
         float distance = distanceTo(index,client);
         if(distance < 30){
-            return 15f;
+            return 15f * (CListConfig.multiplier/10.0f);
         }
         else{
-            return (15 + (distance - 30)/15);
+            return (15 + (distance - 30)/15) * (CListConfig.multiplier/10.0f);
         }
     }
     public float distanceTo(int index, MinecraftClient client) {
@@ -72,10 +72,16 @@ public class CListClient implements ClientModInitializer {
                 GLFW.GLFW_KEY_B,
                 "keybinds.category.name"
         ));
+        toggle_visibility = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "keybinds.waypoints.toggle",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_J,
+                "keybinds.category.name"
+        ));
         WorldRenderEvents.END.register(context -> {
-            if (!variables.waypoints.isEmpty()) {
+            if (!variables.waypoints.isEmpty() && variables.waypoints_toggled) {
                 RenderSystem.disableCull();
-                RenderSystem.depthFunc(GL30.GL_ALWAYS);
+                RenderSystem.depthFunc(GL11.GL_ALWAYS);
                 for(int i = 0; i < variables.waypoints.size(); i++){
                     if(Objects.equals(variables.waypoints.get(i).getDimensionString(), getDimension(String.valueOf(variables.last_world.getDimension().effects())))) {
                         Camera camera = context.camera();
@@ -139,6 +145,9 @@ public class CListClient implements ClientModInitializer {
                     addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()),false);
                 }
             }
+            while(toggle_visibility.wasPressed()){
+                variables.waypoints_toggled = !variables.waypoints_toggled;
+            }
             if (client.world == null) {
                 variables.loaded_last_world = false;
                 variables.waypoints.clear();
@@ -166,6 +175,7 @@ public class CListClient implements ClientModInitializer {
         });
         variables.saved_since_last_update = true;
         variables.loaded_last_world = false;
+        variables.waypoints_toggled = true;
     }
     public static void addNewWaypoint(String name, boolean death){
         CList.LOGGER.info("New waypoint for dimension " + variables.last_world.getDimension().effects());

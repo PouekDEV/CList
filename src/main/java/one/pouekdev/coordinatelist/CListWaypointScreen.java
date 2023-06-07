@@ -32,9 +32,9 @@ public class CListWaypointScreen extends Screen {
         list = new ScrollList();
         list.SetupElements();
         addDrawableChild(list);
-        gridWidget.recalculateDimensions();// 1.19.4 gridWidget.refreshPositions();
+        gridWidget.refreshPositions();
         SimplePositioningWidget.setPos(gridWidget, 0, 0, this.width, this.height, 0.5f, 0f);
-        addDrawableChild(gridWidget);// 1.19.4 gridWidget.forEachChild(this::addDrawableChild);
+        gridWidget.forEachChild(this::addDrawableChild);
     }
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -100,7 +100,7 @@ public class CListWaypointScreen extends Screen {
                 this.id = id;
                 this.button = e;
                 this.delete_button = ButtonWidget.builder(Text.translatable("buttons.delete.waypoint"), button -> {CListClient.deleteWaypoint(id);list.RefreshElements();}).width(70).build();
-                this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 300, 20, Text.literal("type here"));
+                this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 300, 20, Text.literal(""));
                 this.waypoint_name.setFocusUnlocked(true);
                 this.waypoint_name.setMaxLength(25);
                 this.waypoint_name.setText(CListClient.variables.waypoints.get(id).getName());
