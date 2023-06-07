@@ -12,4 +12,5 @@ public class CListVariables {
     public boolean saved_since_last_update;
     public boolean loaded_last_world;
     public boolean had_death_waypoint_placed;
+    public boolean waypoints_toggled;
 }

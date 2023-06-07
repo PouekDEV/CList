@@ -100,7 +100,7 @@ public class CListWaypointScreen extends Screen {
                 this.id = id;
                 this.button = e;
                 this.delete_button = ButtonWidget.builder(Text.translatable("buttons.delete.waypoint"), button -> {CListClient.deleteWaypoint(id);list.RefreshElements();}).width(70).build();
-                this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 300, 20, Text.literal("type here"));
+                this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 300, 20, Text.literal(""));
                 this.waypoint_name.setFocusUnlocked(true);
                 this.waypoint_name.setMaxLength(25);
                 this.waypoint_name.setText(CListClient.variables.waypoints.get(id).getName());
