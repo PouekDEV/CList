@@ -36,27 +36,62 @@ public class CListClient implements ClientModInitializer {
     KeyBinding toggle_visibility;
     public float calculateSizeWaypoint(int index, MinecraftClient client){
         float distance = distanceTo(index,client);
-        if(distance < 30){
-            return 0.5f * (CListConfig.multiplier/10.0f);
-        }
-        else{
-            return (0.5f + (distance - 30)/15) * (CListConfig.multiplier/10.0f);
-        }
+        return 0.5f * (CListConfig.multiplier/10.0f);
     }
     public float calculateSizeText(int index, MinecraftClient client){
         float distance = distanceTo(index,client);
-        if(distance < 30){
-            return 15f * (CListConfig.multiplier/10.0f);
-        }
-        else{
-            return (15 + (distance - 30)/15) * (CListConfig.multiplier/10.0f);
-        }
+        return 15f * (CListConfig.multiplier/10.0f);
     }
     public float distanceTo(int index, MinecraftClient client) {
         float f = (float)(client.getInstance().player.getX() - variables.waypoints.get(index).getX());
         float g = (float)(client.getInstance().player.getY() - variables.waypoints.get(index).getY());
         float h = (float)(client.getInstance().player.getZ() - variables.waypoints.get(index).getZ());
         return Math.round(MathHelper.sqrt(f * f + g * g + h * h));
+    }
+    public HashMap<String,Float> calculateRenderCoords(int index, MinecraftClient client) {
+        float distance = distanceTo(index, client);
+        
+        float px = (float)client.getInstance().player.getX();
+        float py = (float)client.getInstance().player.getY();
+        float pz = (float)client.getInstance().player.getZ();
+        
+        float wx = variables.waypoints.get(index).getX();
+        float wy = variables.waypoints.get(index).getY();
+        float wz = variables.waypoints.get(index).getZ();
+
+   
+        HashMap<String, Float> coords = new HashMap<String, Float>();
+
+        float vx = wx - px;
+        float vy = wy - py;
+        float vz = wz - pz;
+
+      
+        float vector_len = (float)Math.sqrt( Math.pow( vx, 2) + Math.pow(vy, 2) + Math.pow(vz,2) );
+
+        int radius = 32;
+
+        float scx = radius / vector_len * vx;
+        float scy = radius / vector_len * vy;
+        float scz = radius / vector_len * vz;
+        
+        float prx, pry, prz;
+
+        if (distance > 32) {
+            prx = scx + px;
+            pry = scy + py;
+            prz = scz + pz;
+        }
+        else {
+            prx = wx;
+            pry = wy;
+            prz = wz;
+        }
+        coords.put("x", prx);
+        coords.put("y", pry);
+        coords.put("z", prz);
+        //CList.LOGGER.info(coords.toString());
+        return coords;
     }
     @Override
     public void onInitializeClient() {
@@ -86,7 +121,8 @@ public class CListClient implements ClientModInitializer {
                     if(Objects.equals(variables.waypoints.get(i).getDimensionString(), getDimension(String.valueOf(variables.last_world.getDimension().effects())))) {
                         Camera camera = context.camera();
                         float size = calculateSizeWaypoint(i, MinecraftClient.getInstance());
-                        Vec3d targetPosition = new Vec3d(variables.waypoints.get(i).getX(), variables.waypoints.get(i).getY() + 1, variables.waypoints.get(i).getZ());
+                        HashMap<String,Float> renderCoords = calculateRenderCoords(i, MinecraftClient.getInstance());
+                        Vec3d targetPosition = new Vec3d(renderCoords.get("x"), renderCoords.get("y"), renderCoords.get("z"));
                         Vec3d transformedPosition = targetPosition.subtract(camera.getPos());
                         MatrixStack matrixStack = new MatrixStack();
                         matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
