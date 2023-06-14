@@ -20,8 +20,8 @@ public class CListData {
         File file = new File(dataDir, fileName);
 
         try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)))) {
-            for (CListWaypoint cListWaypoint : waypointList) {
-                writer.println(cListWaypoint.getCoordinates() + "~" + cListWaypoint.getName() + "~" + cListWaypoint.getDimensionValue());
+            for (int i = 0; i < waypointList.size(); i++) {
+                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).getName() + "~" + CListClient.variables.waypoints.get(i).getDimensionValue() + "~" + CListClient.variables.colors.get(i).rgbToHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render);
             }
         } catch (IOException ignored) {
         }
@@ -41,11 +41,31 @@ public class CListData {
 
             while ((line = reader.readLine()) != null) {
                 String[] segments = line.split("~");
-                if (segments.length == 3) {
+                if (segments.length >= 3) {
                     String coords = segments[0];
                     String name = segments[1];
                     String dimension = segments[2];
-                    CListWaypoint waypoint = new CListWaypoint(coords, name, dimension);
+                    String color = null,bool = null;
+                    try{
+                        color = segments[3];
+                        bool = segments[4];
+                    }
+                    catch (IndexOutOfBoundsException ignored){}
+                    CListWaypoint waypoint;
+                    if(bool != null){
+                        waypoint = new CListWaypoint(coords, name, dimension, Boolean.parseBoolean(bool));
+                    }
+                    else{
+                        waypoint = new CListWaypoint(coords, name, dimension, true);
+                    }
+                    if(color == null){
+                        CListClient.addRandomWaypointColor();
+                    }
+                    else{
+                        CListWaypointColor color_class = new CListWaypointColor(0,0,0);
+                        color_class.hexToRGB(color);
+                        CListClient.variables.colors.add(color_class);
+                    }
                     waypointList.add(waypoint);
                 }
             }

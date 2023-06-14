@@ -1,5 +1,6 @@
 package one.pouekdev.coordinatelist;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -9,6 +10,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.util.Identifier;
 import org.apache.commons.compress.utils.Lists;
 import org.lwjgl.glfw.GLFW;
 
@@ -69,8 +71,9 @@ public class CListWaypointScreen extends Screen {
                 final int f_i = i;
                 ScrollList.ScrollListEntry Coordinate = new ScrollList.ScrollListEntry(ButtonWidget.builder(Text.literal(CListClient.variables.waypoints.get(i).getCoordinates()), button -> {
                     long window = MinecraftClient.getInstance().getWindow().getHandle();
-                    GLFW.glfwSetClipboardString(window, CListClient.variables.waypoints.get(f_i).getCoordinates());
-                }).width(150).build(),i,this);
+                    CListWaypoint waypoint = CListClient.variables.waypoints.get(f_i);
+                    GLFW.glfwSetClipboardString(window, waypoint.getX() + " " + waypoint.getY() + " " + waypoint.getZ());
+                }).width(150).build(),i);
                 list.addEntry(Coordinate);
             }
         }
@@ -89,40 +92,78 @@ public class CListWaypointScreen extends Screen {
         @Override
         public void drawSelectionHighlight(MatrixStack matrices, int y, int entryWidth, int entryHeight, int borderColor, int fillColor){}
         public void appendNarrations(NarrationMessageBuilder builder){}
+        public class SpriteButton extends ButtonWidget {
+            public int x_pos;
+            public int y_pos;
+            public int id;
+            public SpriteButton(int x, int y, int width, int height, PressAction onPress, int coordinate_id) {
+                super(x, y, width, height, Text.literal(""), onPress,null);
+                this.id = coordinate_id;
+                this.x_pos = x;
+                this.y_pos = y;
+            }
+            public void setX(int value){
+                this.x_pos = value;
+            }
+            public void setY(int value){
+                this.y_pos = value;
+            }
+            @Override
+            public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+                Identifier sprite;
+                if(CListClient.variables.waypoints.get(id).render){
+                    sprite = new Identifier("coordinatelist", "visible.png");
+                }
+                else{
+                    sprite = new Identifier("coordinatelist", "not_visible.png");
+                }
+                RenderSystem.setShaderTexture(0, sprite);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                drawTexture(matrices, x_pos, y_pos, 0, 0, width, height, width, height);
+                RenderSystem.disableBlend();
+                super.renderButton(matrices,mouseX,mouseY,delta);
+            }
+            @Override
+            public boolean mouseReleased(double mouseX, double mouseY, int button) {
+                CListClient.variables.waypoints.get(id).toggleVisibility();
+                return super.mouseReleased(mouseX, mouseY, button);
+            }
+        }
         public class ScrollListEntry extends EntryListWidget.Entry<ScrollListEntry>{
             public final ButtonWidget button;
             public final ButtonWidget delete_button;
-            public final TextFieldWidget waypoint_name;
+            public final Text waypoint_name;
             public final Text dimension;
+            public final SpriteButton sh;
             public final List<Element> children;
             public final int id;
-            public ScrollListEntry(ButtonWidget e, int id, ScrollList list){
+            public ScrollListEntry(ButtonWidget e, int id){
                 this.id = id;
                 this.button = e;
-                this.delete_button = ButtonWidget.builder(Text.translatable("buttons.delete.waypoint"), button -> {CListClient.deleteWaypoint(id);list.RefreshElements();}).width(70).build();
-                this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 300, 20, Text.literal(""));
-                this.waypoint_name.setFocusUnlocked(true);
-                this.waypoint_name.setMaxLength(25);
-                this.waypoint_name.setText(CListClient.variables.waypoints.get(id).getName());
+                this.delete_button = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> MinecraftClient.getInstance().setScreen(new CListWaypointConfig(Text.literal("Config"),id))).width(70).build();
+                this.waypoint_name = Text.of(CListClient.variables.waypoints.get(id).getName());
                 this.dimension = CListClient.variables.waypoints.get(id).getDimension();
+                this.sh = new SpriteButton(0,0,16,12,button -> {CListClient.variables.waypoints.get(id).toggleVisibility();CList.LOGGER.info("Clicked toggle");}, id);
                 this.children = Lists.newArrayList();
                 this.children.add(button);
                 this.children.add(delete_button);
-                this.children.add(waypoint_name);
+                this.children.add(sh);
             }
             @Override
             public void render(MatrixStack matrices, int index, int y, int x, int width, int height, int mouseX, int mouseY, boolean hovered, float delta) {
-                button.setX(x-10);
+                button.setX(x);
                 button.setY(y+4);
-                delete_button.setX(x+140);
+                delete_button.setX(x+150);
                 delete_button.setY(y+4);
-                waypoint_name.setY(y+29);
-                waypoint_name.setX(x-8);
-                waypoint_name.setWidth(width-73);
+                sh.setX(x-10);
+                sh.setY(y+30);
                 button.render(matrices, mouseX, mouseY, delta);
                 delete_button.render(matrices, mouseX, mouseY, delta);
-                waypoint_name.render(matrices, mouseX, mouseY, delta);
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, dimension.getString(), x+150, y+35, 0xFFFFFF);
+                sh.renderButton(matrices, mouseX, mouseY, delta);
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, dimension.getString(), x+160, y+35, 0xFFFFFF);
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, waypoint_name.getString(), x+2, y+35, 0xFFFFFF);
             }
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -148,29 +189,6 @@ public class CListWaypointScreen extends Screen {
             }
             public List<? extends Element> children() {
                 return ImmutableList.of(button);
-            }
-            @Override
-            public boolean charTyped(char chr, int keyCode) {
-                boolean result = super.charTyped(chr, keyCode);
-                waypoint_name.setText(waypoint_name.getText() + chr);
-                try{
-                    CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
-                }
-                catch(IndexOutOfBoundsException ignored){}
-                CListClient.variables.saved_since_last_update = false;
-                return true;
-            }
-            @Override
-            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
-                    if (waypoint_name.getText().length() > 0) {
-                        waypoint_name.setText(waypoint_name.getText().substring(0, waypoint_name.getText().length() - 1));
-                        CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
-                        CListClient.variables.saved_since_last_update = false;
-                    }
-                    return true;
-                }
-                return super.keyPressed(keyCode, scanCode, modifiers);
             }
         }
     }
