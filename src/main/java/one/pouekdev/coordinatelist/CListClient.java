@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.InputUtil;
@@ -150,6 +150,8 @@ public class CListClient implements ClientModInitializer {
                         RenderSystem.depthMask(true);
                         RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
                         size = calculateSizeText();
+                        // Find a way to use this with the matrixStack to actually render the text and background for it
+                        DrawContext dcontext = new DrawContext(MinecraftClient.getInstance(), (VertexConsumerProvider.Immediate) context.consumers());
                         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
                         int distance_without_decimal_places = (int) distanceTo(i, MinecraftClient.getInstance());
                         String labelText = variables.waypoints.get(i).getName() + " (" + distance_without_decimal_places + " m)";
@@ -159,9 +161,9 @@ public class CListClient implements ClientModInitializer {
                         matrixStack.scale(-0.025f, -0.025f, 0.025f);
                         matrixStack.translate(-textWidth+(50-textWidth/2.0), -60-Math.log(Math.pow(size,10)), 0);
                         matrixStack.scale((float) Math.log(size * 4), (float) Math.log(size * 4), (float) Math.log(size * 4));
-                        DrawableHelper.fill(matrixStack, (-29), -2, (textWidth-25), textHeight-1, 0x90000000);
+                        dcontext.fill((-29), -2, (textWidth-25), textHeight-1, 0x90000000);
                         matrixStack.translate(0,0,-0.01f);
-                        textRenderer.draw(matrixStack, labelText, (-26), -1, 0xFFFFFF);
+                        dcontext.drawText(textRenderer,labelText, (-26), -1, 0xFFFFFF,false);
                         matrixStack.pop();
                         RenderSystem.disableBlend();
                     }

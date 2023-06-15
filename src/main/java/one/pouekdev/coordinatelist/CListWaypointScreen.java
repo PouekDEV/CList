@@ -2,14 +2,13 @@ package one.pouekdev.coordinatelist;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.util.Identifier;
 import org.apache.commons.compress.utils.Lists;
 import org.lwjgl.glfw.GLFW;
@@ -39,10 +38,10 @@ public class CListWaypointScreen extends Screen {
         gridWidget.forEachChild(this::addDrawableChild);
     }
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackground(matrices);
-        list.render(matrices, mouseX, mouseY, delta);
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackground(context);
+        list.render(context, mouseX, mouseY, delta);
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
@@ -82,15 +81,15 @@ public class CListWaypointScreen extends Screen {
             SetupElements();
         }
         @Override
-        public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            super.render(matrices, mouseX, mouseY, delta);
+        public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+            super.render(context, mouseX, mouseY, delta);
         }
         @Override
         public int getRowWidth() {
             return 280;
         }
         @Override
-        public void drawSelectionHighlight(MatrixStack matrices, int y, int entryWidth, int entryHeight, int borderColor, int fillColor){}
+        public void drawSelectionHighlight(DrawContext context, int y, int entryWidth, int entryHeight, int borderColor, int fillColor){}
         public void appendNarrations(NarrationMessageBuilder builder){}
         public class SpriteButton extends ButtonWidget {
             public int x_pos;
@@ -113,7 +112,7 @@ public class CListWaypointScreen extends Screen {
                 this.y_pos = value;
             }
             @Override
-            public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+            public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
                 Identifier sprite;
                 if(CListClient.variables.waypoints.get(id).render){
                     sprite = new Identifier("coordinatelist", "visible.png");
@@ -125,7 +124,7 @@ public class CListWaypointScreen extends Screen {
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
-                drawTexture(matrices, x_pos, y_pos, 0, 0, width, height, width, height);
+                drawTexture(context, sprite, x_pos, y_pos, 0, 0,0, width, height, width, height);
                 RenderSystem.disableBlend();
             }
         }
@@ -150,18 +149,18 @@ public class CListWaypointScreen extends Screen {
                 this.children.add(sh);
             }
             @Override
-            public void render(MatrixStack matrices, int index, int y, int x, int width, int height, int mouseX, int mouseY, boolean hovered, float delta) {
+            public void render(DrawContext context, int index, int y, int x, int width, int height, int mouseX, int mouseY, boolean hovered, float delta) {
                 button.setX(x+20);
                 button.setY(y+4);
                 delete_button.setX(x+170);
                 delete_button.setY(y+4);
                 sh.setX(x+2);
                 sh.setY(y+33);
-                button.render(matrices, mouseX, mouseY, delta);
-                delete_button.render(matrices, mouseX, mouseY, delta);
-                sh.render(matrices, mouseX, mouseY, delta);
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, dimension.getString(), x+180, y+35, 0xFFFFFF);
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, waypoint_name.getString(), x+22, y+35, 0xFFFFFF);
+                button.render(context, mouseX, mouseY, delta);
+                delete_button.render(context, mouseX, mouseY, delta);
+                sh.render(context, mouseX, mouseY, delta);
+                context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, dimension.getString(), x+180, y+35, 0xFFFFFF);
+                context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, waypoint_name.getString(), x+22, y+35, 0xFFFFFF);
             }
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {

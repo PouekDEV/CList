@@ -1,12 +1,12 @@
 package one.pouekdev.coordinatelist;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.GridWidget;
 import net.minecraft.client.gui.widget.SimplePositioningWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -43,8 +43,8 @@ public class CListWaypointConfig extends Screen {
         addDrawableChild(this.waypoint_color);
     }
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackground(matrices);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackground(context);
         this.waypoint_name.setX((this.width-150)/2);
         this.waypoint_name.setY((this.height-20)/2-80);
         this.waypoint_color.setX((this.width-70)/2);
@@ -56,8 +56,8 @@ public class CListWaypointConfig extends Screen {
         int top = centerY - SQUARE_SIZE / 2;
         int right = centerX + SQUARE_SIZE / 2;
         int bottom = centerY + SQUARE_SIZE / 2;
-        super.render(matrices, mouseX, mouseY, delta);
-        fill(matrices, left, top, right, bottom, CListClient.variables.colors.get(id).rgbToHex());
+        super.render(context, mouseX, mouseY, delta);
+        context.fill(left, top, right, bottom, CListClient.variables.colors.get(id).rgbToHex());
     }
     @Override
     public boolean charTyped(char chr, int keyCode) {
