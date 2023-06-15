@@ -157,11 +157,11 @@ public class CListClient implements ClientModInitializer {
                         int textHeight = textRenderer.fontHeight;
                         matrixStack.push();
                         matrixStack.scale(-0.025f, -0.025f, 0.025f);
-                        matrixStack.translate(-textWidth / 1.2, -60-Math.log(Math.pow(size,10)), 0);
+                        matrixStack.translate(-textWidth+(50-textWidth/2.0), -60-Math.log(Math.pow(size,10)), 0);
                         matrixStack.scale((float) Math.log(size * 4), (float) Math.log(size * 4), (float) Math.log(size * 4));
                         DrawableHelper.fill(matrixStack, (-29), -2, (textWidth-25), textHeight-1, 0x90000000);
-                        matrixStack.translate(0,0,-1f);
-                        textRenderer.draw(matrixStack, labelText, (-25), (float) (Math.log(size/15)*-1), 0xFFFFFF);
+                        matrixStack.translate(0,0,-0.01f);
+                        textRenderer.draw(matrixStack, labelText, (-26), -1, 0xFFFFFF);
                         matrixStack.pop();
                         RenderSystem.disableBlend();
                     }

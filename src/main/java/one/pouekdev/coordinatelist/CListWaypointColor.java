@@ -27,12 +27,20 @@ public class CListWaypointColor {
             String redHex = hex.substring(0, 2);
             String greenHex = hex.substring(2, 4);
             String blueHex = hex.substring(4, 6);
-            int red = Integer.parseInt(redHex, 16);
-            int green = Integer.parseInt(greenHex, 16);
-            int blue = Integer.parseInt(blueHex, 16);
-            this.r = red / 255.0f;
-            this.g = green / 255.0f;
-            this.b = blue / 255.0f;
+            int red = -1;
+            int green = -1;
+            int blue = -1;
+            try{
+                red = Integer.parseInt(redHex, 16);
+                green = Integer.parseInt(greenHex, 16);
+                blue = Integer.parseInt(blueHex, 16);
+            }
+            catch (NumberFormatException ignored){}
+            if(red != -1 && green != -1 && blue != -1){
+                this.r = red / 255.0f;
+                this.g = green / 255.0f;
+                this.b = blue / 255.0f;
+            }
         }
     }
 }

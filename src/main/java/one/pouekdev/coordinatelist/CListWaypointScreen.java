@@ -87,7 +87,7 @@ public class CListWaypointScreen extends Screen {
         }
         @Override
         public int getRowWidth() {
-            return 220;
+            return 280;
         }
         @Override
         public void drawSelectionHighlight(MatrixStack matrices, int y, int entryWidth, int entryHeight, int borderColor, int fillColor){}
@@ -102,10 +102,14 @@ public class CListWaypointScreen extends Screen {
                 this.x_pos = x;
                 this.y_pos = y;
             }
+            @Override
             public void setX(int value){
+                super.setX(value);
                 this.x_pos = value;
             }
+            @Override
             public void setY(int value){
+                super.setY(value);
                 this.y_pos = value;
             }
             @Override
@@ -123,12 +127,6 @@ public class CListWaypointScreen extends Screen {
                 RenderSystem.defaultBlendFunc();
                 drawTexture(matrices, x_pos, y_pos, 0, 0, width, height, width, height);
                 RenderSystem.disableBlend();
-                super.renderButton(matrices,mouseX,mouseY,delta);
-            }
-            @Override
-            public boolean mouseReleased(double mouseX, double mouseY, int button) {
-                CListClient.variables.waypoints.get(id).toggleVisibility();
-                return super.mouseReleased(mouseX, mouseY, button);
             }
         }
         public class ScrollListEntry extends EntryListWidget.Entry<ScrollListEntry>{
@@ -145,7 +143,7 @@ public class CListWaypointScreen extends Screen {
                 this.delete_button = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> MinecraftClient.getInstance().setScreen(new CListWaypointConfig(Text.literal("Config"),id))).width(70).build();
                 this.waypoint_name = Text.of(CListClient.variables.waypoints.get(id).getName());
                 this.dimension = CListClient.variables.waypoints.get(id).getDimension();
-                this.sh = new SpriteButton(0,0,16,12,button -> {CListClient.variables.waypoints.get(id).toggleVisibility();CList.LOGGER.info("Clicked toggle");}, id);
+                this.sh = new SpriteButton(0,0,16,12,button -> CListClient.variables.waypoints.get(id).toggleVisibility(), id);
                 this.children = Lists.newArrayList();
                 this.children.add(button);
                 this.children.add(delete_button);
@@ -153,17 +151,17 @@ public class CListWaypointScreen extends Screen {
             }
             @Override
             public void render(MatrixStack matrices, int index, int y, int x, int width, int height, int mouseX, int mouseY, boolean hovered, float delta) {
-                button.setX(x);
+                button.setX(x+20);
                 button.setY(y+4);
-                delete_button.setX(x+150);
+                delete_button.setX(x+170);
                 delete_button.setY(y+4);
-                sh.setX(x-10);
-                sh.setY(y+30);
+                sh.setX(x+2);
+                sh.setY(y+33);
                 button.render(matrices, mouseX, mouseY, delta);
                 delete_button.render(matrices, mouseX, mouseY, delta);
-                sh.renderButton(matrices, mouseX, mouseY, delta);
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, dimension.getString(), x+160, y+35, 0xFFFFFF);
-                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, waypoint_name.getString(), x+2, y+35, 0xFFFFFF);
+                sh.render(matrices, mouseX, mouseY, delta);
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, dimension.getString(), x+180, y+35, 0xFFFFFF);
+                MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, waypoint_name.getString(), x+22, y+35, 0xFFFFFF);
             }
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -186,9 +184,6 @@ public class CListWaypointScreen extends Screen {
                     }
                 }
                 return handled || super.mouseReleased(mouseX, mouseY, button);
-            }
-            public List<? extends Element> children() {
-                return ImmutableList.of(button);
             }
         }
     }

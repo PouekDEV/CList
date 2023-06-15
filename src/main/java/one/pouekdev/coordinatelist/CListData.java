@@ -21,7 +21,7 @@ public class CListData {
 
         try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)))) {
             for (int i = 0; i < waypointList.size(); i++) {
-                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).getName() + "~" + CListClient.variables.waypoints.get(i).getDimensionValue() + "~" + CListClient.variables.colors.get(i).rgbToHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render);
+                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).getName().replaceAll("~","") + "~" + CListClient.variables.waypoints.get(i).getDimensionValue() + "~" + CListClient.variables.colors.get(i).rgbToHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render);
             }
         } catch (IOException ignored) {
         }

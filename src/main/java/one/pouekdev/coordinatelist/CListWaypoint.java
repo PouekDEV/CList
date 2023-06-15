@@ -7,12 +7,14 @@ public class CListWaypoint {
     public String coordinates;
     public String name;
     public String dimension;
+    public int bug_fix;
     public boolean render;
     CListWaypoint(String coords, String waypoint_name, String waypoint_dimension, boolean is_rendered){
         this.coordinates = coords;
         this.name = waypoint_name;
         this.dimension = waypoint_dimension;
         this.render = is_rendered;
+        this.bug_fix = 0;
     }
     public String getName(){
         return this.name;
@@ -26,12 +28,13 @@ public class CListWaypoint {
     public void setName(String value){
         this.name = value;
     }
-    public void setVisibility(boolean value){
-        this.render = value;
-    }
     public void toggleVisibility(){
-        CList.LOGGER.info(String.valueOf(this.render));
-        this.render = !this.render;
+        this.bug_fix += 1;
+        if(bug_fix == 2){
+            this.bug_fix = 0;
+            this.render = !this.render;
+            CListClient.variables.saved_since_last_update = false;
+        }
     }
     public Text getDimension(){
         String s = this.dimension;
