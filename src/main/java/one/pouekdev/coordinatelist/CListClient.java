@@ -148,22 +148,19 @@ public class CListClient implements ClientModInitializer {
                         RenderSystem.enableBlend();
                         RenderSystem.depthMask(true);
                         RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
-                        size = calculateSizeText();
                         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
                         int distance_without_decimal_places = (int) distanceTo(i, MinecraftClient.getInstance());
                         String labelText = variables.waypoints.get(i).getName() + " (" + distance_without_decimal_places + " m)";
                         int textWidth = textRenderer.getWidth(labelText);
-                        int textHeight = textRenderer.fontHeight;
-                        //matrixStack = new MatrixStack();
-                        matrixStack.push();
-                        matrixStack.translate(targetPosition.x,targetPosition.y+0.5f,targetPosition.z);
-                        matrixStack.multiply(camera.getRotation());
                         matrixStack.scale(-0.025f, -0.025f, 0.025f);
+                        size = calculateSizeText();
+                        matrixStack.scale((float) Math.log(size * 4), (float) Math.log(size * 4), (float) Math.log(size * 4));
+                        matrixStack.translate(0,-20,0);
                         positionMatrix = matrixStack.peek().getPositionMatrix();
-                        //matrixStack.translate(-textWidth+(50-textWidth/2.0), -60-Math.log(Math.pow(size,10)), 0);
-                        //matrixStack.scale((float) Math.log(size * 4), (float) Math.log(size * 4), (float) Math.log(size * 4));
-                        textRenderer.draw(labelText, (float) (-textWidth+(50-textWidth/2.0)),0,0xFFFFFF,false,positionMatrix,context.consumers(), TextRenderer.TextLayerType.NORMAL,0x90000000,LightmapTextureManager.MAX_LIGHT_COORDINATE);
-                        matrixStack.pop();
+                        float h = (float) (-textWidth/2);
+                        VertexConsumerProvider.Immediate v = VertexConsumerProvider.immediate(tessellator.getBuffer());
+                        textRenderer.draw(labelText, h,0,0xFFFFFF,false,positionMatrix,v, TextRenderer.TextLayerType.NORMAL,0x90000000,LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                        v.draw();
                         RenderSystem.disableBlend();
                     }
                 }
