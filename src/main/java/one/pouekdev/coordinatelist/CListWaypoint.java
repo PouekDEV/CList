@@ -3,6 +3,8 @@ package one.pouekdev.coordinatelist;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
+
 public class CListWaypoint {
     public String coordinates;
     public String name;
@@ -76,5 +78,35 @@ public class CListWaypoint {
         s = s.replace(" ","");
         String[] segments = s.split(":");
         return Integer.parseInt(segments[3]);
+    }
+    public void setX(String value){
+        String s = this.coordinates;
+        s = s.replace("X","");
+        s = s.replace("Y","");
+        s = s.replace("Z","");
+        s = s.replace(" ","");
+        String[] segments = s.split(":");
+        segments[1] = value;
+        this.coordinates = "X: " + segments[1] + " Y: " + segments[2] + " Z: " + segments[3];
+    }
+    public void setY(String value){
+        String s = this.coordinates;
+        s = s.replace("X","");
+        s = s.replace("Y","");
+        s = s.replace("Z","");
+        s = s.replace(" ","");
+        String[] segments = s.split(":");
+        segments[2] = value;
+        this.coordinates = "X: " + segments[1] + " Y: " + segments[2] + " Z: " + segments[3];
+    }
+    public void setZ(String value){
+        String s = this.coordinates;
+        s = s.replace("X","");
+        s = s.replace("Y","");
+        s = s.replace("Z","");
+        s = s.replace(" ","");
+        String[] segments = s.split(":");
+        segments[3] = value;
+        this.coordinates = "X: " + segments[1] + " Y: " + segments[2] + " Z: " + segments[3];
     }
 }

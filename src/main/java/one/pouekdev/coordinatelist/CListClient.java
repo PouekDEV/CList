@@ -159,7 +159,11 @@ public class CListClient implements ClientModInitializer {
                         positionMatrix = matrixStack.peek().getPositionMatrix();
                         float h = (float) (-textWidth/2);
                         VertexConsumerProvider.Immediate v = VertexConsumerProvider.immediate(tessellator.getBuffer());
-                        textRenderer.draw(labelText, h,0,0xFFFFFF,false,positionMatrix,v, TextRenderer.TextLayerType.NORMAL,0x90000000,LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                        // This fixes text flickering
+                        textRenderer.draw(labelText, h,0,0x00000000,false,positionMatrix,v, TextRenderer.TextLayerType.NORMAL,0x90000000,LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                        matrixStack.translate(0,0,-0.03f);
+                        positionMatrix = matrixStack.peek().getPositionMatrix();
+                        textRenderer.draw(labelText, h,0,0xFFFFFF,false,positionMatrix,v, TextRenderer.TextLayerType.NORMAL,0x00000000,LightmapTextureManager.MAX_LIGHT_COORDINATE);
                         v.draw();
                         RenderSystem.disableBlend();
                     }

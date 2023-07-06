@@ -14,6 +14,9 @@ public class CListWaypointConfig extends Screen {
     public int id;
     public TextFieldWidget waypoint_name;
     public TextFieldWidget waypoint_color;
+    public TextFieldWidget x;
+    public TextFieldWidget y;
+    public TextFieldWidget z;
     public CListWaypointConfig(Text title, int waypoint_id){
         super(title);
         this.id = waypoint_id;
@@ -36,11 +39,23 @@ public class CListWaypointConfig extends Screen {
         this.waypoint_color.setFocusUnlocked(true);
         this.waypoint_color.setMaxLength(6);
         this.waypoint_color.setText(CListClient.variables.colors.get(id).rgbToHexNoAlpha());
+        this.x = new TextFieldWidget(textRenderer, 0, 0, 50, 20, Text.literal(""));
+        this.x.setFocusUnlocked(true);
+        this.x.setText(String.valueOf(CListClient.variables.waypoints.get(id).getX()));
+        this.y = new TextFieldWidget(textRenderer, 0, 0, 50, 20, Text.literal(""));
+        this.y.setFocusUnlocked(true);
+        this.y.setText(String.valueOf(CListClient.variables.waypoints.get(id).getY()));
+        this.z = new TextFieldWidget(textRenderer, 0, 0, 50, 20, Text.literal(""));
+        this.z.setFocusUnlocked(true);
+        this.z.setText(String.valueOf(CListClient.variables.waypoints.get(id).getZ()));
         gridWidget.refreshPositions();
         SimplePositioningWidget.setPos(gridWidget, 0, 0, this.width, this.height, 0.5f, 1f);
         gridWidget.forEachChild(this::addDrawableChild);
         addDrawableChild(this.waypoint_name);
         addDrawableChild(this.waypoint_color);
+        addDrawableChild(this.x);
+        addDrawableChild(this.y);
+        addDrawableChild(this.z);
     }
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
@@ -49,6 +64,12 @@ public class CListWaypointConfig extends Screen {
         this.waypoint_name.setY((this.height-20)/2-80);
         this.waypoint_color.setX((this.width-70)/2);
         this.waypoint_color.setY((this.height-20)/2+50);
+        this.x.setX((this.width-50)/2-60);
+        this.x.setY((this.height-20)/2-50);
+        this.y.setX((this.width-50)/2);
+        this.y.setY((this.height-20)/2-50);
+        this.z.setX((this.width-50)/2+60);
+        this.z.setY((this.height-20)/2-50);
         int SQUARE_SIZE = 50;
         int centerX = width / 2;
         int centerY = height / 2;
@@ -74,6 +95,24 @@ public class CListWaypointConfig extends Screen {
             }
             catch(IndexOutOfBoundsException ignored){}
         }
+        if(this.x.isSelected()){
+            try{
+                CListClient.variables.waypoints.get(id).setX(x.getText());
+            }
+            catch(IndexOutOfBoundsException ignored){}
+        }
+        if(this.y.isSelected()){
+            try{
+                CListClient.variables.waypoints.get(id).setY(y.getText());
+            }
+            catch(IndexOutOfBoundsException ignored){}
+        }
+        if(this.z.isSelected()){
+            try{
+                CListClient.variables.waypoints.get(id).setZ(z.getText());
+            }
+            catch(IndexOutOfBoundsException ignored){}
+        }
         CListClient.variables.saved_since_last_update = false;
         return true;
     }
@@ -91,6 +130,27 @@ public class CListWaypointConfig extends Screen {
                 if(waypoint_color.getText().length() > 0){
                     waypoint_color.setText(waypoint_color.getText().substring(0, waypoint_color.getText().length() - 1));
                     CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());
+                    CListClient.variables.saved_since_last_update = false;
+                }
+            }
+            if(this.x.isSelected()){
+                if(x.getText().length() > 0){
+                    x.setText(x.getText().substring(0, x.getText().length() - 1));
+                    CListClient.variables.waypoints.get(id).setX(x.getText());
+                    CListClient.variables.saved_since_last_update = false;
+                }
+            }
+            if(this.y.isSelected()){
+                if(y.getText().length() > 0){
+                    y.setText(y.getText().substring(0, y.getText().length() - 1));
+                    CListClient.variables.waypoints.get(id).setY(y.getText());
+                    CListClient.variables.saved_since_last_update = false;
+                }
+            }
+            if(this.z.isSelected()){
+                if(z.getText().length() > 0){
+                    z.setText(z.getText().substring(0, z.getText().length() - 1));
+                    CListClient.variables.waypoints.get(id).setZ(z.getText());
                     CListClient.variables.saved_since_last_update = false;
                 }
             }
