@@ -83,31 +83,31 @@ public class CListWaypointConfig extends Screen {
     @Override
     public boolean charTyped(char chr, int keyCode) {
         boolean result = super.charTyped(chr, keyCode);
-        if(this.waypoint_name.isSelected()){
+        if(this.waypoint_name.isFocused()){
             try{
                 CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
             }
             catch(IndexOutOfBoundsException ignored){}
         }
-        if(this.waypoint_color.isSelected()){
+        if(this.waypoint_color.isFocused()){
             try{
                 CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());
             }
             catch(IndexOutOfBoundsException ignored){}
         }
-        if(this.x.isSelected()){
+        if(this.x.isFocused()){
             try{
                 CListClient.variables.waypoints.get(id).setX(x.getText());
             }
             catch(IndexOutOfBoundsException ignored){}
         }
-        if(this.y.isSelected()){
+        if(this.y.isFocused()){
             try{
                 CListClient.variables.waypoints.get(id).setY(y.getText());
             }
             catch(IndexOutOfBoundsException ignored){}
         }
-        if(this.z.isSelected()){
+        if(this.z.isFocused()){
             try{
                 CListClient.variables.waypoints.get(id).setZ(z.getText());
             }
@@ -119,35 +119,35 @@ public class CListWaypointConfig extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
-            if(this.waypoint_name.isSelected()){
+            if(this.waypoint_name.isFocused()){
                 if (waypoint_name.getText().length() > 0) {
                     waypoint_name.setText(waypoint_name.getText().substring(0, waypoint_name.getText().length() - 1));
                     CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
                     CListClient.variables.saved_since_last_update = false;
                 }
             }
-            if(this.waypoint_color.isSelected()){
+            if(this.waypoint_color.isFocused()){
                 if(waypoint_color.getText().length() > 0){
                     waypoint_color.setText(waypoint_color.getText().substring(0, waypoint_color.getText().length() - 1));
                     CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());
                     CListClient.variables.saved_since_last_update = false;
                 }
             }
-            if(this.x.isSelected()){
+            if(this.x.isFocused()){
                 if(x.getText().length() > 0){
                     x.setText(x.getText().substring(0, x.getText().length() - 1));
                     CListClient.variables.waypoints.get(id).setX(x.getText());
                     CListClient.variables.saved_since_last_update = false;
                 }
             }
-            if(this.y.isSelected()){
+            if(this.y.isFocused()){
                 if(y.getText().length() > 0){
                     y.setText(y.getText().substring(0, y.getText().length() - 1));
                     CListClient.variables.waypoints.get(id).setY(y.getText());
                     CListClient.variables.saved_since_last_update = false;
                 }
             }
-            if(this.z.isSelected()){
+            if(this.z.isFocused()){
                 if(z.getText().length() > 0){
                     z.setText(z.getText().substring(0, z.getText().length() - 1));
                     CListClient.variables.waypoints.get(id).setZ(z.getText());
