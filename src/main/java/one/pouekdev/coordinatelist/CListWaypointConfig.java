@@ -30,7 +30,7 @@ public class CListWaypointConfig extends Screen {
             CListClient.deleteWaypoint(id);
             MinecraftClient.getInstance().setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
         }).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
-        adder.add(ButtonWidget.builder(Text.translatable("gui.done"), button -> MinecraftClient.getInstance().setScreen(new CListWaypointScreen(Text.literal("Waypoints")))).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
+        adder.add(ButtonWidget.builder(Text.translatable("gui.done"), button -> {MinecraftClient.getInstance().setScreen(new CListWaypointScreen(Text.literal("Waypoints")));CListClient.variables.saved_since_last_update = false;}).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
         this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 150, 20, Text.literal(""));
         this.waypoint_name.setFocusUnlocked(true);
         this.waypoint_name.setMaxLength(25);
@@ -118,44 +118,43 @@ public class CListWaypointConfig extends Screen {
     }
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
+        super.keyPressed(keyCode, scanCode, modifiers);
+        if(keyCode == GLFW.GLFW_KEY_V && modifiers == GLFW.GLFW_MOD_CONTROL){
             if(this.waypoint_name.isFocused()){
-                if (waypoint_name.getText().length() > 0) {
-                    waypoint_name.setText(waypoint_name.getText().substring(0, waypoint_name.getText().length() - 1));
-                    CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
-                    CListClient.variables.saved_since_last_update = false;
-                }
+                CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
             }
             if(this.waypoint_color.isFocused()){
-                if(waypoint_color.getText().length() > 0){
-                    waypoint_color.setText(waypoint_color.getText().substring(0, waypoint_color.getText().length() - 1));
-                    CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());
-                    CListClient.variables.saved_since_last_update = false;
-                }
+                CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());
             }
             if(this.x.isFocused()){
-                if(x.getText().length() > 0){
-                    x.setText(x.getText().substring(0, x.getText().length() - 1));
-                    CListClient.variables.waypoints.get(id).setX(x.getText());
-                    CListClient.variables.saved_since_last_update = false;
-                }
+                CListClient.variables.waypoints.get(id).setX(x.getText());
             }
             if(this.y.isFocused()){
-                if(y.getText().length() > 0){
-                    y.setText(y.getText().substring(0, y.getText().length() - 1));
-                    CListClient.variables.waypoints.get(id).setY(y.getText());
-                    CListClient.variables.saved_since_last_update = false;
-                }
+                CListClient.variables.waypoints.get(id).setY(y.getText());
             }
             if(this.z.isFocused()){
-                if(z.getText().length() > 0){
-                    z.setText(z.getText().substring(0, z.getText().length() - 1));
-                    CListClient.variables.waypoints.get(id).setZ(z.getText());
-                    CListClient.variables.saved_since_last_update = false;
-                }
+                CListClient.variables.waypoints.get(id).setZ(z.getText());
             }
-            return true;
+            CListClient.variables.saved_since_last_update = false;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
+            if(this.waypoint_name.isFocused()){
+                CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
+            }
+            if(this.waypoint_color.isFocused()){
+                CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());
+            }
+            if(this.x.isFocused()){
+                CListClient.variables.waypoints.get(id).setX(x.getText());
+            }
+            if(this.y.isFocused()){
+                CListClient.variables.waypoints.get(id).setY(y.getText());
+            }
+            if(this.z.isFocused()){
+                CListClient.variables.waypoints.get(id).setZ(z.getText());
+            }
+            CListClient.variables.saved_since_last_update = false;
+        }
+        return true;
     }
 }

@@ -191,22 +191,31 @@ public class CListClient implements ClientModInitializer {
                 variables.colors.clear();
                 variables.worldName = null;
                 variables.last_world = null;
+                variables.is_world_error = false;
             }
             else{
-                variables.last_world = client.world;
-                checkForWorldChanges(variables.last_world);
-                checkIfSaveIsNeeded(false);
-                if (client.isInSingleplayer()) {
-                    variables.worldName = client.getServer().getSaveProperties().getLevelName();
-                } else {
-                    variables.worldName = client.getCurrentServerEntry().name;
-                }
-                if(!client.player.isAlive() && !variables.had_death_waypoint_placed){
-                    PlayerEntity player = client.player;
-                    addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()),true);
-                    variables.had_death_waypoint_placed = true;
-                } else if (client.player.isAlive() && variables.had_death_waypoint_placed) {
-                    variables.had_death_waypoint_placed = false;
+                if(!variables.is_world_error){
+                    try{
+                        variables.last_world = client.world;
+                        checkForWorldChanges(variables.last_world);
+                        checkIfSaveIsNeeded(false);
+                        if (client.isInSingleplayer()) {
+                            variables.worldName = client.getServer().getSaveProperties().getLevelName();
+                        } else {
+                            variables.worldName = client.getCurrentServerEntry().name;
+                        }
+                        if(!client.player.isAlive() && !variables.had_death_waypoint_placed && CListConfig.can_place_deathpoints){
+                            PlayerEntity player = client.player;
+                            addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()),true);
+                            variables.had_death_waypoint_placed = true;
+                        } else if (client.player.isAlive() && variables.had_death_waypoint_placed) {
+                            variables.had_death_waypoint_placed = false;
+                        }
+                    }
+                    catch(NullPointerException e){
+                        CList.LOGGER.info("Can't get the current world. Player probably uses ReplayMod and is now watching the replay");
+                        variables.is_world_error = true;
+                    }
                 }
             }
         });
@@ -226,6 +235,9 @@ public class CListClient implements ClientModInitializer {
         variables.waypoints.add(new CListWaypoint(name,waypoint_name,String.valueOf(variables.last_world.getDimension().effects()),true));
         variables.colors.add(new CListWaypointColor(rand.nextFloat(),rand.nextFloat(),rand.nextFloat()));
         variables.saved_since_last_update = false;
+        if(!death){
+            MinecraftClient.getInstance().setScreen(new CListWaypointConfig(Text.literal("Config"),variables.waypoints.size()-1));
+        }
     }
     public static void deleteWaypoint(int position){
         try {

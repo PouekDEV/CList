@@ -43,19 +43,16 @@ public class CListWaypointScreen extends Screen {
         list.render(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
     }
-
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         list.mouseClicked(mouseX, mouseY, button);
         return super.mouseClicked(mouseX, mouseY, button);
     }
-
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         list.mouseReleased(mouseX, mouseY, button);
         return super.mouseReleased(mouseX, mouseY, button);
     }
-
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         list.mouseScrolled(mouseX, mouseY, amount);
@@ -160,7 +157,7 @@ public class CListWaypointScreen extends Screen {
                 delete_button.render(context, mouseX, mouseY, delta);
                 sh.render(context, mouseX, mouseY, delta);
                 context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, dimension.getString(), x+180, y+35, 0xFFFFFF);
-                context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, waypoint_name.getString(), x+22, y+35, 0xFFFFFF);
+                context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, waypoint_name.getString(), x+22, y+35, CListClient.variables.colors.get(id).rgbToHex());
             }
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
