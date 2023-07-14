@@ -202,7 +202,8 @@ public class CListClient implements ClientModInitializer {
                         if (client.isInSingleplayer()) {
                             variables.worldName = client.getServer().getSaveProperties().getLevelName();
                         } else {
-                            variables.worldName = client.getCurrentServerEntry().name;
+                            variables.worldName = client.getCurrentServerEntry().address;
+                            variables.worldName = variables.worldName.replace(":","P");
                         }
                         if(!client.player.isAlive() && !variables.had_death_waypoint_placed && CListConfig.can_place_deathpoints){
                             PlayerEntity player = client.player;
@@ -257,6 +258,7 @@ public class CListClient implements ClientModInitializer {
         return s;
     }
     public static void checkForWorldChanges(ClientWorld current_world){
+        MinecraftClient client = MinecraftClient.getInstance();
         if(!variables.loaded_last_world && variables.worldName != null){
             CList.LOGGER.info("New world " + variables.worldName);
             variables.last_world = current_world;
@@ -279,13 +281,34 @@ public class CListClient implements ClientModInitializer {
             }
             else{
                 // Check for post 1.0 saves
-                List<CListWaypoint> ways = CListData.loadListFromFile("clist_"+variables.worldName);
-                if(ways != null && ways.size() > 0){
-                    variables.waypoints = ways;
-                    CList.LOGGER.info("Loaded data for world " + variables.worldName);
+                if(!client.isInSingleplayer()){
+                    List<CListWaypoint> ways = CListData.loadListFromFile("clist_"+client.getCurrentServerEntry().name);
+                    if(ways != null && ways.size()>0){
+                        variables.waypoints = ways;
+                        CListData.deleteLegacyFile("clist_"+client.getCurrentServerEntry().name);
+                        CList.LOGGER.info("Loaded old multiplier server data");
+                        checkIfSaveIsNeeded(true);
+                    }
+                    else{
+                        ways = CListData.loadListFromFile("clist_"+variables.worldName);
+                        if(ways != null && ways.size() > 0){
+                            variables.waypoints = ways;
+                            CList.LOGGER.info("Loaded data for server " + variables.worldName);
+                        }
+                        else {
+                            CList.LOGGER.info("The file for " + variables.worldName + " doesn't exist");
+                        }
+                    }
                 }
-                else {
-                    CList.LOGGER.info("The file for " + variables.worldName + " doesn't exist");
+                else{
+                    List<CListWaypoint> ways = CListData.loadListFromFile("clist_"+variables.worldName);
+                    if(ways != null && ways.size() > 0){
+                        variables.waypoints = ways;
+                        CList.LOGGER.info("Loaded data for world " + variables.worldName);
+                    }
+                    else {
+                        CList.LOGGER.info("The file for " + variables.worldName + " doesn't exist");
+                    }
                 }
             }
             variables.loaded_last_world = true;
