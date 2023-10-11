@@ -5,11 +5,12 @@
   "keybinds.waypoints.toggle": "Zmień widoczność punktów orientacyjnych",
   "coordinatelist.midnightconfig.title": "Konfiguracja CList",
   "coordinatelist.midnightconfig.multiplier": "Rozmiar punktów orientacyjnych",
+  "coordinatelist.midnightconfig.render_distance": "Odległość na jaką jest widoczny punkt orientacyjny (0 oznacza bez limitu)",
+  "coordinatelist.midnightconfig.waypoints_toggled": "Pokaż punkty orientacyjne",
   "coordinatelist.midnightconfig.can_place_deathpoints": "Twórz punkty orientacyjne przy śmierci",
   "waypoint.last.death": "Ostatnia śmierć",
   "waypoint.new.waypoint": "Nowy Punkt Orientacyjny",
   "buttons.add.new.waypoint": "Dodaj nowy punkt orientacyjny w obecnym miejscu",
-  "buttons.delete.waypoint": "Usuń",
   "tooltip.copy.waypoint.coordinates": "Kliknij aby skopiować koordynaty wybranego punktu orientacyjnego",
   "waypoint.death": "śmierć"
 }

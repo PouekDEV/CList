@@ -26,7 +26,7 @@ public class CListWaypointConfig extends Screen {
         GridWidget gridWidget = new GridWidget();
         gridWidget.getMainPositioner().margin(4, 4, 4, 0);
         GridWidget.Adder adder = gridWidget.createAdder(2);
-        adder.add(ButtonWidget.builder(Text.translatable("buttons.delete.waypoint"), button -> {
+        adder.add(ButtonWidget.builder(Text.translatable("selectWorld.delete"), button -> {
             CListClient.deleteWaypoint(id);
             MinecraftClient.getInstance().setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
         }).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
@@ -59,7 +59,6 @@ public class CListWaypointConfig extends Screen {
     }
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context);
         this.waypoint_name.setX((this.width-150)/2);
         this.waypoint_name.setY((this.height-20)/2-80);
         this.waypoint_color.setX((this.width-70)/2);

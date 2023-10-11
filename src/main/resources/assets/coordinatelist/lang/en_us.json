@@ -5,11 +5,12 @@
   "keybinds.waypoints.toggle": "Toggle waypoints visibility",
   "coordinatelist.midnightconfig.title": "CList configuration",
   "coordinatelist.midnightconfig.multiplier": "Waypoints size",
+  "coordinatelist.midnightconfig.render_distance": "The distance to which the waypoint is visible (0 means no limit)",
+  "coordinatelist.midnightconfig.waypoints_toggled": "Show waypoints",
   "coordinatelist.midnightconfig.can_place_deathpoints": "Create waypoints on death",
   "waypoint.last.death": "Last death",
   "waypoint.new.waypoint": "New Waypoint",
   "buttons.add.new.waypoint": "Add a new waypoint in current position",
-  "buttons.delete.waypoint": "Delete",
   "tooltip.copy.waypoint.coordinates": "Click to copy selected waypoints coordinates",
   "waypoint.death": "death"
 }

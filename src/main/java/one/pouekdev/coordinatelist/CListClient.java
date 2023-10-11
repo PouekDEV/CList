@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+import eu.midnightdust.lib.config.MidnightConfig;
 
 import java.util.HashMap;
 import java.util.List;
@@ -112,11 +113,12 @@ public class CListClient implements ClientModInitializer {
                 "keybinds.category.name"
         ));
         WorldRenderEvents.END.register(context -> {
-            if (!variables.waypoints.isEmpty() && variables.waypoints_toggled) {
+            if (!variables.waypoints.isEmpty() && CListConfig.waypoints_toggled) {
                 RenderSystem.disableCull();
                 RenderSystem.depthFunc(GL11.GL_ALWAYS);
                 for(int i = 0; i < variables.waypoints.size(); i++){
-                    if(Objects.equals(variables.waypoints.get(i).getDimensionString(), getDimension(String.valueOf(variables.last_world.getDimension().effects()))) && variables.waypoints.get(i).render) {
+                    int distance_without_decimal_places = (int) distanceTo(i, MinecraftClient.getInstance());
+                    if(Objects.equals(variables.waypoints.get(i).getDimensionString(), getDimension(String.valueOf(variables.last_world.getDimension().effects()))) && variables.waypoints.get(i).render && (CListConfig.render_distance == 0 || CListConfig.render_distance >= distance_without_decimal_places)) {
                         Camera camera = context.camera();
                         float size = calculateSizeWaypoint();
                         HashMap<String,Float> renderCoords = calculateRenderCoords(i, MinecraftClient.getInstance());
@@ -149,7 +151,6 @@ public class CListClient implements ClientModInitializer {
                         RenderSystem.depthMask(true);
                         RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
                         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-                        int distance_without_decimal_places = (int) distanceTo(i, MinecraftClient.getInstance());
                         String labelText = variables.waypoints.get(i).getName() + " (" + distance_without_decimal_places + " m)";
                         int textWidth = textRenderer.getWidth(labelText);
                         matrixStack.scale(-0.025f, -0.025f, 0.025f);
@@ -183,7 +184,8 @@ public class CListClient implements ClientModInitializer {
                 }
             }
             while(toggle_visibility.wasPressed()){
-                variables.waypoints_toggled = !variables.waypoints_toggled;
+                CListConfig.waypoints_toggled = !CListConfig.waypoints_toggled;
+                MidnightConfig.write(CList.MOD_ID);
             }
             if (client.world == null) {
                 variables.loaded_last_world = false;
@@ -222,7 +224,6 @@ public class CListClient implements ClientModInitializer {
         });
         variables.saved_since_last_update = true;
         variables.loaded_last_world = false;
-        variables.waypoints_toggled = true;
     }
     public static void addNewWaypoint(String name, boolean death){
         CList.LOGGER.info("New waypoint for dimension " + variables.last_world.getDimension().effects());
