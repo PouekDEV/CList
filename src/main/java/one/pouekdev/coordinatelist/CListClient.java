@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -47,12 +48,12 @@ public class CListClient implements ClientModInitializer {
         float h = (float)(client.getInstance().player.getZ() - variables.waypoints.get(index).getZ());
         return Math.round(MathHelper.sqrt(f * f + g * g + h * h));
     }
-    public HashMap<String,Float> calculateRenderCoords(int index, MinecraftClient client) {
+    public HashMap<String,Float> calculateRenderCoords(int index, MinecraftClient client, Camera camera) {
         float distance = distanceTo(index, client);
 
-        float px = (float)client.getInstance().player.getX();
-        float py = (float)client.getInstance().player.getY();
-        float pz = (float)client.getInstance().player.getZ();
+        float px = (float)camera.getPos().x;
+        float py = (float)camera.getPos().y;
+        float pz = (float)camera.getPos().z;
 
         float wx = variables.waypoints.get(index).getX();
         float wy = variables.waypoints.get(index).getY();
@@ -68,7 +69,7 @@ public class CListClient implements ClientModInitializer {
 
         float vector_len = (float)Math.sqrt( Math.pow( vx, 2) + Math.pow(vy, 2) + Math.pow(vz,2) );
 
-        int radius = 32;
+        float radius = 32;
 
         float scx = radius / vector_len * vx;
         float scy = radius / vector_len * vy;
@@ -112,7 +113,7 @@ public class CListClient implements ClientModInitializer {
                 GLFW.GLFW_KEY_J,
                 "keybinds.category.name"
         ));
-        WorldRenderEvents.END.register(context -> {
+        WorldRenderEvents.END.register(context ->{
             if (!variables.waypoints.isEmpty() && CListConfig.waypoints_toggled) {
                 RenderSystem.disableCull();
                 RenderSystem.depthFunc(GL11.GL_ALWAYS);
@@ -121,7 +122,7 @@ public class CListClient implements ClientModInitializer {
                     if(Objects.equals(variables.waypoints.get(i).getDimensionString(), getDimension(String.valueOf(variables.last_world.getDimension().effects()))) && variables.waypoints.get(i).render && (CListConfig.render_distance == 0 || CListConfig.render_distance >= distance_without_decimal_places)) {
                         Camera camera = context.camera();
                         float size = calculateSizeWaypoint();
-                        HashMap<String,Float> renderCoords = calculateRenderCoords(i, MinecraftClient.getInstance());
+                        HashMap<String,Float> renderCoords = calculateRenderCoords(i, MinecraftClient.getInstance(), camera);
                         Vec3d targetPosition = new Vec3d(renderCoords.get("x"), renderCoords.get("y")+1, renderCoords.get("z"));
                         Vec3d transformedPosition = targetPosition.subtract(camera.getPos());
                         MatrixStack matrixStack = new MatrixStack();
