@@ -1,6 +1,5 @@
 package one.pouekdev.coordinatelist;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -12,6 +11,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class CListWaypointConfig extends Screen {
     public int id;
+    public CListWaypoint waypoint;
     public TextFieldWidget waypoint_name;
     public TextFieldWidget waypoint_color;
     public TextFieldWidget x;
@@ -20,6 +20,7 @@ public class CListWaypointConfig extends Screen {
     public CListWaypointConfig(Text title, int waypoint_id){
         super(title);
         this.id = waypoint_id;
+        this.waypoint = CListClient.variables.waypoints.get(id);
     }
     @Override
     protected void init(){
@@ -28,26 +29,26 @@ public class CListWaypointConfig extends Screen {
         GridWidget.Adder adder = gridWidget.createAdder(2);
         adder.add(ButtonWidget.builder(Text.translatable("selectWorld.delete"), button -> {
             CListClient.deleteWaypoint(id);
-            MinecraftClient.getInstance().setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
+            CListVariables.minecraft_client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
         }).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
-        adder.add(ButtonWidget.builder(Text.translatable("gui.done"), button -> {MinecraftClient.getInstance().setScreen(new CListWaypointScreen(Text.literal("Waypoints")));CListClient.variables.saved_since_last_update = false;}).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
+        adder.add(ButtonWidget.builder(Text.translatable("gui.done"), button -> {CListVariables.minecraft_client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));CListClient.variables.saved_since_last_update = false;}).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
         this.waypoint_name = new TextFieldWidget(textRenderer, 0, 0, 150, 20, Text.literal(""));
         this.waypoint_name.setFocusUnlocked(true);
         this.waypoint_name.setMaxLength(25);
-        this.waypoint_name.setText(CListClient.variables.waypoints.get(id).getName());
+        this.waypoint_name.setText(waypoint.getName());
         this.waypoint_color = new TextFieldWidget(textRenderer, 0, 0, 70, 20, Text.literal(""));
         this.waypoint_color.setFocusUnlocked(true);
         this.waypoint_color.setMaxLength(6);
         this.waypoint_color.setText(CListClient.variables.colors.get(id).rgbToHexNoAlpha());
         this.x = new TextFieldWidget(textRenderer, 0, 0, 50, 20, Text.literal(""));
         this.x.setFocusUnlocked(true);
-        this.x.setText(String.valueOf(CListClient.variables.waypoints.get(id).getX()));
+        this.x.setText(String.valueOf(waypoint.getX()));
         this.y = new TextFieldWidget(textRenderer, 0, 0, 50, 20, Text.literal(""));
         this.y.setFocusUnlocked(true);
-        this.y.setText(String.valueOf(CListClient.variables.waypoints.get(id).getY()));
+        this.y.setText(String.valueOf(waypoint.getY()));
         this.z = new TextFieldWidget(textRenderer, 0, 0, 50, 20, Text.literal(""));
         this.z.setFocusUnlocked(true);
-        this.z.setText(String.valueOf(CListClient.variables.waypoints.get(id).getZ()));
+        this.z.setText(String.valueOf(waypoint.getZ()));
         gridWidget.refreshPositions();
         SimplePositioningWidget.setPos(gridWidget, 0, 0, this.width, this.height, 0.5f, 1f);
         gridWidget.forEachChild(this::addDrawableChild);
@@ -84,7 +85,7 @@ public class CListWaypointConfig extends Screen {
         boolean result = super.charTyped(chr, keyCode);
         if(this.waypoint_name.isFocused()){
             try{
-                CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
+                waypoint.setName(waypoint_name.getText());
             }
             catch(IndexOutOfBoundsException ignored){}
         }
@@ -96,19 +97,19 @@ public class CListWaypointConfig extends Screen {
         }
         if(this.x.isFocused()){
             try{
-                CListClient.variables.waypoints.get(id).setX(x.getText());
+                waypoint.setX(x.getText());
             }
             catch(IndexOutOfBoundsException ignored){}
         }
         if(this.y.isFocused()){
             try{
-                CListClient.variables.waypoints.get(id).setY(y.getText());
+                waypoint.setY(y.getText());
             }
             catch(IndexOutOfBoundsException ignored){}
         }
         if(this.z.isFocused()){
             try{
-                CListClient.variables.waypoints.get(id).setZ(z.getText());
+                waypoint.setZ(z.getText());
             }
             catch(IndexOutOfBoundsException ignored){}
         }
@@ -120,37 +121,37 @@ public class CListWaypointConfig extends Screen {
         super.keyPressed(keyCode, scanCode, modifiers);
         if(keyCode == GLFW.GLFW_KEY_V && modifiers == GLFW.GLFW_MOD_CONTROL){
             if(this.waypoint_name.isFocused()){
-                CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
+                waypoint.setName(waypoint_name.getText());
             }
             if(this.waypoint_color.isFocused()){
                 CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());
             }
             if(this.x.isFocused()){
-                CListClient.variables.waypoints.get(id).setX(x.getText());
+                waypoint.setX(x.getText());
             }
             if(this.y.isFocused()){
-                CListClient.variables.waypoints.get(id).setY(y.getText());
+                waypoint.setY(y.getText());
             }
             if(this.z.isFocused()){
-                CListClient.variables.waypoints.get(id).setZ(z.getText());
+                waypoint.setZ(z.getText());
             }
             CListClient.variables.saved_since_last_update = false;
         }
         if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
             if(this.waypoint_name.isFocused()){
-                CListClient.variables.waypoints.get(id).setName(waypoint_name.getText());
+                waypoint.setName(waypoint_name.getText());
             }
             if(this.waypoint_color.isFocused()){
                 CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());
             }
             if(this.x.isFocused()){
-                CListClient.variables.waypoints.get(id).setX(x.getText());
+                waypoint.setX(x.getText());
             }
             if(this.y.isFocused()){
-                CListClient.variables.waypoints.get(id).setY(y.getText());
+                waypoint.setY(y.getText());
             }
             if(this.z.isFocused()){
-                CListClient.variables.waypoints.get(id).setZ(z.getText());
+                waypoint.setZ(z.getText());
             }
             CListClient.variables.saved_since_last_update = false;
         }

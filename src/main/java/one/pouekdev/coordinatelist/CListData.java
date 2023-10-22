@@ -21,7 +21,7 @@ public class CListData {
 
         try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)))) {
             for (int i = 0; i < waypointList.size(); i++) {
-                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).getName().replaceAll("~","") + "~" + CListClient.variables.waypoints.get(i).getDimensionValue() + "~" + CListClient.variables.colors.get(i).rgbToHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render);
+                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).getName().replaceAll("~","") + "~" + CListClient.variables.waypoints.get(i).getDimensionValue() + "~" + CListClient.variables.colors.get(i).rgbToHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint);
             }
         } catch (IOException ignored) {
         }
@@ -45,19 +45,14 @@ public class CListData {
                     String coords = segments[0];
                     String name = segments[1];
                     String dimension = segments[2];
-                    String color = null,bool = null;
+                    String color = null,bool = null,deathpoint = null;
                     try{
                         color = segments[3];
                         bool = segments[4];
+                        deathpoint = segments[5];
                     }
                     catch (IndexOutOfBoundsException ignored){}
-                    CListWaypoint waypoint;
-                    if(bool != null){
-                        waypoint = new CListWaypoint(coords, name, dimension, Boolean.parseBoolean(bool));
-                    }
-                    else{
-                        waypoint = new CListWaypoint(coords, name, dimension, true);
-                    }
+                    CListWaypoint waypoint = new CListWaypoint(coords, name, dimension, Boolean.parseBoolean(bool), Boolean.parseBoolean(deathpoint));
                     if(color == null){
                         CListClient.addRandomWaypointColor();
                     }

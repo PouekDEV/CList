@@ -9,11 +9,13 @@ public class CListWaypoint {
     public String dimension;
     public int bug_fix;
     public boolean render;
-    CListWaypoint(String coords, String waypoint_name, String waypoint_dimension, boolean is_rendered){
+    public boolean deathpoint;
+    CListWaypoint(String coords, String waypoint_name, String waypoint_dimension, boolean is_rendered, boolean is_deathpoint){
         this.coordinates = coords;
         this.name = waypoint_name;
         this.dimension = waypoint_dimension;
         this.render = is_rendered;
+        this.deathpoint = is_deathpoint;
         this.bug_fix = 0;
     }
     public String getName(){

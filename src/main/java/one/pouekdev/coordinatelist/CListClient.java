@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -25,10 +24,12 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import eu.midnightdust.lib.config.MidnightConfig;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CListClient implements ClientModInitializer {
     public static CListVariables variables = new CListVariables();
@@ -42,41 +43,28 @@ public class CListClient implements ClientModInitializer {
     public float calculateSizeText(){
         return 15f * (CListConfig.multiplier/10.0f);
     }
-    public float distanceTo(int index, MinecraftClient client) {
-        float f = (float)(client.getInstance().player.getX() - variables.waypoints.get(index).getX());
-        float g = (float)(client.getInstance().player.getY() - variables.waypoints.get(index).getY());
-        float h = (float)(client.getInstance().player.getZ() - variables.waypoints.get(index).getZ());
+    public float distanceTo(CListWaypoint waypoint) {
+        float f = (float)(CListVariables.minecraft_client.player.getX() - waypoint.getX());
+        float g = (float)(CListVariables.minecraft_client.player.getY() - waypoint.getY());
+        float h = (float)(CListVariables.minecraft_client.player.getZ() - waypoint.getZ());
         return Math.round(MathHelper.sqrt(f * f + g * g + h * h));
     }
-    public HashMap<String,Float> calculateRenderCoords(int index, MinecraftClient client, Camera camera) {
-        float distance = distanceTo(index, client);
-
+    public Vec3d calculateRenderCoords(CListWaypoint waypoint, Camera camera, float distance) {
         float px = (float)camera.getPos().x;
         float py = (float)camera.getPos().y;
         float pz = (float)camera.getPos().z;
-
-        float wx = variables.waypoints.get(index).getX();
-        float wy = variables.waypoints.get(index).getY();
-        float wz = variables.waypoints.get(index).getZ();
-
-
-        HashMap<String, Float> coords = new HashMap<String, Float>();
-
+        float wx = waypoint.getX();
+        float wy = waypoint.getY();
+        float wz = waypoint.getZ();
         float vx = wx - px;
         float vy = wy - py;
         float vz = wz - pz;
-
-
-        float vector_len = (float)Math.sqrt( Math.pow( vx, 2) + Math.pow(vy, 2) + Math.pow(vz,2) );
-
+        float vector_len = (float)Math.sqrt((vx*vx) + (vy*vy) + (vz*vz));
         float radius = 32;
-
         float scx = radius / vector_len * vx;
         float scy = radius / vector_len * vy;
         float scz = radius / vector_len * vz;
-
         float prx, pry, prz;
-
         if (distance > 32) {
             prx = scx + px;
             pry = scy + py;
@@ -87,11 +75,16 @@ public class CListClient implements ClientModInitializer {
             pry = wy;
             prz = wz;
         }
-        coords.put("x", prx);
-        coords.put("y", pry);
-        coords.put("z", prz);
-        //CList.LOGGER.info(coords.toString());
-        return coords;
+        return new Vec3d(prx,pry,prz);
+    }
+    public static List<String> findNumbersInString(String input) {
+        List<String> numbersList = new ArrayList<>();
+        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+        Matcher matcher = pattern.matcher(input);
+        while (matcher.find()) {
+            numbersList.add(matcher.group());
+        }
+        return numbersList;
     }
     @Override
     public void onInitializeClient() {
@@ -118,12 +111,13 @@ public class CListClient implements ClientModInitializer {
                 RenderSystem.disableCull();
                 RenderSystem.depthFunc(GL11.GL_ALWAYS);
                 for(int i = 0; i < variables.waypoints.size(); i++){
-                    int distance_without_decimal_places = (int) distanceTo(i, MinecraftClient.getInstance());
-                    if(Objects.equals(variables.waypoints.get(i).getDimensionString(), getDimension(String.valueOf(variables.last_world.getDimension().effects()))) && variables.waypoints.get(i).render && (CListConfig.render_distance == 0 || CListConfig.render_distance >= distance_without_decimal_places)) {
+                    CListWaypoint waypoint = variables.waypoints.get(i);
+                    int distance_without_decimal_places = (int) distanceTo(waypoint);
+                    if(Objects.equals(waypoint.getDimensionString(), getDimension(String.valueOf(variables.last_world.getDimension().effects()))) && waypoint.render && (CListConfig.render_distance == 0 || CListConfig.render_distance >= distance_without_decimal_places)) {
                         Camera camera = context.camera();
                         float size = calculateSizeWaypoint();
-                        HashMap<String,Float> renderCoords = calculateRenderCoords(i, MinecraftClient.getInstance(), camera);
-                        Vec3d targetPosition = new Vec3d(renderCoords.get("x"), renderCoords.get("y")+1, renderCoords.get("z"));
+                        Vec3d renderCoords = calculateRenderCoords(waypoint, camera, distance_without_decimal_places);
+                        Vec3d targetPosition = new Vec3d(renderCoords.x, renderCoords.y+1, renderCoords.z);
                         Vec3d transformedPosition = targetPosition.subtract(camera.getPos());
                         MatrixStack matrixStack = new MatrixStack();
                         matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
@@ -140,7 +134,7 @@ public class CListClient implements ClientModInitializer {
                         buffer.vertex(positionMatrix, 1, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 1).next();
                         buffer.vertex(positionMatrix, 1, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 0f).next();
                         RenderSystem.setShader(GameRenderer::getPositionColorTexProgram);
-                        if(variables.waypoints.get(i).getName().contains((Text.translatable("waypoint.death")).getString().toLowerCase())){
+                        if(waypoint.deathpoint){
                             RenderSystem.setShaderTexture(0, new Identifier("coordinatelist", "skull.png"));
                         }
                         else {
@@ -151,8 +145,8 @@ public class CListClient implements ClientModInitializer {
                         RenderSystem.enableBlend();
                         RenderSystem.depthMask(true);
                         RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
-                        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-                        String labelText = variables.waypoints.get(i).getName() + " (" + distance_without_decimal_places + " m)";
+                        TextRenderer textRenderer = CListVariables.minecraft_client.textRenderer;
+                        String labelText = waypoint.getName() + " (" + distance_without_decimal_places + " m)";
                         int textWidth = textRenderer.getWidth(labelText);
                         matrixStack.scale(-0.025f, -0.025f, 0.025f);
                         size = calculateSizeText();
@@ -175,12 +169,21 @@ public class CListClient implements ClientModInitializer {
             }
         });
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if(CListVariables.delayed_events.size()>0){
+                for(CListDelayedEvent event: CListVariables.delayed_events){
+                    boolean destroy = event.update();
+                    if(destroy){
+                        CListVariables.delayed_events.remove(event);
+                        break;
+                    }
+                }
+            }
             while (open_waypoints_keybind.wasPressed()) {
                 client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
             }
             while(add_a_waypoint.wasPressed()){
                 if(!Objects.equals(client.currentScreen, new CListWaypointScreen(Text.literal("Waypoints")))){
-                    PlayerEntity player = MinecraftClient.getInstance().player;
+                    PlayerEntity player = CListVariables.minecraft_client.player;
                     addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()),false);
                 }
             }
@@ -235,11 +238,11 @@ public class CListClient implements ClientModInitializer {
         else{
             waypoint_name = (Text.translatable("waypoint.new.waypoint")).getString();
         }
-        variables.waypoints.add(new CListWaypoint(name,waypoint_name,String.valueOf(variables.last_world.getDimension().effects()),true));
+        variables.waypoints.add(new CListWaypoint(name,waypoint_name,String.valueOf(variables.last_world.getDimension().effects()),true,death));
         variables.colors.add(new CListWaypointColor(rand.nextFloat(),rand.nextFloat(),rand.nextFloat()));
         variables.saved_since_last_update = false;
         if(!death){
-            MinecraftClient.getInstance().setScreen(new CListWaypointConfig(Text.literal("Config"),variables.waypoints.size()-1));
+            CListVariables.minecraft_client.setScreen(new CListWaypointConfig(Text.literal("Config"),variables.waypoints.size()-1));
         }
     }
     public static void deleteWaypoint(int position){
@@ -260,7 +263,6 @@ public class CListClient implements ClientModInitializer {
         return s;
     }
     public static void checkForWorldChanges(ClientWorld current_world){
-        MinecraftClient client = MinecraftClient.getInstance();
         if(!variables.loaded_last_world && variables.worldName != null){
             CList.LOGGER.info("New world " + variables.worldName);
             variables.last_world = current_world;
@@ -270,7 +272,7 @@ public class CListClient implements ClientModInitializer {
             if(names != null && names.size()>0){
                 List<String> temp = CListData.loadListFromFileLegacy("clist_"+variables.worldName);
                 for(int i = 0; i < names.size(); i++){
-                    variables.waypoints.add(new CListWaypoint(temp.get(i),names.get(i),dimensions.get(i),true));
+                    variables.waypoints.add(new CListWaypoint(temp.get(i),names.get(i),dimensions.get(i),true,false));
                 }
                 for(int i = 0; i < variables.waypoints.size(); i++){
                     variables.colors.add(new CListWaypointColor(rand.nextFloat(),rand.nextFloat(),rand.nextFloat()));
@@ -283,11 +285,11 @@ public class CListClient implements ClientModInitializer {
             }
             else{
                 // Check for post 1.0 saves
-                if(!client.isInSingleplayer()){
-                    List<CListWaypoint> ways = CListData.loadListFromFile("clist_"+client.getCurrentServerEntry().name);
+                if(!CListVariables.minecraft_client.isInSingleplayer()){
+                    List<CListWaypoint> ways = CListData.loadListFromFile("clist_"+CListVariables.minecraft_client.getCurrentServerEntry().name);
                     if(ways != null && ways.size()>0){
                         variables.waypoints = ways;
-                        CListData.deleteLegacyFile("clist_"+client.getCurrentServerEntry().name);
+                        CListData.deleteLegacyFile("clist_"+CListVariables.minecraft_client.getCurrentServerEntry().name);
                         CList.LOGGER.info("Loaded old multiplier server data");
                         checkIfSaveIsNeeded(true);
                     }

@@ -12,5 +12,5 @@
   "waypoint.new.waypoint": "New Waypoint",
   "buttons.add.new.waypoint": "Add a new waypoint in current position",
   "tooltip.copy.waypoint.coordinates": "Click to copy selected waypoints coordinates",
-  "waypoint.death": "death"
+  "chat.create.waypoint.message": "[Create a waypoint]"
 }

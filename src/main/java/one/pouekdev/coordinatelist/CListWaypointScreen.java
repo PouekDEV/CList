@@ -1,7 +1,6 @@
 package one.pouekdev.coordinatelist;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -33,17 +32,17 @@ public class CListWaypointScreen extends Screen {
         GridWidget.Adder adder = gridWidget.createAdder(2);
         GridWidget.Adder adderBottom = gridWidgetBottom.createAdder(2);
         adder.add(ButtonWidget.builder(Text.translatable("buttons.add.new.waypoint"), button -> {
-            PlayerEntity player = MinecraftClient.getInstance().player;
+            PlayerEntity player = CListVariables.minecraft_client.player;
             CListClient.addNewWaypoint("X: "+Math.round(player.getX())+" Y: "+Math.round(player.getY())+" Z: "+Math.round(player.getZ()),false);
             list.RefreshElements();
         }).width(300).build(),2, gridWidget.copyPositioner().marginTop(10));
         copy_coordinates_button = ButtonWidget.builder(Text.literal("---"), button -> {
-            long window = MinecraftClient.getInstance().getWindow().getHandle();
+            long window = CListVariables.minecraft_client.getWindow().getHandle();
             CListWaypoint waypoint = CListClient.variables.waypoints.get(selected_waypoint_id);
             GLFW.glfwSetClipboardString(window, waypoint.getX() + " " + waypoint.getY() + " " + waypoint.getZ());
         }).width(150).build();
         copy_coordinates_button.setTooltip(Tooltip.of(Text.translatable("tooltip.copy.waypoint.coordinates")));
-        edit_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> MinecraftClient.getInstance().setScreen(new CListWaypointConfig(Text.literal("Config"),selected_waypoint_id))).width(150).build();
+        edit_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> CListVariables.minecraft_client.setScreen(new CListWaypointConfig(Text.literal("Config"),selected_waypoint_id))).width(150).build();
         adderBottom.add(copy_coordinates_button,1, gridWidgetBottom.copyPositioner().marginBottom(10));
         adderBottom.add(edit_waypoint_button,1, gridWidgetBottom.copyPositioner().marginBottom(10));
         list = new ScrollList();
@@ -183,8 +182,8 @@ public class CListWaypointScreen extends Screen {
                 select.setY(y);
                 sh.render(context, mouseX, mouseY, delta);
                 select.render(context, mouseX, mouseY, delta);
-                context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, dimension.getString(), x+180, y+6, 0xFFFFFF);
-                context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, waypoint_name.getString(), x+22, y+6, CListClient.variables.colors.get(id).rgbToHex());
+                context.drawTextWithShadow(CListVariables.minecraft_client.textRenderer, dimension.getString(), x+180, y+6, 0xFFFFFF);
+                context.drawTextWithShadow(CListVariables.minecraft_client.textRenderer, waypoint_name.getString(), x+22, y+6, CListClient.variables.colors.get(id).rgbToHex());
             }
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {

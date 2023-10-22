@@ -12,5 +12,5 @@
   "waypoint.new.waypoint": "Nowy Punkt Orientacyjny",
   "buttons.add.new.waypoint": "Dodaj nowy punkt orientacyjny w obecnym miejscu",
   "tooltip.copy.waypoint.coordinates": "Kliknij aby skopiować koordynaty wybranego punktu orientacyjnego",
-  "waypoint.death": "śmierć"
+  "chat.create.waypoint.message": "[Stwórz punkt orientacyjny]"
 }
