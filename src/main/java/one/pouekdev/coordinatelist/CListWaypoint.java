@@ -10,6 +10,8 @@ public class CListWaypoint {
     public int bug_fix;
     public boolean render;
     public boolean deathpoint;
+
+    // To be reworked and changed from string to ints
     CListWaypoint(String coords, String waypoint_name, String waypoint_dimension, boolean is_rendered, boolean is_deathpoint){
         this.coordinates = coords;
         this.name = waypoint_name;
@@ -38,7 +40,7 @@ public class CListWaypoint {
             CListClient.variables.saved_since_last_update = false;
         }
     }
-    public Text getDimension(){
+    public Text getDimensionText(){
         String s = this.dimension;
         s = s.replace("minecraft:","");
         s = s.replace("_"," ");

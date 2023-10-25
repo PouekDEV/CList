@@ -17,7 +17,7 @@
   "license": "MIT License",
   "icon": "assets/coordinatelist/icon.png",
 
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "main": [
       "one.pouekdev.coordinatelist.CList"
@@ -37,6 +37,7 @@
     "java": ">=17",
     "midnightlib": ">=1.5.0"
   },
+
   "suggests": {
     "another-mod": "*"
   }

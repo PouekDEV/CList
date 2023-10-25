@@ -79,7 +79,7 @@ public class CListClient implements ClientModInitializer {
     }
     public static List<String> findNumbersInString(String input) {
         List<String> numbersList = new ArrayList<>();
-        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+        Pattern pattern = Pattern.compile("\\b-?\\d+(\\.\\d+)?\\b");
         Matcher matcher = pattern.matcher(input);
         while (matcher.find()) {
             numbersList.add(matcher.group());

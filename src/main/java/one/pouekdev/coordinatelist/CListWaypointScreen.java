@@ -158,7 +158,7 @@ public class CListWaypointScreen extends Screen {
             public ScrollListEntry(int id){
                 this.id = id;
                 this.waypoint_name = Text.of(CListClient.variables.waypoints.get(id).getName());
-                this.dimension = CListClient.variables.waypoints.get(id).getDimension();
+                this.dimension = CListClient.variables.waypoints.get(id).getDimensionText();
                 this.sh = new SpriteButton(0,0,16,12,button -> {
                     CListClient.variables.waypoints.get(id).toggleVisibility();
                     selected_waypoint_id = id;
