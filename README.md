@@ -9,6 +9,8 @@ This mod includes:
 - copying the waypoint coordinates by clicking the button with coordinates in the waypoint menu.
 - toggle waypoint visibility.
 - changing the size of the waypoint to your liking.
+- setting the maximum rendering distance for waypoints.
+- detecting coordinates from chat.
 - no minimap.
 
 (If you want to help and know any other language than English you can help by translating the mod [here](https://github.com/PouekDEV/CList/tree/1.20.2/src/main/resources/assets/coordinatelist/lang) by making a pull request)
