@@ -8,6 +8,8 @@
   "coordinatelist.midnightconfig.render_distance": "The distance to which the waypoint is visible (0 means no limit)",
   "coordinatelist.midnightconfig.waypoints_toggled": "Show waypoints",
   "coordinatelist.midnightconfig.can_place_deathpoints": "Create waypoints on death",
+  "modmenu.summaryTranslation.coordinatelist": "A simple minimalistic fabric mod for saving your coordinates.",
+  "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (CList for short) is a simple minimalistic fabric mod for saving your coordinates. No minimaps. Just a list with in-game waypoints.",
   "waypoint.last.death": "Last death",
   "waypoint.new.waypoint": "New Waypoint",
   "buttons.add.new.waypoint": "Add a new waypoint in current position",

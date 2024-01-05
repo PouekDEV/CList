@@ -62,7 +62,7 @@ public class CListWaypointScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        list.render(context, mouseX, mouseY, delta);
+        //list.render(context, mouseX, mouseY, delta);
         if(selected_waypoint_id >= 0){
             copy_coordinates_button.active = true;
             edit_waypoint_button.active = true;
@@ -89,7 +89,7 @@ public class CListWaypointScreen extends Screen {
     }
     public class ScrollList extends EntryListWidget<ScrollList.ScrollListEntry> {
         public ScrollList(){
-            super(CListWaypointScreen.this.client, CListWaypointScreen.this.width, CListWaypointScreen.this.height, 32, CListWaypointScreen.this.height - 32, 25);
+            super(CListWaypointScreen.this.client, CListWaypointScreen.this.width, CListWaypointScreen.this.height-64, 32, 25);//32
         }
         public void SetupElements(){
             for(int i = 0; i < CListClient.variables.waypoints.size(); i++){
@@ -105,15 +105,15 @@ public class CListWaypointScreen extends Screen {
         public int getRowWidth() {
             return 245;
         }
-        public void appendNarrations(NarrationMessageBuilder builder){}
-        public class InvisibleButton extends ButtonWidget{
+        public void appendClickableNarrations(NarrationMessageBuilder builder){}
+        public static class InvisibleButton extends ButtonWidget{
             public InvisibleButton(int x, int y, int width, int height, PressAction onPress){
                 super(x, y, width, height, Text.literal(""), onPress,null);
             }
             @Override
-            public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {}
+            public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {}
         }
-        public class SpriteButton extends ButtonWidget {
+        public static class SpriteButton extends ButtonWidget {
             public int x_pos;
             public int y_pos;
             public int id;
@@ -134,7 +134,7 @@ public class CListWaypointScreen extends Screen {
                 this.y_pos = value;
             }
             @Override
-            public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+            public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
                 Identifier eye_icon;
                 if(CListClient.variables.waypoints.get(id).render){
                     eye_icon = new Identifier("coordinatelist", "icon/visible");
@@ -159,13 +159,13 @@ public class CListWaypointScreen extends Screen {
                 this.id = id;
                 this.waypoint_name = Text.of(CListClient.variables.waypoints.get(id).getName());
                 this.dimension = CListClient.variables.waypoints.get(id).getDimensionText();
-                this.sh = new SpriteButton(0,0,16,12,button -> {
+                this.sh = new SpriteButton(0, 0, 16, 12, button -> {
                     CListClient.variables.waypoints.get(id).toggleVisibility();
                     selected_waypoint_id = id;
                     CListWaypoint waypoint = CListClient.variables.waypoints.get(selected_waypoint_id);
                     copy_coordinates_button.setMessage(Text.literal(waypoint.getX() + " " + waypoint.getY() + " " + waypoint.getZ()));
                 }, id);
-                this.select = new InvisibleButton(0,0,240,25,button -> {
+                this.select = new InvisibleButton(0, 0, 240, 25, button -> {
                     selected_waypoint_id = id;
                     CListWaypoint waypoint = CListClient.variables.waypoints.get(selected_waypoint_id);
                     copy_coordinates_button.setMessage(Text.literal(waypoint.getX() + " " + waypoint.getY() + " " + waypoint.getZ()));

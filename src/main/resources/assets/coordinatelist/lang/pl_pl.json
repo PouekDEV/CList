@@ -8,6 +8,8 @@
   "coordinatelist.midnightconfig.render_distance": "Odległość na jaką jest widoczny punkt orientacyjny (0 oznacza bez limitu)",
   "coordinatelist.midnightconfig.waypoints_toggled": "Pokaż punkty orientacyjne",
   "coordinatelist.midnightconfig.can_place_deathpoints": "Twórz punkty orientacyjne przy śmierci",
+  "modmenu.summaryTranslation.coordinatelist": "Prosty i minimalistyczny mod na fabrica do zapisywania swojej pozycji",
+  "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (w skrócie CList) to prosty i minimalistyczny mod na fabrica do zapisywania swojej pozycji. Zero minimap. Tylko prosta lista z wyświetlanymi punktami orientacyjnymi w grze.",
   "waypoint.last.death": "Ostatnia śmierć",
   "waypoint.new.waypoint": "Nowy Punkt Orientacyjny",
   "buttons.add.new.waypoint": "Dodaj nowy punkt orientacyjny w obecnym miejscu",
