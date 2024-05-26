@@ -1,0 +1,19 @@
+{
+  "keybinds.category.name": "CList 快捷键",
+  "keybinds.waypoint.add": "在当前位置添加路径点",
+  "keybinds.waypoints.menu": "打开路径点菜单",
+  "keybinds.waypoints.toggle": "切换路径点可见性",
+  "coordinatelist.midnightconfig.title": "CList 配置",
+  "coordinatelist.midnightconfig.multiplier": "路径点大小",
+  "coordinatelist.midnightconfig.render_distance": "路径点可见的距离（0 表示无限制）",
+  "coordinatelist.midnightconfig.waypoints_toggled": "显示路径点",
+  "coordinatelist.midnightconfig.can_place_deathpoints": "死亡时创建路径点",
+  "coordinatelist.midnightconfig.waypoint_text_background": "在路径点名称后面显示背景",
+  "modmenu.summaryTranslation.coordinatelist": "一个简单的极简主义Fabric模组，用于保存您的坐标。",
+  "modmenu.descriptionTranslation.coordinatelist": "CoordinateList（简称CList）是一个简单的极简主义Fabric模组，用于保存您的坐标。没有小地图。只有一个包含于游戏的内路径点的列表。",
+  "waypoint.last.death": "最后死亡点",
+  "waypoint.new.waypoint": "新路径点",
+  "buttons.add.new.waypoint": "在当前位置添加一个新路径点",
+  "tooltip.copy.waypoint.coordinates": "点击复制选中的路径点坐标",
+  "chat.create.waypoint.message": "[创建路径点]"
+}
