@@ -133,10 +133,10 @@ public class CListWaypointScreen extends Screen {
             public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
                 Identifier eye_icon;
                 if(CListClient.variables.waypoints.get(id).render){
-                    eye_icon = new Identifier("coordinatelist", "icon/visible");
+                    eye_icon = Identifier.of("coordinatelist", "icon/visible");
                 }
                 else{
-                    eye_icon = new Identifier("coordinatelist", "icon/not_visible");
+                    eye_icon = Identifier.of("coordinatelist", "icon/not_visible");
                 }
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();

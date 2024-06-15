@@ -72,7 +72,7 @@ public class CListWaypointConfig extends Screen {
         @Override
         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
             Identifier icon;
-            icon = new Identifier("coordinatelist", "icon/change");
+            icon = Identifier.of("coordinatelist", "icon/change");
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             context.drawGuiTexture(icon, x_pos, y_pos, width, height);

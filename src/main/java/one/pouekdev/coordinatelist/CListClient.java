@@ -9,6 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.*;
+import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
@@ -24,6 +25,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import eu.midnightdust.lib.config.MidnightConfig;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -124,24 +126,23 @@ public class CListClient implements ClientModInitializer {
                         matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
                         matrixStack.translate(transformedPosition.x, transformedPosition.y, transformedPosition.z);
                         matrixStack.multiply(camera.getRotation());
-                        matrixStack.scale(size, size, size);
+                        matrixStack.scale(-size, size, size);
                         Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
                         Tessellator tessellator = Tessellator.getInstance();
-                        BufferBuilder buffer = tessellator.getBuffer();
-                        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR_TEXTURE);
-                        buffer.vertex(positionMatrix, 0, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(0f, 0f).next();
-                        buffer.vertex(positionMatrix, 0, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(0f, 1f).next();
-                        buffer.vertex(positionMatrix, 1, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 1).next();
-                        buffer.vertex(positionMatrix, 1, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 0f).next();
-                        RenderSystem.setShader(GameRenderer::getPositionColorTexProgram);
+                        BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+                        buffer.vertex(positionMatrix, 0, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(0f, 0f);
+                        buffer.vertex(positionMatrix, 0, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(0f, 1f);
+                        buffer.vertex(positionMatrix, 1, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 1);
+                        buffer.vertex(positionMatrix, 1, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 0f);
+                        RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
                         if(waypoint.deathpoint){
-                            RenderSystem.setShaderTexture(0, new Identifier("coordinatelist", "skull.png"));
+                            RenderSystem.setShaderTexture(0, Identifier.of("coordinatelist", "skull.png"));
                         }
                         else {
-                            RenderSystem.setShaderTexture(0, new Identifier("coordinatelist", "waypoint_icon.png"));
+                            RenderSystem.setShaderTexture(0, Identifier.of("coordinatelist", "waypoint_icon.png"));
                         }
                         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-                        tessellator.draw();
+                        BufferRenderer.drawWithGlobalProgram(buffer.end());
                         RenderSystem.enableBlend();
                         RenderSystem.depthMask(true);
                         RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
@@ -154,13 +155,11 @@ public class CListClient implements ClientModInitializer {
                         matrixStack.translate(0,-20,0);
                         positionMatrix = matrixStack.peek().getPositionMatrix();
                         float h = (float) (-textWidth/2);
-                        VertexConsumerProvider.Immediate v = VertexConsumerProvider.immediate(tessellator.getBuffer());
+                        VertexConsumerProvider.Immediate v = CListVariables.minecraft_client.getBufferBuilders().getEntityVertexConsumers();
                         if(CListConfig.waypoint_text_background) {
-                            textRenderer.draw(labelText, h,0,0x00000000,false,positionMatrix,v, TextRenderer.TextLayerType.NORMAL,0x90000000,LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                            textRenderer.draw(labelText, h, 0, 0xFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.NORMAL, 0x90000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
                         }
-                        // This fixes text flickering
-                        matrixStack.translate(0,0,-0.03f);
-                        positionMatrix = matrixStack.peek().getPositionMatrix();
+                        RenderSystem.depthMask(false);
                         textRenderer.draw(labelText, h,0,0xFFFFFF,false,positionMatrix,v, TextRenderer.TextLayerType.NORMAL,0x00000000,LightmapTextureManager.MAX_LIGHT_COORDINATE);
                         v.draw();
                         RenderSystem.disableBlend();
