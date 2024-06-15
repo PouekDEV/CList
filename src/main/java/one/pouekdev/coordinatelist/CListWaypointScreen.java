@@ -23,6 +23,7 @@ public class CListWaypointScreen extends Screen {
     public int selected_waypoint_id = -1;
     public ButtonWidget copy_coordinates_button;
     public ButtonWidget edit_waypoint_button;
+    public ButtonWidget delete_waypoint_button;
     @Override
     protected void init() {
         GridWidget gridWidget = new GridWidget();
@@ -30,7 +31,7 @@ public class CListWaypointScreen extends Screen {
         gridWidget.getMainPositioner().margin(4, 4, 4, 0);
         gridWidgetBottom.getMainPositioner().margin(4, 4, 4, 0);
         GridWidget.Adder adder = gridWidget.createAdder(2);
-        GridWidget.Adder adderBottom = gridWidgetBottom.createAdder(2);
+        GridWidget.Adder adderBottom = gridWidgetBottom.createAdder(3);
         adder.add(ButtonWidget.builder(Text.translatable("buttons.add.new.waypoint"), button -> {
             PlayerEntity player = CListVariables.minecraft_client.player;
             CListClient.addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),false);
@@ -42,7 +43,12 @@ public class CListWaypointScreen extends Screen {
             GLFW.glfwSetClipboardString(window, waypoint.x + " " + waypoint.y + " " + waypoint.z);
         }).width(150).build();
         copy_coordinates_button.setTooltip(Tooltip.of(Text.translatable("tooltip.copy.waypoint.coordinates")));
-        edit_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> CListVariables.minecraft_client.setScreen(new CListWaypointConfig(Text.literal("Config"),selected_waypoint_id))).width(150).build();
+        edit_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> CListVariables.minecraft_client.setScreen(new CListWaypointConfig(Text.literal("Config"),selected_waypoint_id))).width(100).build();
+        delete_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.delete"), button -> {
+            CListClient.deleteWaypoint(selected_waypoint_id);
+            list.RefreshElements();
+        }).width(100).build();
+        adderBottom.add(delete_waypoint_button,1, gridWidgetBottom.copyPositioner().marginBottom(10));
         adderBottom.add(copy_coordinates_button,1, gridWidgetBottom.copyPositioner().marginBottom(10));
         adderBottom.add(edit_waypoint_button,1, gridWidgetBottom.copyPositioner().marginBottom(10));
         list = new ScrollList();
@@ -62,10 +68,12 @@ public class CListWaypointScreen extends Screen {
         if(selected_waypoint_id >= 0){
             copy_coordinates_button.active = true;
             edit_waypoint_button.active = true;
+            delete_waypoint_button.active = true;
         }
         else{
             copy_coordinates_button.active = false;
             edit_waypoint_button.active = false;
+            delete_waypoint_button.active = false;
         }
     }
     @Override

@@ -159,7 +159,9 @@ public class CListClient implements ClientModInitializer {
                         if(CListConfig.waypoint_text_background) {
                             textRenderer.draw(labelText, h, 0, 0xFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.NORMAL, 0x90000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
                         }
-                        RenderSystem.depthMask(false);
+                        // This fixes text flickering. If somebody finds a better way to fix it, please open a PR
+                        matrixStack.translate(0,0,0.06f);
+                        positionMatrix = matrixStack.peek().getPositionMatrix();
                         textRenderer.draw(labelText, h,0,0xFFFFFF,false,positionMatrix,v, TextRenderer.TextLayerType.NORMAL,0x00000000,LightmapTextureManager.MAX_LIGHT_COORDINATE);
                         v.draw();
                         RenderSystem.disableBlend();
