@@ -46,6 +46,9 @@ public class CListWaypointScreen extends Screen {
         edit_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> CListVariables.minecraft_client.setScreen(new CListWaypointConfig(Text.literal("Config"),selected_waypoint_id))).width(100).build();
         delete_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.delete"), button -> {
             CListClient.deleteWaypoint(selected_waypoint_id);
+            if(selected_waypoint_id >= CListClient.variables.waypoints.size()){
+                selected_waypoint_id -= 1;
+            }
             list.RefreshElements();
         }).width(100).build();
         adderBottom.add(delete_waypoint_button,1, gridWidgetBottom.copyPositioner().marginBottom(10));
@@ -65,6 +68,9 @@ public class CListWaypointScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         //list.render(context, mouseX, mouseY, delta);
+        if(selected_waypoint_id != -1){
+            list.setSelected(list.children().get(selected_waypoint_id));
+        }
         if(selected_waypoint_id >= 0){
             copy_coordinates_button.active = true;
             edit_waypoint_button.active = true;
@@ -161,7 +167,7 @@ public class CListWaypointScreen extends Screen {
             public final int id;
             public ScrollListEntry(int id){
                 this.id = id;
-                this.waypoint_name = Text.of(CListClient.variables.waypoints.get(id).getName());
+                this.waypoint_name = Text.of(CListClient.variables.waypoints.get(id).name);
                 this.dimension = CListClient.variables.waypoints.get(id).getDimensionText();
                 this.sh = new SpriteButton(0, 0, 16, 12, button -> {
                     CListClient.variables.waypoints.get(id).toggleVisibility();

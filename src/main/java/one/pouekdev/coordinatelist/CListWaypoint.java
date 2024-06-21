@@ -36,14 +36,8 @@ public class CListWaypoint {
         this.deathpoint = is_deathpoint;
         this.bug_fix = 0;
     }
-    public String getName(){
-        return this.name;
-    }
     public String getCoordinates(){
         return "X: " + x + " Y: " + y + " Z: " + z;
-    }
-    public String getDimensionValue(){
-        return this.dimension;
     }
     public void setName(String value){
         this.name = value;
@@ -57,11 +51,7 @@ public class CListWaypoint {
         }
     }
     public Text getDimensionText(){
-        String s = this.dimension;
-        s = s.replace("minecraft:","");
-        s = s.replace("_"," ");
-        s = StringUtils.capitalize(s);
-        return Text.literal(s);
+        return Text.literal(this.getDimensionString());
     }
     public String getDimensionString(){
         String s = this.dimension;

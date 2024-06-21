@@ -9,7 +9,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.*;
-import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
@@ -25,7 +24,6 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import eu.midnightdust.lib.config.MidnightConfig;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -147,7 +145,7 @@ public class CListClient implements ClientModInitializer {
                         RenderSystem.depthMask(true);
                         RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
                         TextRenderer textRenderer = CListVariables.minecraft_client.textRenderer;
-                        String labelText = waypoint.getName() + " (" + distance_without_decimal_places + " m)";
+                        String labelText = waypoint.name + " (" + distance_without_decimal_places + " m)";
                         int textWidth = textRenderer.getWidth(labelText);
                         matrixStack.scale(-0.025f, -0.025f, 0.025f);
                         size = calculateSizeText();
@@ -172,7 +170,7 @@ public class CListClient implements ClientModInitializer {
             }
         });
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if(CListVariables.delayed_events.size()>0){
+            if(!CListVariables.delayed_events.isEmpty()){
                 for(CListDelayedEvent event: CListVariables.delayed_events){
                     boolean destroy = event.update();
                     if(destroy){
@@ -259,9 +257,7 @@ public class CListClient implements ClientModInitializer {
             variables.colors.remove(position);
             variables.saved_since_last_update = false;
         }
-        catch (IndexOutOfBoundsException e){
-            //CList.LOGGER.info("WTF");
-        }
+        catch (IndexOutOfBoundsException ignored){}
     }
     public static String getDimension(String text){
         String s = text;
@@ -277,7 +273,7 @@ public class CListClient implements ClientModInitializer {
             // Check for old 1.0 saves and convert them
             List<String> names = CListData.loadListFromFileLegacy("clist_names_"+variables.worldName);
             List<String> dimensions = CListData.loadListFromFileLegacy("clist_dimensions_"+variables.worldName);
-            if(names != null && names.size()>0){
+            if(names != null && !names.isEmpty()){
                 List<String> temp = CListData.loadListFromFileLegacy("clist_"+variables.worldName);
                 for(int i = 0; i < names.size(); i++){
                     variables.waypoints.add(new CListWaypoint(temp.get(i),names.get(i),dimensions.get(i),true,false));
@@ -295,7 +291,7 @@ public class CListClient implements ClientModInitializer {
                 // Check for post 1.0 saves
                 if(!CListVariables.minecraft_client.isInSingleplayer()){
                     List<CListWaypoint> ways = CListData.loadListFromFile("clist_"+CListVariables.minecraft_client.getCurrentServerEntry().name);
-                    if(ways != null && ways.size()>0){
+                    if(ways != null && !ways.isEmpty()){
                         variables.waypoints = ways;
                         CListData.deleteLegacyFile("clist_"+CListVariables.minecraft_client.getCurrentServerEntry().name);
                         CList.LOGGER.info("Loaded old multiplier server data");
@@ -303,7 +299,7 @@ public class CListClient implements ClientModInitializer {
                     }
                     else{
                         ways = CListData.loadListFromFile("clist_"+variables.worldName);
-                        if(ways != null && ways.size() > 0){
+                        if(ways != null && !ways.isEmpty()){
                             variables.waypoints = ways;
                             CList.LOGGER.info("Loaded data for server " + variables.worldName);
                         }
@@ -314,7 +310,7 @@ public class CListClient implements ClientModInitializer {
                 }
                 else{
                     List<CListWaypoint> ways = CListData.loadListFromFile("clist_"+variables.worldName);
-                    if(ways != null && ways.size() > 0){
+                    if(ways != null && !ways.isEmpty()){
                         variables.waypoints = ways;
                         CList.LOGGER.info("Loaded data for world " + variables.worldName);
                     }
