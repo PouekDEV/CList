@@ -21,5 +21,5 @@ public class CListCommand implements ClientCommandRegistrationCallback {
                     CListClient.addNewWaypoint(x,y,z,false);
                     return 0;
         })))));
-    };
+    }
 }

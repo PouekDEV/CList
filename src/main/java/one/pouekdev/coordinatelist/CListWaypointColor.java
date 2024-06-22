@@ -9,11 +9,6 @@ public class CListWaypointColor {
         g = green;
         b = blue;
     }
-    public void setRGB(float red, float green, float blue){
-        r = red;
-        g = green;
-        b = blue;
-    }
     public void hsvToRgb(float[] hsv) {
         float h = hsv[0];
         float s = hsv[1];

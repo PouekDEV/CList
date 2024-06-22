@@ -67,7 +67,6 @@ public class CListWaypointScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        //list.render(context, mouseX, mouseY, delta);
         if(selected_waypoint_id != -1){
             list.setSelected(list.children().get(selected_waypoint_id));
         }
@@ -118,30 +117,16 @@ public class CListWaypointScreen extends Screen {
         public void appendClickableNarrations(NarrationMessageBuilder builder){}
         public static class InvisibleButton extends ButtonWidget{
             public InvisibleButton(int x, int y, int width, int height, PressAction onPress){
-                super(x, y, width, height, Text.literal(""), onPress,null);
+                super(x, y, width, height, Text.literal(""), onPress,DEFAULT_NARRATION_SUPPLIER);
             }
             @Override
             public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {}
         }
         public static class SpriteButton extends ButtonWidget {
-            public int x_pos;
-            public int y_pos;
-            public int id;
+            private final int id;
             public SpriteButton(int x, int y, int width, int height, PressAction onPress, int coordinate_id) {
-                super(x, y, width, height, Text.literal(""), onPress,null);
+                super(x, y, width, height, Text.literal(""), onPress,DEFAULT_NARRATION_SUPPLIER);
                 this.id = coordinate_id;
-                this.x_pos = x;
-                this.y_pos = y;
-            }
-            @Override
-            public void setX(int value){
-                super.setX(value);
-                this.x_pos = value;
-            }
-            @Override
-            public void setY(int value){
-                super.setY(value);
-                this.y_pos = value;
             }
             @Override
             public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
@@ -154,7 +139,7 @@ public class CListWaypointScreen extends Screen {
                 }
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
-                context.drawGuiTexture(eye_icon, x_pos, y_pos, width, height);
+                context.drawGuiTexture(eye_icon, getX(), getY(), width, height);
                 RenderSystem.disableBlend();
             }
         }
