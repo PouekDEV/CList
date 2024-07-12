@@ -23,7 +23,7 @@ public class CListWaypointConfig extends Screen {
     public TextFieldWidget x, y, z;
     public SpriteButton change_color;
     public HSVSlider h, s, v;
-    static float[] hsv = CListClient.variables.colors.get(id).rgbToHsv();
+    static float[] hsv;
     public CListWaypointConfig(Text title, int waypoint_id){
         super(title);
         id = waypoint_id;
@@ -32,6 +32,7 @@ public class CListWaypointConfig extends Screen {
     @Override
     protected void init(){
         GridWidget gridWidget = new GridWidget();
+        hsv = CListClient.variables.colors.get(id).rgbToHsv();
         gridWidget.getMainPositioner().margin(4, 4, 4, 0);
         GridWidget.Adder adder = gridWidget.createAdder(2);
         adder.add(ButtonWidget.builder(Text.translatable("selectWorld.delete"), button -> {
@@ -71,7 +72,7 @@ public class CListWaypointConfig extends Screen {
         this.h.visible = false;
         this.s.visible = false;
         this.v.visible = false;
-        addDrawableChild(this.change_color);
+        addDrawableChild(change_color);
         addDrawableChild(this.h);
         addDrawableChild(this.s);
         addDrawableChild(this.v);

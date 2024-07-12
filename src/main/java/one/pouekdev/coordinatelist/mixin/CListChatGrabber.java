@@ -31,9 +31,9 @@ public abstract class CListChatGrabber {
         }
         catch (NullPointerException ignored){}
         if(numbersList.size() >= 3){
-            int x = Integer.parseInt(numbersList.get(0));
-            int y = Integer.parseInt(numbersList.get(1));
-            int z = Integer.parseInt(numbersList.get(2));
+            int x = Math.round(Float.parseFloat(numbersList.get(0)));
+            int y = Math.round(Float.parseFloat(numbersList.get(1)));
+            int z = Math.round(Float.parseFloat(numbersList.get(2)));
             Text clickableMessage = Text.translatable("chat.create.waypoint.message").formatted(Formatting.GREEN).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/clist " + x + " " + y + " " + z)));
             CListVariables.delayed_events.add(new CListDelayedEvent(0.1f,() -> CListVariables.minecraft_client.inGameHud.getChatHud().addMessage(clickableMessage)));
         }

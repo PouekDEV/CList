@@ -70,9 +70,9 @@ public class CListWaypointColor {
         h *= 60;
         if (h < 0)
             h += 360;
-        h = Float.parseFloat(String.format("%.1f", h));
-        s = Float.parseFloat(String.format("%.1f", s));
-        v = Float.parseFloat(String.format("%.1f", v));
+        h = Float.parseFloat(String.format("%.1f", h).replace(",", "."));
+        s = Float.parseFloat(String.format("%.1f", s).replace(",", "."));
+        v = Float.parseFloat(String.format("%.1f", v).replace(",", "."));
         return new float[]{h, s, v};
     }
     public int rgbToHex(){
