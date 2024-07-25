@@ -1,0 +1,19 @@
+{
+  "keybinds.category.name": "CList",
+  "keybinds.waypoint.add": "現在位置をウェイポイントに追加",
+  "keybinds.waypoints.menu": "ウェイポイントのメニューを開く",
+  "keybinds.waypoints.toggle": "ウェイポイントの表示 ・非表示",
+  "coordinatelist.midnightconfig.title": "CList 設定",
+  "coordinatelist.midnightconfig.multiplier": "ウェイポイントの表示サイズ",
+  "coordinatelist.midnightconfig.render_distance": "ウェイポイントが見える距離（0は制限なし）",
+  "coordinatelist.midnightconfig.waypoints_toggled": "ウェイポイントを表示する",
+  "coordinatelist.midnightconfig.can_place_deathpoints": "死亡時にウェイポイントを作成する",
+  "coordinatelist.midnightconfig.waypoint_text_background": "ウェイポイント名の後ろに背景を表示する",
+  "modmenu.summaryTranslation.coordinatelist": "シンプルでミニマルなファブリックMODで座標を保存。",
+  "modmenu.descriptionTranslation.coordinatelist": "Coordinate List （略してCList）は、座標を保存するためのシンプルでミニマルなファブリックMODです。ミニマップはありません。ただゲーム内のウェイポイントをリスト表示するだけです。",
+  "waypoint.last.death": "死亡地点",
+  "waypoint.new.waypoint": "新しいウェイポイント",
+  "buttons.add.new.waypoint": "現在位置を新しいウェイポイントに追加する",
+  "tooltip.copy.waypoint.coordinates": "クリックすると、選択したウェイポイントの座標がコピーされます。",
+  "chat.create.waypoint.message": "[ウェイポイントの作成］"
+}
