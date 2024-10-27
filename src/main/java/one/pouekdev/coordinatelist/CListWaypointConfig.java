@@ -4,8 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.*;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -124,8 +123,8 @@ public class CListWaypointConfig extends Screen {
         @Override
         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta){
             Matrix4f matrix4f = context.getMatrices().peek().getPositionMatrix();
-            VertexConsumer vertexConsumer = context.getVertexConsumers().getBuffer(RenderLayer.getGui());
-            context.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+            VertexConsumer vertexConsumer = CListVariables.minecraft_client.getBufferBuilders().getEntityVertexConsumers().getBuffer(RenderLayer.getGui());
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.enableDepthTest();
@@ -135,23 +134,23 @@ public class CListWaypointConfig extends Screen {
                 for (int i = 0; i < this.width; i++) {
                     float hue = i / (float) this.width;
                     int color_h = Color.HSBtoRGB(hue, color_float[1], color_float[2]);
-                    vertexConsumer.vertex(matrix4f, this.getX() + i, this.getY(), -1).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
-                    vertexConsumer.vertex(matrix4f, this.getX() + i, this.getY() + this.getHeight(), -1).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
-                    vertexConsumer.vertex(matrix4f, this.getX() + i + 1, this.getY() + this.getHeight(), -1).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
-                    vertexConsumer.vertex(matrix4f, this.getX() + i + 1, this.getY(), -1).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
+                    vertexConsumer.vertex(matrix4f, this.getX() + i, this.getY(), 0).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
+                    vertexConsumer.vertex(matrix4f, this.getX() + i, this.getY() + this.getHeight(), 0).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
+                    vertexConsumer.vertex(matrix4f, this.getX() + i + 1, this.getY() + this.getHeight(), 0).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
+                    vertexConsumer.vertex(matrix4f, this.getX() + i + 1, this.getY(), 0).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
                 }
             }
             else{
                 int color_s = Color.HSBtoRGB(color_float[0], 1.0f, color_float[2]);
                 int color_v = Color.HSBtoRGB(color_float[0], color_float[1], 1.0f);
                 int color_s_start = Color.HSBtoRGB(1.0f, 0.0f, color_float[2]);
-                vertexConsumer.vertex(matrix4f, this.getX(), this.getY(), -1).color(type == 1 ? color_s_start : 0xFF000000);
-                vertexConsumer.vertex(matrix4f, this.getX(), this.getY() + this.getHeight(), -1).color(type == 1 ? color_s_start : 0xFF000000);
-                vertexConsumer.vertex(matrix4f, this.getX() + this.width, this.getY() + this.getHeight(), -1).color(type == 1 ? color_s : color_v);
-                vertexConsumer.vertex(matrix4f, this.getX() + this.width, this.getY(), -1).color(type == 1 ? color_s : color_v);
+                vertexConsumer.vertex(matrix4f, this.getX(), this.getY(), 0).color(type == 1 ? color_s_start : 0xFF000000);
+                vertexConsumer.vertex(matrix4f, this.getX(), this.getY() + this.getHeight(), 0).color(type == 1 ? color_s_start : 0xFF000000);
+                vertexConsumer.vertex(matrix4f, this.getX() + this.width, this.getY() + this.getHeight(), 0).color(type == 1 ? color_s : color_v);
+                vertexConsumer.vertex(matrix4f, this.getX() + this.width, this.getY(), 0).color(type == 1 ? color_s : color_v);
             }
-            context.drawGuiTexture(this.getHandleTexture(), this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, this.getHeight());
-            context.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            context.drawGuiTexture(RenderLayer::getGuiTextured, this.getHandleTexture(), this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, this.getHeight());
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             int i = this.active ? 16777215 : 10526880;
             this.drawScrollableText(context, CListVariables.minecraft_client.textRenderer, 2, i | MathHelper.ceil(this.alpha * 255.0F) << 24);
         }
@@ -166,7 +165,7 @@ public class CListWaypointConfig extends Screen {
             icon = Identifier.of("coordinatelist", "icon/change");
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            context.drawGuiTexture(icon, getX(), getY(), width, height);
+            context.drawGuiTexture(RenderLayer::getGuiTextured, icon, getX(), getY(), width, height);
             RenderSystem.disableBlend();
         }
     }

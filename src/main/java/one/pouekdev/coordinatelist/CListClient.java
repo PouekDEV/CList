@@ -5,8 +5,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.InputUtil;
@@ -132,7 +132,7 @@ public class CListClient implements ClientModInitializer {
                         buffer.vertex(positionMatrix, 0, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(0f, 1f);
                         buffer.vertex(positionMatrix, 1, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 1);
                         buffer.vertex(positionMatrix, 1, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 0f);
-                        RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
+                        RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
                         if(waypoint.deathpoint){
                             RenderSystem.setShaderTexture(0, Identifier.of("coordinatelist", "skull.png"));
                         }
@@ -143,7 +143,7 @@ public class CListClient implements ClientModInitializer {
                         BufferRenderer.drawWithGlobalProgram(buffer.end());
                         RenderSystem.enableBlend();
                         RenderSystem.depthMask(true);
-                        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
+                        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT);
                         TextRenderer textRenderer = CListVariables.minecraft_client.textRenderer;
                         String labelText = waypoint.name + " (" + distance_without_decimal_places + " m)";
                         int textWidth = textRenderer.getWidth(labelText);

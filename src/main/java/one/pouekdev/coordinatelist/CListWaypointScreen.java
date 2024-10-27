@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -139,7 +140,7 @@ public class CListWaypointScreen extends Screen {
                 }
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
-                context.drawGuiTexture(eye_icon, getX(), getY(), width, height);
+                context.drawGuiTexture(RenderLayer::getGuiTextured, eye_icon, getX(), getY(), width, height);
                 RenderSystem.disableBlend();
             }
         }
