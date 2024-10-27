@@ -107,7 +107,7 @@ public class CListClient implements ClientModInitializer {
                 "keybinds.category.name"
         ));
         WorldRenderEvents.END.register(context ->{
-            if (!variables.waypoints.isEmpty() && CListConfig.waypoints_toggled) {
+            if (!variables.waypoints.isEmpty() && CListConfig.waypoints_toggled && !CListVariables.minecraft_client.options.hudHidden) {
                 RenderSystem.disableCull();
                 RenderSystem.depthFunc(GL11.GL_ALWAYS);
                 for(int i = 0; i < variables.waypoints.size(); i++){
