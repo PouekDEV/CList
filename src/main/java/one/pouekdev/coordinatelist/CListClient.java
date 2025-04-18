@@ -1,12 +1,11 @@
 package one.pouekdev.coordinatelist;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.InputUtil;
@@ -21,15 +20,11 @@ import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.StringUtils;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 import eu.midnightdust.lib.config.MidnightConfig;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CListClient implements ClientModInitializer {
     public static CListVariables variables = new CListVariables();
@@ -37,10 +32,10 @@ public class CListClient implements ClientModInitializer {
     KeyBinding open_waypoints_keybind;
     KeyBinding add_a_waypoint;
     KeyBinding toggle_visibility;
-    public float calculateSizeWaypoint(){
+    public float calculateWaypointSize(){
         return 0.5f * (CListConfig.multiplier/10.0f);
     }
-    public float calculateSizeText(){
+    public float calculateTextSize(){
         return 15f * (CListConfig.multiplier/10.0f);
     }
     public float distanceTo(CListWaypoint waypoint) {
@@ -77,15 +72,6 @@ public class CListClient implements ClientModInitializer {
         }
         return new Vec3d(prx,pry,prz);
     }
-    public static List<String> findNumbersInString(String input) {
-        List<String> numbersList = new ArrayList<>();
-        Pattern pattern = Pattern.compile("-?\\b(?![A-Za-z])\\d+(\\.\\d+)?\\b");
-        Matcher matcher = pattern.matcher(input);
-        while (matcher.find()) {
-            numbersList.add(matcher.group());
-        }
-        return numbersList;
-    }
     @Override
     public void onInitializeClient() {
         open_waypoints_keybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -108,14 +94,12 @@ public class CListClient implements ClientModInitializer {
         ));
         WorldRenderEvents.END.register(context ->{
             if (!variables.waypoints.isEmpty() && CListConfig.waypoints_toggled && !CListVariables.minecraft_client.options.hudHidden) {
-                RenderSystem.disableCull();
-                RenderSystem.depthFunc(GL11.GL_ALWAYS);
                 for(int i = 0; i < variables.waypoints.size(); i++){
                     CListWaypoint waypoint = variables.waypoints.get(i);
                     int distance_without_decimal_places = (int) distanceTo(waypoint);
                     if(Objects.equals(waypoint.getDimensionString(), getDimension(String.valueOf(variables.last_world.getDimension().effects()))) && waypoint.render && (CListConfig.render_distance == 0 || CListConfig.render_distance >= distance_without_decimal_places)) {
                         Camera camera = context.camera();
-                        float size = calculateSizeWaypoint();
+                        float size = calculateWaypointSize();
                         Vec3d renderCoords = calculateRenderCoords(waypoint, camera, distance_without_decimal_places);
                         Vec3d targetPosition = new Vec3d(renderCoords.x, renderCoords.y+1, renderCoords.z);
                         Vec3d transformedPosition = targetPosition.subtract(camera.getPos());
@@ -130,25 +114,21 @@ public class CListClient implements ClientModInitializer {
                         BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
                         buffer.vertex(positionMatrix, 0, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(0f, 0f);
                         buffer.vertex(positionMatrix, 0, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(0f, 1f);
-                        buffer.vertex(positionMatrix, 1, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 1);
+                        buffer.vertex(positionMatrix, 1, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 1f);
                         buffer.vertex(positionMatrix, 1, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 0f);
-                        RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX_COLOR);
+                        Identifier icon;
                         if(waypoint.deathpoint){
-                            RenderSystem.setShaderTexture(0, Identifier.of("coordinatelist", "skull.png"));
+                            icon = Identifier.of("coordinatelist", "skull.png");
                         }
                         else {
-                            RenderSystem.setShaderTexture(0, Identifier.of("coordinatelist", "waypoint_icon.png"));
+                            icon = Identifier.of("coordinatelist", "waypoint_icon.png");
                         }
-                        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-                        BufferRenderer.drawWithGlobalProgram(buffer.end());
-                        RenderSystem.enableBlend();
-                        RenderSystem.depthMask(true);
-                        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT);
+                        CListRenderLayers.POSITION_TEX_COLOR.apply(icon).draw(buffer.end());
                         TextRenderer textRenderer = CListVariables.minecraft_client.textRenderer;
                         String labelText = waypoint.name + " (" + distance_without_decimal_places + " m)";
                         int textWidth = textRenderer.getWidth(labelText);
                         matrixStack.scale(-0.025f, -0.025f, 0.025f);
-                        size = calculateSizeText();
+                        size = calculateTextSize();
                         matrixStack.scale((float) Math.log(size * 4), (float) Math.log(size * 4), (float) Math.log(size * 4));
                         matrixStack.translate(0,-20,0);
                         positionMatrix = matrixStack.peek().getPositionMatrix();
@@ -157,16 +137,14 @@ public class CListClient implements ClientModInitializer {
                         if(CListConfig.waypoint_text_background) {
                             textRenderer.draw(labelText, h, 0, 0xFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.NORMAL, 0x90000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
                         }
-                        // This fixes text flickering. If somebody finds a better way to fix it, please open a PR
-                        matrixStack.translate(0,0,0.06f);
-                        positionMatrix = matrixStack.peek().getPositionMatrix();
-                        textRenderer.draw(labelText, h,0,0xFFFFFF,false,positionMatrix,v, TextRenderer.TextLayerType.NORMAL,0x00000000,LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                        else{
+                            textRenderer.draw(labelText, h, 0, 0xFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.NORMAL, 0x00000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                        }
+                        // If we want text to be rendered on top we will have to have a separate layer for it
+                        // A separate layer breaks the rotation of the text
                         v.draw();
-                        RenderSystem.disableBlend();
                     }
                 }
-                RenderSystem.depthFunc(GL11.GL_LEQUAL);
-                RenderSystem.enableCull();
             }
         });
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

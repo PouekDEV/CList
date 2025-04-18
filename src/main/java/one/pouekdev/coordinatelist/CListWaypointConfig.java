@@ -1,5 +1,6 @@
 package one.pouekdev.coordinatelist;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -125,9 +126,8 @@ public class CListWaypointConfig extends Screen {
             Matrix4f matrix4f = context.getMatrices().peek().getPositionMatrix();
             VertexConsumer vertexConsumer = CListVariables.minecraft_client.getBufferBuilders().getEntityVertexConsumers().getBuffer(RenderLayer.getGui());
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.enableDepthTest();
+            GlStateManager._enableBlend();
+            GlStateManager._enableDepthTest();
             int color = CListClient.variables.colors.get(id).rgbToHex();
             float[] color_float = Color.RGBtoHSB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, null);
             if(type == 0){
@@ -163,10 +163,9 @@ public class CListWaypointConfig extends Screen {
         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
             Identifier icon;
             icon = Identifier.of("coordinatelist", "icon/change");
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
+            GlStateManager._enableBlend();
             context.drawGuiTexture(RenderLayer::getGuiTextured, icon, getX(), getY(), width, height);
-            RenderSystem.disableBlend();
+            GlStateManager._disableBlend();
         }
     }
     @Override
@@ -211,7 +210,7 @@ public class CListWaypointConfig extends Screen {
     public boolean charTyped(char chr, int keyCode) {
         boolean result = super.charTyped(chr, keyCode);
         if(this.waypoint_name.isFocused()){
-            waypoint.setName(waypoint_name.getText());
+            waypoint.name = waypoint_name.getText();
         }
         if(waypoint_color.isFocused()){
             CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());
@@ -237,7 +236,7 @@ public class CListWaypointConfig extends Screen {
         super.keyPressed(keyCode, scanCode, modifiers);
         if(keyCode == GLFW.GLFW_KEY_V && modifiers == GLFW.GLFW_MOD_CONTROL){
             if(this.waypoint_name.isFocused()){
-                waypoint.setName(waypoint_name.getText());
+                waypoint.name = waypoint_name.getText();
             }
             if(waypoint_color.isFocused()){
                 CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());
@@ -259,7 +258,7 @@ public class CListWaypointConfig extends Screen {
         }
         if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
             if(this.waypoint_name.isFocused()){
-                waypoint.setName(waypoint_name.getText());
+                waypoint.name = waypoint_name.getText();
             }
             if(waypoint_color.isFocused()){
                 CListClient.variables.colors.get(id).hexToRGB(waypoint_color.getText());

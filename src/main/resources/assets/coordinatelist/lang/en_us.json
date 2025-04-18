@@ -4,7 +4,7 @@
   "keybinds.waypoints.menu": "Open waypoints menu",
   "keybinds.waypoints.toggle": "Toggle waypoints visibility",
   "coordinatelist.midnightconfig.title": "CList configuration",
-  "coordinatelist.midnightconfig.multiplier": "Waypoints size",
+  "coordinatelist.midnightconfig.multiplier": "Waypoints' size",
   "coordinatelist.midnightconfig.render_distance": "The distance to which the waypoint is visible (0 means no limit)",
   "coordinatelist.midnightconfig.waypoints_toggled": "Show waypoints",
   "coordinatelist.midnightconfig.can_place_deathpoints": "Create waypoints on death",

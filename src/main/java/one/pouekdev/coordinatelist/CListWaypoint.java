@@ -39,9 +39,6 @@ public class CListWaypoint {
     public String getCoordinates(){
         return "X: " + x + " Y: " + y + " Z: " + z;
     }
-    public void setName(String value){
-        this.name = value;
-    }
     public void toggleVisibility(){
         this.bug_fix += 1;
         if(bug_fix == 2){

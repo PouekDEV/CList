@@ -1,6 +1,6 @@
 package one.pouekdev.coordinatelist;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -138,10 +138,9 @@ public class CListWaypointScreen extends Screen {
                 else{
                     eye_icon = Identifier.of("coordinatelist", "icon/not_visible");
                 }
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
+                GlStateManager._enableBlend();
                 context.drawGuiTexture(RenderLayer::getGuiTextured, eye_icon, getX(), getY(), width, height);
-                RenderSystem.disableBlend();
+                GlStateManager._disableBlend();
             }
         }
         public class ScrollListEntry extends EntryListWidget.Entry<ScrollListEntry>{
