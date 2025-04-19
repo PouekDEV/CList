@@ -9,7 +9,7 @@ public class CListWaypointColor {
         g = green;
         b = blue;
     }
-    public void hsvToRgb(float[] hsv) {
+    public void set(float[] hsv) {
         float h = hsv[0];
         float s = hsv[1];
         float v = hsv[2];
@@ -48,7 +48,7 @@ public class CListWaypointColor {
         this.g = (gPrime + m);
         this.b = (bPrime + m);
     }
-    public float[] rgbToHsv() {
+    public float[] getHSV() {
         float min = Math.min(Math.min(r, g), b);
         float max = Math.max(Math.max(r, g), b);
         float delta = max - min;
@@ -70,24 +70,30 @@ public class CListWaypointColor {
         h *= 60;
         if (h < 0)
             h += 360;
+        if (Float.isNaN(h))
+            h = 0;
+        if (Float.isNaN(s))
+            s = 0;
+        if (Float.isNaN(v))
+            v = 0;
         h = Float.parseFloat(String.format("%.1f", h).replace(",", "."));
         s = Float.parseFloat(String.format("%.1f", s).replace(",", "."));
         v = Float.parseFloat(String.format("%.1f", v).replace(",", "."));
         return new float[]{h, s, v};
     }
-    public int rgbToHex(){
+    public int getHex(){
         int red = (int) (r * 255);
         int green = (int) (g * 255);
         int blue = (int) (b * 255);
         return (255 << 24) | (red << 16) | (green << 8) | blue;
     }
-    public String rgbToHexNoAlpha(){
+    public String getHexNoAlpha(){
         int red = (int) (r * 255);
         int green = (int) (g * 255);
         int blue = (int) (b * 255);
         return String.format("%02X%02X%02X", red, green, blue);
     }
-    public void hexToRGB(String hex) {
+    public void set(String hex) {
         if(hex.length() == 6 && hex.matches("[a-zA-Z0-9]+")){
             hex = hex.replace("#", "");
             String redHex = hex.substring(0, 2);

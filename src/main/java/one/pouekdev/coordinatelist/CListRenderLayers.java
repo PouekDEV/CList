@@ -12,23 +12,6 @@ import net.minecraft.util.Util;
 import java.util.function.Function;
 
 public class CListRenderLayers {
-    private static final RenderPipeline TEXT_PIPELINE = RenderPipelines.register(
-            RenderPipeline.builder(RenderPipelines.TEXT_SNIPPET, RenderPipelines.FOG_SNIPPET)
-                    .withLocation("pipeline/text")
-                    .withVertexShader("core/rendertype_text")
-                    .withFragmentShader("core/rendertype_text")
-                    .withSampler("Sampler0")
-                    .withSampler("Sampler2")
-                    .build()
-    );
-    public static final RenderLayer TEXT = RenderLayer.of(
-            "text",
-            1536,
-            false,
-            true,
-            TEXT_PIPELINE,
-            RenderLayer.MultiPhaseParameters.builder().build(false)
-    );
     private static final RenderPipeline POSITION_TEX_COLOR_PIPELINE = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.POSITION_TEX_COLOR_SNIPPET)
                     .withLocation("pipeline/position_tex_color")

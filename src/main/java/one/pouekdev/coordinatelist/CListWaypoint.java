@@ -7,7 +7,7 @@ public class CListWaypoint {
     public int x, y, z;
     public String name;
     public String dimension;
-    public int bug_fix;
+    private int bug_fix;
     public boolean render;
     public boolean deathpoint;
     CListWaypoint(String coords, String waypoint_name, String waypoint_dimension, boolean is_rendered, boolean is_deathpoint){

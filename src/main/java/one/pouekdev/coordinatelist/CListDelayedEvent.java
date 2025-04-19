@@ -1,8 +1,8 @@
 package one.pouekdev.coordinatelist;
 
 public class CListDelayedEvent {
-    float ticks;
-    Runnable function;
+    private float ticks;
+    private final Runnable function;
     public CListDelayedEvent(float seconds, Runnable function){
         this.ticks = seconds*20;
         this.function = function;

@@ -20,11 +20,11 @@ public class CListWaypointScreen extends Screen {
     public CListWaypointScreen(Text title) {
         super(title);
     }
-    public ScrollList list;
-    public int selected_waypoint_id = -1;
-    public ButtonWidget copy_coordinates_button;
-    public ButtonWidget edit_waypoint_button;
-    public ButtonWidget delete_waypoint_button;
+    private ScrollList list;
+    private int selected_waypoint_id = -1;
+    private ButtonWidget copy_coordinates_button;
+    private ButtonWidget edit_waypoint_button;
+    private ButtonWidget delete_waypoint_button;
     @Override
     protected void init() {
         GridWidget gridWidget = new GridWidget();
@@ -97,7 +97,7 @@ public class CListWaypointScreen extends Screen {
         list.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
-    public class ScrollList extends EntryListWidget<ScrollList.ScrollListEntry> {
+    private class ScrollList extends EntryListWidget<ScrollList.ScrollListEntry> {
         public ScrollList(){
             super(CListWaypointScreen.this.client, CListWaypointScreen.this.width, CListWaypointScreen.this.height-64, 32, 25);//32
         }
@@ -116,14 +116,14 @@ public class CListWaypointScreen extends Screen {
             return 245;
         }
         public void appendClickableNarrations(NarrationMessageBuilder builder){}
-        public static class InvisibleButton extends ButtonWidget{
+        private static class InvisibleButton extends ButtonWidget{
             public InvisibleButton(int x, int y, int width, int height, PressAction onPress){
                 super(x, y, width, height, Text.literal(""), onPress,DEFAULT_NARRATION_SUPPLIER);
             }
             @Override
             public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {}
         }
-        public static class SpriteButton extends ButtonWidget {
+        private static class SpriteButton extends ButtonWidget {
             private final int id;
             public SpriteButton(int x, int y, int width, int height, PressAction onPress, int coordinate_id) {
                 super(x, y, width, height, Text.literal(""), onPress,DEFAULT_NARRATION_SUPPLIER);
@@ -143,13 +143,13 @@ public class CListWaypointScreen extends Screen {
                 GlStateManager._disableBlend();
             }
         }
-        public class ScrollListEntry extends EntryListWidget.Entry<ScrollListEntry>{
-            public final Text waypoint_name;
-            public final Text dimension;
-            public final SpriteButton sh;
-            public final InvisibleButton select;
-            public final List<Element> children;
-            public final int id;
+        private class ScrollListEntry extends EntryListWidget.Entry<ScrollListEntry>{
+            private final Text waypoint_name;
+            private final Text dimension;
+            private final SpriteButton sh;
+            private final InvisibleButton select;
+            private final List<Element> children;
+            private final int id;
             public ScrollListEntry(int id){
                 this.id = id;
                 this.waypoint_name = Text.of(CListClient.variables.waypoints.get(id).name);
@@ -178,7 +178,7 @@ public class CListWaypointScreen extends Screen {
                 sh.render(context, mouseX, mouseY, delta);
                 select.render(context, mouseX, mouseY, delta);
                 context.drawTextWithShadow(CListVariables.minecraft_client.textRenderer, dimension.getString(), x+180, y+6, 0xFFFFFF);
-                context.drawTextWithShadow(CListVariables.minecraft_client.textRenderer, waypoint_name.getString(), x+22, y+6, CListClient.variables.colors.get(id).rgbToHex());
+                context.drawTextWithShadow(CListVariables.minecraft_client.textRenderer, waypoint_name.getString(), x+22, y+6, CListClient.variables.colors.get(id).getHex());
             }
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {

@@ -21,7 +21,7 @@ public class CListData {
 
         try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)))) {
             for (int i = 0; i < waypointList.size(); i++) {
-                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).name.replaceAll("~","") + "~" + CListClient.variables.waypoints.get(i).dimension + "~" + CListClient.variables.colors.get(i).rgbToHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint);
+                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).name.replaceAll("~","") + "~" + CListClient.variables.waypoints.get(i).dimension + "~" + CListClient.variables.colors.get(i).getHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint);
             }
         } catch (IOException ignored) {
         }
@@ -58,7 +58,7 @@ public class CListData {
                     }
                     else{
                         CListWaypointColor color_class = new CListWaypointColor(0,0,0);
-                        color_class.hexToRGB(color);
+                        color_class.set(color);
                         CListClient.variables.colors.add(color_class);
                     }
                     waypointList.add(waypoint);

@@ -135,13 +135,11 @@ public class CListClient implements ClientModInitializer {
                         float h = (float) (-textWidth/2);
                         VertexConsumerProvider.Immediate v = CListVariables.minecraft_client.getBufferBuilders().getEntityVertexConsumers();
                         if(CListConfig.waypoint_text_background) {
-                            textRenderer.draw(labelText, h, 0, 0xFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.NORMAL, 0x90000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                            textRenderer.draw(labelText, h, 0, 0xFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.SEE_THROUGH, 0x90000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
                         }
                         else{
-                            textRenderer.draw(labelText, h, 0, 0xFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.NORMAL, 0x00000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                            textRenderer.draw(labelText, h, 0, 0xFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.SEE_THROUGH, 0x00000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
                         }
-                        // If we want text to be rendered on top we will have to have a separate layer for it
-                        // A separate layer breaks the rotation of the text
                         v.draw();
                     }
                 }
