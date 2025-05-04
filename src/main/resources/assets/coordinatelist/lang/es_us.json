@@ -1,0 +1,19 @@
+{
+  "keybinds.category.name": "Asignación de teclas de CList",
+  "keybinds.waypoint.add": "Agregar un waypoint en las coordenadas actuales.",
+  "keybinds.waypoints.menu": "Abre el menú de waypoints.",
+  "keybinds.waypoints.toggle": "Activa/desactiva la visibilidad de los waypoints.",
+  "coordinatelist.midnightconfig.title": "Configuración de CList",
+  "coordinatelist.midnightconfig.multiplier": "Tamaño de los waypoints",
+  "coordinatelist.midnightconfig.render_distance": "Distancia de visibilidad de los waypoints (0 significa sin límite)",
+  "coordinatelist.midnightconfig.waypoints_toggled": "Mostrar los waypoints",
+  "coordinatelist.midnightconfig.can_place_deathpoints": "Crear un waypoint en las coordenadas de muerte.",
+  "coordinatelist.midnightconfig.waypoint_text_background": "Mostrar un fondo detrás del texto del waypoint.",
+  "modmenu.summaryTranslation.coordinatelist": "Un simple mod de Fabric que permite guardar tus coordenadas.",
+  "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (CList abreviado) es un simple mod de Fabric que permite guardar tus coordenadas. Nada de mini mapas. Sólo una lista de waypoints.",
+  "waypoint.last.death": "Última muerte",
+  "waypoint.new.waypoint": "Nuevo waypoint",
+  "buttons.add.new.waypoint": "Agregar un waypoint en las coordenadas actuales",
+  "tooltip.copy.waypoint.coordinates": "Haz click para copiar las coordenadas seleccionadas en un waypoint",
+  "chat.create.waypoint.message": "[Crear un waypoint]"
+}
