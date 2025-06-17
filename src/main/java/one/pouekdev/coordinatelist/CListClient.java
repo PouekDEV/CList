@@ -121,7 +121,12 @@ public class CListClient implements ClientModInitializer {
                             icon = Identifier.of("coordinatelist", "skull.png");
                         }
                         else {
-                            icon = Identifier.of("coordinatelist", "waypoint_icon.png");
+                            if(CListConfig.square_waypoints){
+                                icon = Identifier.of("coordinatelist", "waypoint_icon_square.png");
+                            }
+                            else{
+                                icon = Identifier.of("coordinatelist", "waypoint_icon.png");
+                            }
                         }
                         CListRenderLayers.POSITION_TEX_COLOR.apply(icon).draw(buffer.end());
                         TextRenderer textRenderer = CListVariables.minecraft_client.textRenderer;

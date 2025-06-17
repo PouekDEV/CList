@@ -8,4 +8,5 @@ public class CListConfig extends MidnightConfig {
     @Entry public static boolean waypoints_toggled = true;
     @Entry public static boolean can_place_deathpoints = true;
     @Entry public static boolean waypoint_text_background = true;
+    @Entry public static boolean square_waypoints = false;
 }
