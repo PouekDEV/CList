@@ -17,14 +17,14 @@ import org.lwjgl.glfw.GLFW;
 import java.util.List;
 
 public class CListWaypointScreen extends Screen {
-    public CListWaypointScreen(Text title) {
-        super(title);
-    }
     private ScrollList list;
     private int selected_waypoint_id = -1;
     private ButtonWidget copy_coordinates_button;
     private ButtonWidget edit_waypoint_button;
     private ButtonWidget delete_waypoint_button;
+    public CListWaypointScreen(Text title) {
+        super(title);
+    }
     @Override
     protected void init() {
         GridWidget gridWidget = new GridWidget();
@@ -35,7 +35,7 @@ public class CListWaypointScreen extends Screen {
         GridWidget.Adder adderBottom = gridWidgetBottom.createAdder(3);
         adder.add(ButtonWidget.builder(Text.translatable("buttons.add.new.waypoint"), button -> {
             PlayerEntity player = CListVariables.minecraft_client.player;
-            CListClient.addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),false);
+            CListClient.addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),false,true);
             list.RefreshElements();
         }).width(300).build(),2, gridWidget.copyPositioner().marginTop(10));
         copy_coordinates_button = ButtonWidget.builder(Text.literal("---"), button -> {
@@ -44,7 +44,7 @@ public class CListWaypointScreen extends Screen {
             GLFW.glfwSetClipboardString(window, waypoint.x + " " + waypoint.y + " " + waypoint.z);
         }).width(150).build();
         copy_coordinates_button.setTooltip(Tooltip.of(Text.translatable("tooltip.copy.waypoint.coordinates")));
-        edit_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> CListVariables.minecraft_client.setScreen(new CListWaypointConfig(Text.literal("Config"),selected_waypoint_id))).width(100).build();
+        edit_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> CListVariables.minecraft_client.setScreen(new CListWaypointConfig(Text.literal("Config"),selected_waypoint_id,false))).width(100).build();
         delete_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.delete"), button -> {
             CListClient.deleteWaypoint(selected_waypoint_id);
             if(selected_waypoint_id >= CListClient.variables.waypoints.size()){

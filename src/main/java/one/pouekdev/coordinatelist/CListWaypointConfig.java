@@ -17,6 +17,7 @@ import java.awt.*;
 public class CListWaypointConfig extends Screen {
     private static int id;
     private boolean render_color_picker = false;
+    private final boolean viaKeybind;
     private final CListWaypoint waypoint;
     private TextFieldWidget waypoint_name;
     private static TextFieldWidget waypoint_color;
@@ -24,10 +25,11 @@ public class CListWaypointConfig extends Screen {
     private SpriteButton change_color;
     private HSVSlider h, s, v;
     private static float[] hsv;
-    public CListWaypointConfig(Text title, int waypoint_id){
+    public CListWaypointConfig(Text title, int waypoint_id, boolean viaKeybind){
         super(title);
         id = waypoint_id;
         this.waypoint = CListClient.variables.waypoints.get(id);
+        this.viaKeybind = viaKeybind;
     }
     @Override
     protected void init(){
@@ -39,7 +41,15 @@ public class CListWaypointConfig extends Screen {
             CListClient.deleteWaypoint(id);
             CListVariables.minecraft_client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
         }).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
-        adder.add(ButtonWidget.builder(Text.translatable("gui.done"), button -> {CListVariables.minecraft_client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));CListClient.variables.saved_since_last_update = false;}).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
+        adder.add(ButtonWidget.builder(Text.translatable("gui.done"), button -> {
+            CListClient.variables.saved_since_last_update = false;
+            if(!viaKeybind){
+                CListVariables.minecraft_client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
+            }
+            else{
+                close();
+            }
+        }).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
         this.waypoint_name = new TextFieldWidget(textRenderer, (this.width-150)/2, (this.height-20)/2-80, 150, 20, Text.literal(""));
         this.waypoint_name.setFocusUnlocked(true);
         this.waypoint_name.setMaxLength(25);

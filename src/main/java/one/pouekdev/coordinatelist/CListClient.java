@@ -166,7 +166,7 @@ public class CListClient implements ClientModInitializer {
             while(add_a_waypoint.wasPressed()){
                 if(!Objects.equals(client.currentScreen, new CListWaypointScreen(Text.literal("Waypoints")))){
                     PlayerEntity player = CListVariables.minecraft_client.player;
-                    addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),false);
+                    addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),false,true);
                 }
             }
             while(toggle_visibility.wasPressed()){
@@ -200,7 +200,7 @@ public class CListClient implements ClientModInitializer {
                         }
                         if(!client.player.isAlive() && !variables.had_death_waypoint_placed && CListConfig.can_place_deathpoints){
                             PlayerEntity player = client.player;
-                            addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),true);
+                            addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),true,false);
                             variables.had_death_waypoint_placed = true;
                         } else if (client.player.isAlive() && variables.had_death_waypoint_placed) {
                             variables.had_death_waypoint_placed = false;
@@ -216,7 +216,7 @@ public class CListClient implements ClientModInitializer {
         variables.saved_since_last_update = true;
         variables.loaded_last_world = false;
     }
-    public static void addNewWaypoint(int x, int y, int z, boolean death){
+    public static void addNewWaypoint(int x, int y, int z, boolean death, boolean viaKeybind){
         CList.LOGGER.info("New waypoint for dimension " + variables.last_world.getDimension().effects());
         String waypoint_name;
         if(death){
@@ -229,7 +229,7 @@ public class CListClient implements ClientModInitializer {
         variables.colors.add(new CListWaypointColor(rand.nextFloat(),rand.nextFloat(),rand.nextFloat()));
         variables.saved_since_last_update = false;
         if(!death){
-            CListVariables.minecraft_client.setScreen(new CListWaypointConfig(Text.literal("Config"),variables.waypoints.size()-1));
+            CListVariables.minecraft_client.setScreen(new CListWaypointConfig(Text.literal("Config"),variables.waypoints.size()-1, viaKeybind));
         }
     }
     public static void deleteWaypoint(int position){
