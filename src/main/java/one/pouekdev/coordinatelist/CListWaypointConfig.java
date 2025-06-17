@@ -39,7 +39,12 @@ public class CListWaypointConfig extends Screen {
         GridWidget.Adder adder = gridWidget.createAdder(2);
         adder.add(ButtonWidget.builder(Text.translatable("selectWorld.delete"), button -> {
             CListClient.deleteWaypoint(id);
-            CListVariables.minecraft_client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
+            if(!viaKeybind){
+                CListVariables.minecraft_client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
+            }
+            else{
+                close();
+            }
         }).width(150).build(),1, gridWidget.copyPositioner().marginBottom(10));
         adder.add(ButtonWidget.builder(Text.translatable("gui.done"), button -> {
             CListClient.variables.saved_since_last_update = false;

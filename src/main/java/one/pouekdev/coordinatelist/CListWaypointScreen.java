@@ -35,7 +35,7 @@ public class CListWaypointScreen extends Screen {
         GridWidget.Adder adderBottom = gridWidgetBottom.createAdder(3);
         adder.add(ButtonWidget.builder(Text.translatable("buttons.add.new.waypoint"), button -> {
             PlayerEntity player = CListVariables.minecraft_client.player;
-            CListClient.addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),false,true);
+            CListClient.addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),false,false);
             list.RefreshElements();
         }).width(300).build(),2, gridWidget.copyPositioner().marginTop(10));
         copy_coordinates_button = ButtonWidget.builder(Text.literal("---"), button -> {
