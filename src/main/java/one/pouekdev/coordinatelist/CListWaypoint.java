@@ -54,6 +54,7 @@ public class CListWaypoint {
         String s = this.dimension;
         s = s.replace("minecraft:","");
         s = s.replace("_"," ");
+        s = s.replace(":"," ");
         s = StringUtils.capitalize(s);
         return s;
     }
