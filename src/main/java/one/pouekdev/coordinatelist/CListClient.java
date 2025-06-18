@@ -98,7 +98,7 @@ public class CListClient implements ClientModInitializer {
                 for(int i = 0; i < variables.waypoints.size(); i++){
                     CListWaypoint waypoint = variables.waypoints.get(i);
                     int distance_without_decimal_places = (int) distanceTo(waypoint);
-                    if(Objects.equals(waypoint.getDimensionString(), getDimension(variables.last_world.getDimensionEntry().getIdAsString())) && waypoint.render && (CListConfig.render_distance == 0 || CListConfig.render_distance >= distance_without_decimal_places)) {
+                    if(Objects.equals(waypoint.getDimensionString(), getDimension(variables.last_world.getRegistryKey().getValue().toString())) && waypoint.render && (CListConfig.render_distance == 0 || CListConfig.render_distance >= distance_without_decimal_places)) {
                         Camera camera = context.camera();
                         float size = calculateWaypointSize();
                         Vec3d renderCoords = calculateRenderCoords(waypoint, camera, distance_without_decimal_places);
@@ -219,7 +219,7 @@ public class CListClient implements ClientModInitializer {
         variables.loaded_last_world = false;
     }
     public static void addNewWaypoint(int x, int y, int z, boolean death, boolean viaKeybind){
-        CList.LOGGER.info("New waypoint for dimension " + variables.last_world.getDimensionEntry().getIdAsString());
+        CList.LOGGER.info("New waypoint for dimension " + variables.last_world.getRegistryKey().getValue().toString());
         String waypoint_name;
         if(death){
             waypoint_name = (Text.translatable("waypoint.last.death")).getString();
@@ -227,7 +227,7 @@ public class CListClient implements ClientModInitializer {
         else{
             waypoint_name = (Text.translatable("waypoint.new.waypoint")).getString();
         }
-        variables.waypoints.add(new CListWaypoint(x,y,z,waypoint_name,String.valueOf(variables.last_world.getDimensionEntry().getIdAsString()),true,death));
+        variables.waypoints.add(new CListWaypoint(x,y,z,waypoint_name,variables.last_world.getRegistryKey().getValue().toString(),true,death));
         variables.colors.add(new CListWaypointColor(rand.nextFloat(),rand.nextFloat(),rand.nextFloat()));
         variables.saved_since_last_update = false;
         if(!death){

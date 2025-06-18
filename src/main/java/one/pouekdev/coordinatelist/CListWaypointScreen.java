@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -41,7 +42,12 @@ public class CListWaypointScreen extends Screen {
         copy_coordinates_button = ButtonWidget.builder(Text.literal("---"), button -> {
             long window = CListVariables.minecraft_client.getWindow().getHandle();
             CListWaypoint waypoint = CListClient.variables.waypoints.get(selected_waypoint_id);
-            GLFW.glfwSetClipboardString(window, waypoint.x + " " + waypoint.y + " " + waypoint.z);
+            if(InputUtil.isKeyPressed(window,InputUtil.GLFW_KEY_LEFT_CONTROL)){
+                GLFW.glfwSetClipboardString(window, "/execute in " + waypoint.dimension + " run tp @p " + waypoint.x + " " + waypoint.y + " " + waypoint.z);
+            }
+            else{
+                GLFW.glfwSetClipboardString(window, waypoint.x + " " + waypoint.y + " " + waypoint.z);
+            }
         }).width(150).build();
         copy_coordinates_button.setTooltip(Tooltip.of(Text.translatable("tooltip.copy.waypoint.coordinates")));
         edit_waypoint_button = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> CListVariables.minecraft_client.setScreen(new CListWaypointConfig(Text.literal("Config"),selected_waypoint_id,false))).width(100).build();
