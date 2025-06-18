@@ -104,6 +104,7 @@ public class CListClient implements ClientModInitializer {
                         Vec3d renderCoords = calculateRenderCoords(waypoint, camera, distance_without_decimal_places);
                         Vec3d targetPosition = new Vec3d(renderCoords.x+0.5, renderCoords.y+1, renderCoords.z+0.5);
                         Vec3d transformedPosition = targetPosition.subtract(camera.getPos());
+                        // TODO: use the MatrixStack from context instead of recalculating everything by ourselves
                         MatrixStack matrixStack = new MatrixStack();
                         matrixStack.translate(0.25,0,0.25);
                         matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));

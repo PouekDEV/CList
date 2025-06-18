@@ -13,6 +13,7 @@ Coordinate List (CList for short) is a simple minimalistic fabric mod for saving
 - Hotkey for placing a waypoint in the current position
 - Automatic waypoints in the place where you died
 - Copying the waypoint coordinates to the clipboard
+- Copying a teleport command to the waypoint in its dimension
 - Toggling waypoint visibility
 - Changing the size of the waypoint to your liking
 - Changing the color of the waypoint to your liking
