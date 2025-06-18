@@ -102,9 +102,10 @@ public class CListClient implements ClientModInitializer {
                         Camera camera = context.camera();
                         float size = calculateWaypointSize();
                         Vec3d renderCoords = calculateRenderCoords(waypoint, camera, distance_without_decimal_places);
-                        Vec3d targetPosition = new Vec3d(renderCoords.x, renderCoords.y+1, renderCoords.z);
+                        Vec3d targetPosition = new Vec3d(renderCoords.x+0.5, renderCoords.y+1, renderCoords.z+0.5);
                         Vec3d transformedPosition = targetPosition.subtract(camera.getPos());
                         MatrixStack matrixStack = new MatrixStack();
+                        matrixStack.translate(0.25,0,0.25);
                         matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
                         matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
                         matrixStack.translate(transformedPosition.x, transformedPosition.y, transformedPosition.z);
@@ -167,7 +168,7 @@ public class CListClient implements ClientModInitializer {
             while(add_a_waypoint.wasPressed()){
                 if(!Objects.equals(client.currentScreen, new CListWaypointScreen(Text.literal("Waypoints")))){
                     PlayerEntity player = CListVariables.minecraft_client.player;
-                    addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),false,true);
+                    addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()),false,true);
                 }
             }
             while(toggle_visibility.wasPressed()){
@@ -201,7 +202,7 @@ public class CListClient implements ClientModInitializer {
                         }
                         if(!client.player.isAlive() && !variables.had_death_waypoint_placed && CListConfig.can_place_deathpoints){
                             PlayerEntity player = client.player;
-                            addNewWaypoint((int) Math.round(player.getX()), (int) Math.round(player.getY()), (int) Math.round(player.getZ()),true,false);
+                            addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()),true,false);
                             variables.had_death_waypoint_placed = true;
                         } else if (client.player.isAlive() && variables.had_death_waypoint_placed) {
                             variables.had_death_waypoint_placed = false;
