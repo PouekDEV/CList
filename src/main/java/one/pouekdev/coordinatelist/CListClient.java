@@ -14,6 +14,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
@@ -188,7 +189,7 @@ public class CListClient implements ClientModInitializer {
                         checkForWorldChanges(variables.last_world);
                         checkIfSaveIsNeeded(false);
                         if (client.isInSingleplayer()) {
-                            variables.worldName = client.getServer().getSaveProperties().getLevelName();
+                            variables.worldName = client.getServer().getSavePath(WorldSavePath.ROOT).getParent().getFileName().toString();
                         } else {
                             if(client.getCurrentServerEntry().isRealm()) {
                                 variables.worldName = client.getCurrentServerEntry().name;
