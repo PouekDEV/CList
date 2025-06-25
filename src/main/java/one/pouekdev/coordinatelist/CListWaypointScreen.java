@@ -1,13 +1,13 @@
 package one.pouekdev.coordinatelist;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
@@ -145,7 +145,7 @@ public class CListWaypointScreen extends Screen {
                     eye_icon = Identifier.of("coordinatelist", "icon/not_visible");
                 }
                 GlStateManager._enableBlend();
-                context.drawGuiTexture(RenderLayer::getGuiTextured, eye_icon, getX(), getY(), width, height);
+                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, eye_icon, getX(), getY(), width, height);
                 GlStateManager._disableBlend();
             }
         }
@@ -183,7 +183,7 @@ public class CListWaypointScreen extends Screen {
                 select.setY(y);
                 sh.render(context, mouseX, mouseY, delta);
                 select.render(context, mouseX, mouseY, delta);
-                context.drawTextWithShadow(CListVariables.minecraft_client.textRenderer, dimension.getString(), x+180, y+6, 0xFFFFFF);
+                context.drawTextWithShadow(CListVariables.minecraft_client.textRenderer, dimension.getString(), x+180, y+6, 0xFFFFFFFF);
                 context.drawTextWithShadow(CListVariables.minecraft_client.textRenderer, waypoint_name.getString(), x+22, y+6, CListClient.variables.colors.get(id).getHex());
             }
             @Override

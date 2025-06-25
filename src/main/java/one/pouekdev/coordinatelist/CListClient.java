@@ -115,10 +115,11 @@ public class CListClient implements ClientModInitializer {
                         Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
                         Tessellator tessellator = Tessellator.getInstance();
                         BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-                        buffer.vertex(positionMatrix, 0, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(0f, 0f);
-                        buffer.vertex(positionMatrix, 0, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(0f, 1f);
-                        buffer.vertex(positionMatrix, 1, 0, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 1f);
-                        buffer.vertex(positionMatrix, 1, 1, 0).color(variables.colors.get(i).r, variables.colors.get(i).g, variables.colors.get(i).b, 1f).texture(1f, 0f);
+                        CListWaypointColor color = variables.colors.get(i);
+                        buffer.vertex(positionMatrix, 0, 1, 0).color(color.r, color.g, color.b, 1f).texture(0f, 0f);
+                        buffer.vertex(positionMatrix, 0, 0, 0).color(color.r, color.g, color.b, 1f).texture(0f, 1f);
+                        buffer.vertex(positionMatrix, 1, 0, 0).color(color.r, color.g, color.b, 1f).texture(1f, 1f);
+                        buffer.vertex(positionMatrix, 1, 1, 0).color(color.r, color.g, color.b, 1f).texture(1f, 0f);
                         Identifier icon;
                         if(waypoint.deathpoint){
                             icon = Identifier.of("coordinatelist", "skull.png");
@@ -143,10 +144,10 @@ public class CListClient implements ClientModInitializer {
                         float h = (float) (-textWidth/2);
                         VertexConsumerProvider.Immediate v = CListVariables.minecraft_client.getBufferBuilders().getEntityVertexConsumers();
                         if(CListConfig.waypoint_text_background) {
-                            textRenderer.draw(labelText, h, 0, 0xFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.SEE_THROUGH, 0x90000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                            textRenderer.draw(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.SEE_THROUGH, 0x90000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
                         }
                         else{
-                            textRenderer.draw(labelText, h, 0, 0xFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.SEE_THROUGH, 0x00000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                            textRenderer.draw(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, v, TextRenderer.TextLayerType.SEE_THROUGH, 0x00000000, LightmapTextureManager.MAX_LIGHT_COORDINATE);
                         }
                         v.draw();
                     }

@@ -6,7 +6,6 @@ import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TriState;
 import net.minecraft.util.Util;
 
 import java.util.function.Function;
@@ -28,7 +27,8 @@ public class CListRenderLayers {
                     false,
                     true,
                     POSITION_TEX_COLOR_PIPELINE,
-                    RenderLayer.MultiPhaseParameters.builder().texture(new RenderPhase.Texture(texture, TriState.FALSE, false)).build(false)
+                    RenderLayer.MultiPhaseParameters.builder().texture(new RenderPhase.Texture(texture,false)).build(false)
             )
     );
+    public static final RenderLayer GUI_LAYER = RenderLayer.of("coordinatelist_gui",786432,RenderPipelines.GUI,RenderLayer.MultiPhaseParameters.builder().build(false));
 }
