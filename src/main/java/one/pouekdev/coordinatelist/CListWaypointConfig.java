@@ -5,7 +5,7 @@ import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.render.*;
+import net.minecraft.client.texture.TextureSetup;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -138,34 +138,31 @@ public class CListWaypointConfig extends Screen {
         }
         @Override
         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta){
-            Matrix3x2f matrix3x2f = context.getMatrices();
-            VertexConsumer vertexConsumer = CListVariables.minecraft_client.getBufferBuilders().getEntityVertexConsumers().getBuffer(CListRenderLayers.GUI_LAYER); // .getGui()
             GlStateManager._enableBlend();
             GlStateManager._enableDepthTest();
-            // SimpleGuiElementRenderState ?
-            // TODO: consider the following https://github.com/0x3C50/Renderer
+            // consider the following https://github.com/0x3C50/Renderer
             int color = CListClient.variables.colors.get(id).getHex();
             float[] color_float = Color.RGBtoHSB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, null);
             if(type == 0){
                 for (int i = 0; i < this.width; i++) {
                     float hue = i / (float) this.width;
                     int color_h = Color.HSBtoRGB(hue, color_float[1], color_float[2]);
-                    vertexConsumer.vertex(matrix3x2f, this.getX() + i, this.getY(), 0).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
-                    vertexConsumer.vertex(matrix3x2f, this.getX() + i, this.getY() + this.getHeight(), 0).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
-                    vertexConsumer.vertex(matrix3x2f, this.getX() + i + 1, this.getY() + this.getHeight(), 0).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
-                    vertexConsumer.vertex(matrix3x2f, this.getX() + i + 1, this.getY(), 0).color((color_h >> 16) & 0xFF, (color_h >> 8) & 0xFF, color_h & 0xFF, 0xFF);
+                    context.drawVerticalLine(this.getX() + i, this.getY() - 1, this.getY() + this.height,color_h);
                 }
             }
             else{
-                int color_s = Color.HSBtoRGB(color_float[0], 1.0f, color_float[2]);
-                int color_v = Color.HSBtoRGB(color_float[0], color_float[1], 1.0f);
-                int color_s_start = Color.HSBtoRGB(1.0f, 0.0f, color_float[2]);
-                vertexConsumer.vertex(matrix3x2f, this.getX(), this.getY(), 0).color(type == 1 ? color_s_start : 0xFF000000);
-                vertexConsumer.vertex(matrix3x2f, this.getX(), this.getY() + this.getHeight(), 0).color(type == 1 ? color_s_start : 0xFF000000);
-                vertexConsumer.vertex(matrix3x2f, this.getX() + this.width, this.getY() + this.getHeight(), 0).color(type == 1 ? color_s : color_v);
-                vertexConsumer.vertex(matrix3x2f, this.getX() + this.width, this.getY(), 0).color(type == 1 ? color_s : color_v);
+                int color_start, color_end;
+                if(type == 1){
+                    color_start = Color.HSBtoRGB(1.0f, 0.0f, color_float[2]);
+                    color_end = Color.HSBtoRGB(color_float[0], 1.0f, color_float[2]);
+                }
+                else{
+                    color_start = 0xFF000000;
+                    color_end = Color.HSBtoRGB(color_float[0], color_float[1], 1.0f);
+                }
+                context.state.addSimpleElement(new CListReverseColoredQuadGuiElementRenderState(RenderPipelines.GUI, TextureSetup.empty(), new Matrix3x2f(context.getMatrices()), this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, color_start, color_end, context.scissorStack.peekLast()));
             }
-            context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, this.getHandleTexture(), this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, this.getHeight());
+            context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, this.getHandleTexture(), this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, this.height);
             int i = this.active ? 16777215 : 10526880;
             this.drawScrollableText(context, CListVariables.minecraft_client.textRenderer, 2, i | MathHelper.ceil(this.alpha * 255.0F) << 24);
         }

@@ -30,5 +30,4 @@ public class CListRenderLayers {
                     RenderLayer.MultiPhaseParameters.builder().texture(new RenderPhase.Texture(texture,false)).build(false)
             )
     );
-    public static final RenderLayer GUI_LAYER = RenderLayer.of("coordinatelist_gui",786432,RenderPipelines.GUI,RenderLayer.MultiPhaseParameters.builder().build(false));
 }
