@@ -90,17 +90,14 @@ public class CListWaypointScreen extends Screen {
     }
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        list.mouseClicked(mouseX, mouseY, button);
         return super.mouseClicked(mouseX, mouseY, button);
     }
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        list.mouseReleased(mouseX, mouseY, button);
         return super.mouseReleased(mouseX, mouseY, button);
     }
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        list.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
     private class ScrollList extends EntryListWidget<ScrollList.ScrollListEntry> {
