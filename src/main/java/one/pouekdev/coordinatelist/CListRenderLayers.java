@@ -10,7 +10,7 @@ import net.minecraft.util.Util;
 
 import java.util.function.Function;
 
-public class CListRenderLayers {
+public class CListRenderLayers{
     private static final RenderPipeline POSITION_TEX_COLOR_PIPELINE = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.POSITION_TEX_COLOR_SNIPPET)
                     .withLocation("pipeline/position_tex_color")
@@ -27,7 +27,7 @@ public class CListRenderLayers {
                     false,
                     true,
                     POSITION_TEX_COLOR_PIPELINE,
-                    RenderLayer.MultiPhaseParameters.builder().texture(new RenderPhase.Texture(texture,false)).build(false)
+                    RenderLayer.MultiPhaseParameters.builder().texture(new RenderPhase.Texture(texture, false)).build(false)
             )
     );
 }

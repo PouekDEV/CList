@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "coordinatelist",
   "version": "${version}",
-
   "name": "CList",
   "description": "Coordinate List (CList for short) is a simple minimalistic fabric mod for saving your coordinates. No minimaps. Just a list with in-game waypoints.",
   "authors": [
@@ -13,10 +12,8 @@
     "sources": "https://github.com/PouekDEV/CList",
     "issues": "https://github.com/PouekDEV/CList/issues"
   },
-
   "license": "MIT License",
   "icon": "assets/coordinatelist/icon.png",
-
   "environment": "client",
   "entrypoints": {
     "main": [
@@ -29,7 +26,6 @@
   "mixins": [
     "coordinatelist.mixins.json"
   ],
-
   "depends": {
     "fabricloader": ">=0.16.14",
     "fabric-api": "*",
@@ -37,7 +33,6 @@
     "java": ">=21",
     "midnightlib": ">=1.7.5"
   },
-
   "suggests": {
     "another-mod": "*"
   }

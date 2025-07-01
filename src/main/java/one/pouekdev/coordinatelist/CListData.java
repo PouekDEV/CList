@@ -8,67 +8,61 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 
-public class CListData {
-    public static void saveListToFile(String fileName, List<CListWaypoint> waypointList) {
-        if (!Files.exists(FabricLoader.getInstance().getConfigDir().resolve("coordinatelist"))) {
-            try {
+public class CListData{
+    public static void saveListToFile(String fileName, List<CListWaypoint> waypointList){
+        if(!Files.exists(FabricLoader.getInstance().getConfigDir().resolve("coordinatelist"))){
+            try{
                 Files.createDirectories(FabricLoader.getInstance().getConfigDir().resolve("coordinatelist"));
-            } catch (IOException ignored) {
             }
+            catch(IOException ignored){}
         }
         File dataDir = FabricLoader.getInstance().getConfigDir().resolve("coordinatelist").toFile();
         File file = new File(dataDir, fileName);
-
-        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)))) {
-            for (int i = 0; i < waypointList.size(); i++) {
-                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).name.replaceAll("~","") + "~" + CListClient.variables.waypoints.get(i).dimension + "~" + CListClient.variables.colors.get(i).getHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint);
+        try(PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)))){
+            for(int i = 0; i < waypointList.size(); i++){
+                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).name.replaceAll("~", "") + "~" + CListClient.variables.waypoints.get(i).dimension + "~" + CListClient.variables.colors.get(i).getHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint);
             }
-        } catch (IOException ignored) {
         }
+        catch(IOException ignored){}
     }
 
-    public static List<CListWaypoint> loadListFromFile(String fileName) {
+    public static List<CListWaypoint> loadListFromFile(String fileName){
         File dataDir = FabricLoader.getInstance().getConfigDir().resolve("coordinatelist").toFile();
         File file = new File(dataDir, fileName);
-
-        if (!file.exists()) {
+        if(!file.exists()){
             return null;
         }
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))){
             List<CListWaypoint> waypointList = Lists.newArrayList();
             String line;
-
-            while ((line = reader.readLine()) != null) {
+            while((line = reader.readLine()) != null){
                 String[] segments = line.split("~");
-                if (segments.length >= 3) {
+                if(segments.length >= 3){
                     String coords = segments[0];
                     String name = segments[1];
                     String dimension = segments[2];
-                    String color = null,bool = null,deathpoint = null;
+                    String color = null, bool = null, deathpoint = null;
                     try{
                         color = segments[3];
                         bool = segments[4];
                         deathpoint = segments[5];
                     }
-                    catch (IndexOutOfBoundsException ignored){}
+                    catch(IndexOutOfBoundsException ignored){}
                     CListWaypoint waypoint = new CListWaypoint(coords, name, dimension, Boolean.parseBoolean(bool), Boolean.parseBoolean(deathpoint));
                     if(color == null){
                         CListClient.addRandomWaypointColor();
                     }
                     else{
-                        CListWaypointColor color_class = new CListWaypointColor(0,0,0);
+                        CListWaypointColor color_class = new CListWaypointColor(0, 0, 0);
                         color_class.set(color);
                         CListClient.variables.colors.add(color_class);
                     }
                     waypointList.add(waypoint);
                 }
             }
-
             return waypointList;
-        } catch (IOException ignored) {
         }
-
+        catch(IOException ignored){}
         return null;
     }
 
@@ -80,26 +74,21 @@ public class CListData {
         }
     }
 
-    public static List<String> loadListFromFileLegacy(String fileName) {
+    public static List<String> loadListFromFileLegacy(String fileName){
         File dataDir = FabricLoader.getInstance().getConfigDir().resolve("coordinatelist").toFile();
         File file = new File(dataDir, fileName);
-
-        if (!file.exists()) {
+        if(!file.exists()){
             return null;
         }
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))){
             List<String> stringList = Lists.newArrayList();
             String line;
-
-            while ((line = reader.readLine()) != null) {
+            while((line = reader.readLine()) != null){
                 stringList.add(line);
             }
-
             return stringList;
-        } catch (IOException ignored) {
         }
-
+        catch(IOException ignored){}
         return null;
     }
 }

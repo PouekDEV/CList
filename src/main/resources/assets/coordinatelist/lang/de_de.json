@@ -5,12 +5,12 @@
     "keybinds.waypoints.toggle": "Sichtbarkeit der Wegpunkte umschalten",
     "coordinatelist.midnightconfig.title": "CList Konfiguration",
     "coordinatelist.midnightconfig.multiplier": "Größe der Wegpunkte",
-    "coordinatelist.midnightconfig.render_distance": "Sichtweite der Wegpunkte (0 für unendliche Sichtweite)",
-    "coordinatelist.midnightconfig.waypoints_toggled": "Wegpunkte anzeigen",
-    "coordinatelist.midnightconfig.can_place_deathpoints": "Automatisch Wegpunkte bei Tod erstellen",
+    "coordinatelist.midnightconfig.renderDistance": "Sichtweite der Wegpunkte (0 für unendliche Sichtweite)",
+    "coordinatelist.midnightconfig.waypointsToggled": "Wegpunkte anzeigen",
+    "coordinatelist.midnightconfig.canPlaceDeathpoints": "Automatisch Wegpunkte bei Tod erstellen",
     "waypoint.last.death": "Letzter Todespunkt",
     "waypoint.new.waypoint": "Neuer Wegpunkt",
     "buttons.add.new.waypoint": "Wegpunkt hier erstellen",
     "tooltip.copy.waypoint.coordinates": "Koordinaten des gewählen Punktes kopieren",
     "chat.create.waypoint.message": "[Wegpunkt erstellen]"
-  }
+}
