@@ -192,6 +192,7 @@ public class CListWaypointScreen extends Screen {
                         break;
                     }
                 }
+                sh.mouseClicked(mouseX, mouseY, button);
                 return handled || super.mouseClicked(mouseX, mouseY, button);
             }
             @Override
