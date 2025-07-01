@@ -199,7 +199,7 @@ public class CListWaypointScreen extends Screen{
                 select.setY(y);
                 visibility.render(context, mouseX, mouseY, delta);
                 select.render(context, mouseX, mouseY, delta);
-                context.drawTextWithShadow(CListVariables.minecraftClient.textRenderer, dimension.getString(), x + 180, y + 6, 0xFFFFFFFF);
+                drawScrollableText(context, CListVariables.minecraftClient.textRenderer, dimension, x + 180, y, x + textRenderer.getWidth("The nether") + 180, y + textRenderer.fontHeight + 10, 0xFFFFFFFF);
                 context.drawTextWithShadow(CListVariables.minecraftClient.textRenderer, waypointName.getString(), x + 22, y + 6, CListClient.variables.colors.get(id).getHex());
             }
 
