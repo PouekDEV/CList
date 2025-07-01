@@ -90,17 +90,14 @@ public class CListWaypointScreen extends Screen {
     }
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        list.mouseClicked(mouseX, mouseY, button);
         return super.mouseClicked(mouseX, mouseY, button);
     }
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        list.mouseReleased(mouseX, mouseY, button);
         return super.mouseReleased(mouseX, mouseY, button);
     }
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        list.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
     private class ScrollList extends EntryListWidget<ScrollList.ScrollListEntry> {
@@ -183,7 +180,7 @@ public class CListWaypointScreen extends Screen {
                 select.setY(y);
                 sh.render(context, mouseX, mouseY, delta);
                 select.render(context, mouseX, mouseY, delta);
-                context.drawTextWithShadow(CListVariables.minecraft_client.textRenderer, dimension.getString(), x+180, y+6, 0xFFFFFF);
+                drawScrollableText(context, CListVariables.minecraft_client.textRenderer, dimension, x + 180, y, x + textRenderer.getWidth("The nether") + 180, y + textRenderer.fontHeight + 10, 0xFFFFFFFF);
                 context.drawTextWithShadow(CListVariables.minecraft_client.textRenderer, waypoint_name.getString(), x+22, y+6, CListClient.variables.colors.get(id).getHex());
             }
             @Override
@@ -195,6 +192,7 @@ public class CListWaypointScreen extends Screen {
                         break;
                     }
                 }
+                sh.mouseClicked(mouseX, mouseY, button);
                 return handled || super.mouseClicked(mouseX, mouseY, button);
             }
             @Override
