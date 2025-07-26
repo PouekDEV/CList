@@ -19,6 +19,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import eu.midnightdust.lib.config.MidnightConfig;
@@ -175,7 +176,7 @@ public class CListClient implements ClientModInitializer{
             while(addAWaypoint.wasPressed()){
                 if(!Objects.equals(client.currentScreen, new CListWaypointScreen(Text.literal("Waypoints")))){
                     PlayerEntity player = CListVariables.minecraftClient.player;
-                    addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, true);
+                    addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, true, null);
                 }
             }
             while(toggleVisibility.wasPressed()){
@@ -210,7 +211,7 @@ public class CListClient implements ClientModInitializer{
                         }
                         if(!client.player.isAlive() && !variables.hadDeathWaypointPlaced && CListConfig.canPlaceDeathpoints){
                             PlayerEntity player = client.player;
-                            addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), true, false);
+                            addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), true, false, null);
                             variables.hadDeathWaypointPlaced = true;
                         }
                         else if(client.player.isAlive() && variables.hadDeathWaypointPlaced){
@@ -228,19 +229,20 @@ public class CListClient implements ClientModInitializer{
         variables.loadedLastWorld = false;
     }
 
-    public static void addNewWaypoint(int x, int y, int z, boolean death, boolean viaKeybind){
+    public static void addNewWaypoint(int x, int y, int z, boolean death, boolean viaKeybind, @Nullable String waypointName) {
         CList.LOGGER.info("New waypoint for dimension " + variables.lastWorld.getRegistryKey().getValue().toString());
-        String waypointName;
-        if(death){
-            waypointName = Text.translatable("waypoint.last.death").getString();
+        String finalWaypointName = waypointName;
+        if (finalWaypointName == null) {
+            if (death) {
+                finalWaypointName = Text.translatable("waypoint.last.death").getString();
+            } else {
+                finalWaypointName = Text.translatable("waypoint.new.waypoint").getString();
+            }
         }
-        else{
-            waypointName = Text.translatable("waypoint.new.waypoint").getString();
-        }
-        variables.waypoints.add(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.getRegistryKey().getValue().toString(), true, death));
+        variables.waypoints.add(new CListWaypoint(x, y, z, finalWaypointName, variables.lastWorld.getRegistryKey().getValue().toString(), true, death));
         variables.colors.add(new CListWaypointColor(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
         variables.savedSinceLastUpdate = false;
-        if(!death){
+        if (!death) {
             CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Text.literal("Config"), variables.waypoints.size() - 1, viaKeybind));
         }
     }
