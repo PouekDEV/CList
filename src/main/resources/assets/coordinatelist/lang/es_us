@@ -1,0 +1,20 @@
+{
+  "keybinds.category.name": "Atajos de teclado de CList",
+  "keybinds.waypoint.add": "Crear un punto de referencia en tu ubicación actual",
+  "keybinds.waypoints.menu": "Abrir menú de puntos de referencia",
+  "keybinds.waypoints.toggle": "Activar/desactivar visibilidad de los puntos de referencia",
+  "coordinatelist.midnightconfig.title": "Configuración de CList",
+  "coordinatelist.midnightconfig.multiplier": "Tamaño de los puntos de referencia",
+  "coordinatelist.midnightconfig.renderDistance": "Distancia de visibilidad del punto de referencia (0 = sin límite)",
+  "coordinatelist.midnightconfig.waypointsToggled": "Mostrar puntos de referencia",
+  "coordinatelist.midnightconfig.canPlaceDeathpoints": "Crear punto de referencia al morir",
+  "coordinatelist.midnightconfig.waypointTextBackground": "Mostrar fondo detrás del nombre del punto de referencia",
+  "coordinatelist.midnightconfig.squareWaypoints": "Usar un icono cuadrado en lugar de circular para los puntos de referencia",
+  "modmenu.summaryTranslation.coordinatelist": "Un mod simple y minimalista de Fabric para guardar tus coordenadas.",
+  "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (CList) es un mod simple y minimalista de Fabric para guardar tus coordenadas. Sin minimapas. Solo una lista con puntos de referencia dentro del juego.",
+  "waypoint.last.death": "Última muerte",
+  "waypoint.new.waypoint": "Nuevo punto de referencia",
+  "buttons.add.new.waypoint": "Agregar un nuevo punto de referencia en la posición actual",
+  "tooltip.copy.waypoint.coordinates": "Haz clic para copiar las coordenadas del punto de referencia seleccionado.\n\nUsa CTRL para copiarlo como comando de teletransporte.",
+  "chat.create.waypoint.message": "[Crear un punto de referencia]"
+}
