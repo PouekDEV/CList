@@ -1,5 +1,5 @@
 {
-  "keybinds.category.name": "CList Keybinds",
+  "key.category.minecraft.coordinatelist": "CList Keybinds",
   "keybinds.waypoint.add": "Add a waypoint in current position",
   "keybinds.waypoints.menu": "Open waypoints menu",
   "keybinds.waypoints.toggle": "Toggle waypoints visibility",

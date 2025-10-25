@@ -1,5 +1,5 @@
 {
-  "keybinds.category.name": "Teclas de Atalho do CList",
+  "key.category.minecraft.coordinatelist": "Teclas de Atalho do CList",
   "keybinds.waypoint.add": "Adicionar um ponto de referência na posição atual",
   "keybinds.waypoints.menu": "Abrir menu de pontos de referência",
   "keybinds.waypoints.toggle": "Alternar visibilidade dos pontos de referência",

@@ -11,16 +11,32 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 
 @Environment(EnvType.CLIENT)
-public record CListReverseColoredQuadGuiElementRenderState(RenderPipeline pipeline, TextureSetup textureSetup, Matrix3x2f pose, int x0, int y0, int x1, int y1, int col1, int col2, @Nullable ScreenRect scissorArea, @Nullable ScreenRect bounds) implements SimpleGuiElementRenderState{
+public class CListReverseColoredQuadGuiElementRenderState implements SimpleGuiElementRenderState{
+    int x0, x1, y0, y1, col1, col2;
+    RenderPipeline pipeline;
+    TextureSetup textureSetup;
+    ScreenRect scissorArea, bounds;
+    Matrix3x2f pose;
+
     public CListReverseColoredQuadGuiElementRenderState(RenderPipeline pipeline, TextureSetup textureSetup, Matrix3x2f pose, int x0, int y0, int x1, int y1, int col1, int col2, @Nullable ScreenRect scissorArea){
-        this(pipeline, textureSetup, pose, x0, y0, x1, y1, col1, col2, scissorArea, createBounds(x0, y0, x1, y1, pose, scissorArea));
+        this.pipeline = pipeline;
+        this.textureSetup = textureSetup;
+        this.pose = pose;
+        this.x0 = x0;
+        this.y0 = y0;
+        this.x1 = x1;
+        this.y1 = y1;
+        this.col1 = col1;
+        this.col2 = col2;
+        this.scissorArea = scissorArea;
+        this.bounds = createBounds(x0, y0, x1, y1, pose, scissorArea);
     }
 
-    public void setupVertices(VertexConsumer vertices, float depth){
-        vertices.vertex(this.pose(), (float) this.x0(), (float) this.y0(), depth).color(this.col1());
-        vertices.vertex(this.pose(), (float) this.x0(), (float) this.y1(), depth).color(this.col1());
-        vertices.vertex(this.pose(), (float) this.x1(), (float) this.y1(), depth).color(this.col2());
-        vertices.vertex(this.pose(), (float) this.x1(), (float) this.y0(), depth).color(this.col2());
+    public void setupVertices(VertexConsumer vertices){
+        vertices.vertex(this.pose(), (float) this.x0(), (float) this.y0()).color(this.col1());
+        vertices.vertex(this.pose(), (float) this.x0(), (float) this.y1()).color(this.col1());
+        vertices.vertex(this.pose(), (float) this.x1(), (float) this.y1()).color(this.col2());
+        vertices.vertex(this.pose(), (float) this.x1(), (float) this.y0()).color(this.col2());
     }
 
     @Nullable

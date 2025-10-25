@@ -1,5 +1,5 @@
 {
-  "keybinds.category.name": "CList 快捷键",
+  "key.category.minecraft.coordinatelist": "CList 快捷键",
   "keybinds.waypoint.add": "在当前位置添加路径点",
   "keybinds.waypoints.menu": "打开路径点菜单",
   "keybinds.waypoints.toggle": "切换路径点可见性",

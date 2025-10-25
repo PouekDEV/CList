@@ -1,5 +1,5 @@
 {
-  "keybinds.category.name": "Сочетания Клавиш CList",
+  "key.category.minecraft.coordinatelist": "Сочетания Клавиш CList",
   "keybinds.waypoint.add": "Добавить путевую точку в текущей позиции",
   "keybinds.waypoints.menu": "Открыть меню путевых точек",
   "waypoint.last.death": "Последняя смерть",

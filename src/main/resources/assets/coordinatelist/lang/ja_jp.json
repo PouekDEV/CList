@@ -1,5 +1,5 @@
 {
-  "keybinds.category.name": "CList",
+  "key.category.minecraft.coordinatelist": "CList",
   "keybinds.waypoint.add": "現在位置をウェイポイントに追加",
   "keybinds.waypoints.menu": "ウェイポイントのメニューを開く",
   "keybinds.waypoints.toggle": "ウェイポイントの表示 ・非表示",
