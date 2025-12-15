@@ -1,19 +1,22 @@
 package one.pouekdev.coordinatelist;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.Window;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.components.Tooltip;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.compress.utils.Lists;
 import org.lwjgl.glfw.GLFW;
 
@@ -22,40 +25,40 @@ import java.util.List;
 public class CListWaypointScreen extends Screen{
     private ScrollList list;
     private int selectedWaypointId = -1;
-    private ButtonWidget copyCoordinatesButton;
-    private ButtonWidget editWaypointButton;
-    private ButtonWidget deleteWaypointButton;
+    private Button copyCoordinatesButton;
+    private Button editWaypointButton;
+    private Button deleteWaypointButton;
 
-    public CListWaypointScreen(Text title){
+    public CListWaypointScreen(Component title){
         super(title);
     }
 
     @Override
     protected void init(){
-        GridWidget gridWidget = new GridWidget();
-        GridWidget gridWidgetBottom = new GridWidget();
-        gridWidget.getMainPositioner().margin(4, 4, 4, 0);
-        gridWidgetBottom.getMainPositioner().margin(4, 4, 4, 0);
-        GridWidget.Adder adder = gridWidget.createAdder(2);
-        GridWidget.Adder adderBottom = gridWidgetBottom.createAdder(3);
-        adder.add(ButtonWidget.builder(Text.translatable("buttons.add.new.waypoint"), button -> {
-            PlayerEntity player = CListVariables.minecraftClient.player;
+        GridLayout gridWidget = new GridLayout();
+        GridLayout gridWidgetBottom = new GridLayout();
+        gridWidget.defaultCellSetting().padding(4, 4, 4, 0);
+        gridWidgetBottom.defaultCellSetting().padding(4, 4, 4, 0);
+        GridLayout.RowHelper adder = gridWidget.createRowHelper(2);
+        GridLayout.RowHelper adderBottom = gridWidgetBottom.createRowHelper(3);
+        adder.addChild(Button.builder(Component.translatable("buttons.add.new.waypoint"), button -> {
+            Player player = CListVariables.minecraftClient.player;
             CListClient.addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, false);
             list.refreshElements();
-        }).width(300).build(), 2, gridWidget.copyPositioner().marginTop(10));
-        copyCoordinatesButton = ButtonWidget.builder(Text.literal("---"), button -> {
+        }).width(300).build(), 2, gridWidget.newCellSettings().paddingTop(10));
+        copyCoordinatesButton = Button.builder(Component.literal("---"), button -> {
             Window window = CListVariables.minecraftClient.getWindow();
             CListWaypoint waypoint = CListClient.variables.waypoints.get(selectedWaypointId);
-            if(InputUtil.isKeyPressed(window, InputUtil.GLFW_KEY_LEFT_CONTROL)){
-                GLFW.glfwSetClipboardString(window.getHandle(), "/execute in " + waypoint.dimension + " run tp @p " + waypoint.x + " " + waypoint.y + " " + waypoint.z);
+            if(InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL)){
+                GLFW.glfwSetClipboardString(window.handle(), "/execute in " + waypoint.dimension + " run tp @p " + waypoint.x + " " + waypoint.y + " " + waypoint.z);
             }
             else{
-                GLFW.glfwSetClipboardString(window.getHandle(), waypoint.x + " " + waypoint.y + " " + waypoint.z);
+                GLFW.glfwSetClipboardString(window.handle(), waypoint.x + " " + waypoint.y + " " + waypoint.z);
             }
         }).width(150).build();
-        copyCoordinatesButton.setTooltip(Tooltip.of(Text.translatable("tooltip.copy.waypoint.coordinates")));
-        editWaypointButton = ButtonWidget.builder(Text.translatable("selectWorld.edit"), button -> CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Text.literal("Config"), selectedWaypointId, false))).width(100).build();
-        deleteWaypointButton = ButtonWidget.builder(Text.translatable("selectWorld.delete"), button -> {
+        copyCoordinatesButton.setTooltip(Tooltip.create(Component.translatable("tooltip.copy.waypoint.coordinates")));
+        editWaypointButton = Button.builder(Component.translatable("selectWorld.edit"), button -> CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), selectedWaypointId, false))).width(100).build();
+        deleteWaypointButton = Button.builder(Component.translatable("selectWorld.delete"), button -> {
             CListClient.deleteWaypoint(selectedWaypointId);
             list.refreshElements();
             if(selectedWaypointId >= CListClient.variables.waypoints.size()){
@@ -64,24 +67,24 @@ public class CListWaypointScreen extends Screen{
             if(selectedWaypointId != -1){
                 list.setFocused(list.children().get(selectedWaypointId));
             }
-            list.refreshScroll();
+            list.refreshScrollAmount();
         }).width(100).build();
-        adderBottom.add(deleteWaypointButton, 1, gridWidgetBottom.copyPositioner().marginBottom(10));
-        adderBottom.add(copyCoordinatesButton, 1, gridWidgetBottom.copyPositioner().marginBottom(10));
-        adderBottom.add(editWaypointButton, 1, gridWidgetBottom.copyPositioner().marginBottom(10));
+        adderBottom.addChild(deleteWaypointButton, 1, gridWidgetBottom.newCellSettings().paddingBottom(10));
+        adderBottom.addChild(copyCoordinatesButton, 1, gridWidgetBottom.newCellSettings().paddingBottom(10));
+        adderBottom.addChild(editWaypointButton, 1, gridWidgetBottom.newCellSettings().paddingBottom(10));
         list = new ScrollList();
         list.setupEntries();
-        addDrawableChild(list);
-        gridWidget.refreshPositions();
-        gridWidgetBottom.refreshPositions();
-        SimplePositioningWidget.setPos(gridWidget, 0, 0, this.width, this.height, 0.5f, 0f);
-        SimplePositioningWidget.setPos(gridWidgetBottom, 0, 0, this.width, this.height, 0.5f, 1f);
-        gridWidget.forEachChild(this::addDrawableChild);
-        gridWidgetBottom.forEachChild(this::addDrawableChild);
+        addRenderableWidget(list);
+        gridWidget.arrangeElements();
+        gridWidgetBottom.arrangeElements();
+        FrameLayout.alignInRectangle(gridWidget, 0, 0, this.width, this.height, 0.5f, 0f);
+        FrameLayout.alignInRectangle(gridWidgetBottom, 0, 0, this.width, this.height, 0.5f, 1f);
+        gridWidget.visitWidgets(this::addRenderableWidget);
+        gridWidgetBottom.visitWidgets(this::addRenderableWidget);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta){
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta){
         super.render(context, mouseX, mouseY, delta);
         if(selectedWaypointId >= 0){
             copyCoordinatesButton.active = true;
@@ -96,12 +99,12 @@ public class CListWaypointScreen extends Screen{
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled){
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled){
         return super.mouseClicked(click, doubled);
     }
 
     @Override
-    public boolean mouseReleased(Click click){
+    public boolean mouseReleased(MouseButtonEvent click){
         return super.mouseReleased(click);
     }
 
@@ -110,9 +113,9 @@ public class CListWaypointScreen extends Screen{
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
-    private class ScrollList extends EntryListWidget<ScrollList.ScrollListEntry>{
+    private class ScrollList extends AbstractSelectionList<ScrollList.ScrollListEntry>{
         public ScrollList(){
-            super(CListWaypointScreen.this.client, CListWaypointScreen.this.width, CListWaypointScreen.this.height - 64, 32, 25);//32
+            super(CListWaypointScreen.this.minecraft, CListWaypointScreen.this.width, CListWaypointScreen.this.height - 64, 32, 25);//32
         }
 
         public void setupEntries(){
@@ -132,62 +135,62 @@ public class CListWaypointScreen extends Screen{
             return 245;
         }
 
-        public void appendClickableNarrations(NarrationMessageBuilder builder){}
+        public void updateWidgetNarration(NarrationElementOutput builder){}
 
-        private static class InvisibleButton extends ButtonWidget{
-            public InvisibleButton(int x, int y, int width, int height, PressAction onPress){
-                super(x, y, width, height, Text.literal(""), onPress, DEFAULT_NARRATION_SUPPLIER);
+        private static class InvisibleButton extends Button{
+            public InvisibleButton(int x, int y, int width, int height, OnPress onPress){
+                super(x, y, width, height, Component.literal(""), onPress, DEFAULT_NARRATION);
             }
 
             @Override
-            public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta){}
+            public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta){}
         }
 
-        private static class SpriteButton extends ButtonWidget{
+        private static class SpriteButton extends Button{
             private final int id;
 
-            public SpriteButton(int x, int y, int width, int height, PressAction onPress, int coordinateId){
-                super(x, y, width, height, Text.literal(""), onPress, DEFAULT_NARRATION_SUPPLIER);
+            public SpriteButton(int x, int y, int width, int height, OnPress onPress, int coordinateId){
+                super(x, y, width, height, Component.literal(""), onPress, DEFAULT_NARRATION);
                 this.id = coordinateId;
             }
 
             @Override
-            public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta){
-                Identifier eyeIcon;
+            public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta){
+                ResourceLocation eyeIcon;
                 if(CListClient.variables.waypoints.get(id).render){
-                    eyeIcon = Identifier.of("coordinatelist", "icon/visible");
+                    eyeIcon = ResourceLocation.fromNamespaceAndPath("coordinatelist", "icon/visible");
                 }
                 else{
-                    eyeIcon = Identifier.of("coordinatelist", "icon/not_visible");
+                    eyeIcon = ResourceLocation.fromNamespaceAndPath("coordinatelist", "icon/not_visible");
                 }
                 GlStateManager._enableBlend();
-                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, eyeIcon, getX(), getY(), width, height);
+                context.blitSprite(RenderPipelines.GUI_TEXTURED, eyeIcon, getX(), getY(), width, height);
                 GlStateManager._disableBlend();
             }
         }
 
-        private class ScrollListEntry extends EntryListWidget.Entry<ScrollListEntry>{
-            private final Text waypointName;
-            private final Text dimension;
+        private class ScrollListEntry extends AbstractSelectionList.Entry<ScrollListEntry>{
+            private final Component waypointName;
+            private final Component dimension;
             private final SpriteButton visibility;
             private final InvisibleButton select;
-            private final List<Element> children;
+            private final List<GuiEventListener> children;
             private final int id;
 
             public ScrollListEntry(int id){
                 this.id = id;
-                this.waypointName = Text.of(CListClient.variables.waypoints.get(id).name);
+                this.waypointName = Component.nullToEmpty(CListClient.variables.waypoints.get(id).name);
                 this.dimension = CListClient.variables.waypoints.get(id).getDimensionText();
                 this.visibility = new SpriteButton(0, 0, 16, 12, button -> {
                     CListClient.variables.waypoints.get(id).toggleVisibility();
                     selectedWaypointId = id;
                     CListWaypoint waypoint = CListClient.variables.waypoints.get(selectedWaypointId);
-                    copyCoordinatesButton.setMessage(Text.literal(waypoint.x + " " + waypoint.y + " " + waypoint.z));
+                    copyCoordinatesButton.setMessage(Component.literal(waypoint.x + " " + waypoint.y + " " + waypoint.z));
                 }, id);
                 this.select = new InvisibleButton(0, 0, 240, 25, button -> {
                     selectedWaypointId = id;
                     CListWaypoint waypoint = CListClient.variables.waypoints.get(selectedWaypointId);
-                    copyCoordinatesButton.setMessage(Text.literal(waypoint.x + " " + waypoint.y + " " + waypoint.z));
+                    copyCoordinatesButton.setMessage(Component.literal(waypoint.x + " " + waypoint.y + " " + waypoint.z));
                 });
                 this.children = Lists.newArrayList();
                 this.children.add(visibility);
@@ -195,7 +198,7 @@ public class CListWaypointScreen extends Screen{
             }
 
             @Override
-            public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float deltaTicks){
+            public void renderContent(GuiGraphics context, int mouseX, int mouseY, boolean hovered, float deltaTicks){
                 int x = this.getX();
                 int y = this.getY();
                 visibility.setX(x + 5);
@@ -204,14 +207,14 @@ public class CListWaypointScreen extends Screen{
                 select.setY(y);
                 visibility.render(context, mouseX, mouseY, deltaTicks);
                 select.render(context, mouseX, mouseY, deltaTicks);
-                drawScrollableText(context, CListVariables.minecraftClient.textRenderer, dimension, x + 183, y + 2, x + textRenderer.getWidth("The nether") + 183, y + textRenderer.fontHeight + 12, 0xFFFFFFFF);
-                context.drawTextWithShadow(CListVariables.minecraftClient.textRenderer, waypointName.getString(), x + 25, y + 8, CListClient.variables.colors.get(id).getHex());
+                renderScrollingString(context, CListVariables.minecraftClient.font, dimension, x + 183, y + 2, x + font.width("The nether") + 183, y + font.lineHeight + 12, 0xFFFFFFFF);
+                context.drawString(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, CListClient.variables.colors.get(id).getHex());
             }
 
             @Override
-            public boolean mouseClicked(Click click, boolean doubled){
+            public boolean mouseClicked(MouseButtonEvent click, boolean doubled){
                 boolean handled = false;
-                for(Element E: children){
+                for(GuiEventListener E: children){
                     if(E.mouseClicked(click, doubled)){
                         handled = true;
                         break;
@@ -222,9 +225,9 @@ public class CListWaypointScreen extends Screen{
             }
 
             @Override
-            public boolean mouseReleased(Click click){
+            public boolean mouseReleased(MouseButtonEvent click){
                 boolean handled = false;
-                for(Element E: children){
+                for(GuiEventListener E: children){
                     if(E.mouseReleased(click)){
                         handled = true;
                         break;

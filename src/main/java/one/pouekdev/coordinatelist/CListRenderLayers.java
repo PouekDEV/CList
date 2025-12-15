@@ -2,17 +2,17 @@ package one.pouekdev.coordinatelist;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.Util;
 
 import java.util.function.Function;
 
 public class CListRenderLayers{
     private static final RenderPipeline POSITION_TEX_COLOR_PIPELINE = RenderPipelines.register(
-            RenderPipeline.builder(RenderPipelines.POSITION_TEX_COLOR_SNIPPET)
+            RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
                     .withLocation("pipeline/position_tex_color")
                     .withCull(false)
                     .withoutBlend()
@@ -20,14 +20,14 @@ public class CListRenderLayers{
                     .withDepthWrite(true)
                     .build()
     );
-    public static final Function<Identifier, RenderLayer> POSITION_TEX_COLOR = Util.memoize(
-            texture -> RenderLayer.of(
+    public static final Function<ResourceLocation, RenderType> POSITION_TEX_COLOR = Util.memoize(
+            texture -> RenderType.create(
                     "pos_tex_color",
                     1536,
                     false,
                     true,
                     POSITION_TEX_COLOR_PIPELINE,
-                    RenderLayer.MultiPhaseParameters.builder().texture(new RenderPhase.Texture(texture, false)).build(false)
+                    RenderType.CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(texture, false)).createCompositeState(false)
             )
     );
 }

@@ -1,10 +1,10 @@
 package one.pouekdev.coordinatelist.mixin;
 
-import net.minecraft.client.gui.hud.ChatHud;
-import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.GuiMessage;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import one.pouekdev.coordinatelist.CListDelayedEvent;
 import one.pouekdev.coordinatelist.CListVariables;
 import org.apache.commons.compress.utils.Lists;
@@ -18,10 +18,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Mixin(ChatHud.class)
+@Mixin(ChatComponent.class)
 public abstract class CListChatGrabber{
-    @Inject(method = "logChatMessage", at = @At("RETURN"))
-    private void getCoordsFromChat(ChatHudLine message, CallbackInfo ci){
+    @Inject(method ="logChatMessage", at = @At("RETURN"))
+    private void getCoordsFromChat(GuiMessage message, CallbackInfo ci){
         List<String> numbersList = Lists.newArrayList();
         String player;
         try{
@@ -39,8 +39,8 @@ public abstract class CListChatGrabber{
             int x = Math.round(Float.parseFloat(numbersList.get(0)));
             int y = Math.round(Float.parseFloat(numbersList.get(1)));
             int z = Math.round(Float.parseFloat(numbersList.get(2)));
-            Text clickableMessage = Text.translatable("chat.create.waypoint.message").formatted(Formatting.GREEN).styled(style -> style.withClickEvent(new ClickEvent.RunCommand("/clist " + x + " " + y + " " + z)));
-            CListVariables.delayedEvents.add(new CListDelayedEvent(0.1f, () -> CListVariables.minecraftClient.inGameHud.getChatHud().addMessage(clickableMessage)));
+            Component clickableMessage = Component.translatable("chat.create.waypoint.message").withStyle(ChatFormatting.GREEN).withStyle(style -> style.withClickEvent(new ClickEvent.RunCommand("/clist " + x + " " + y + " " + z)));
+            CListVariables.delayedEvents.add(new CListDelayedEvent(0.1f, () -> CListVariables.minecraftClient.gui.getChat().addMessage(clickableMessage)));
         }
     }
 }

@@ -1,6 +1,6 @@
 package one.pouekdev.coordinatelist;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.StringUtils;
 
 public class CListWaypoint{
@@ -52,8 +52,8 @@ public class CListWaypoint{
         }
     }
 
-    public Text getDimensionText(){
-        return Text.literal(this.getDimensionString());
+    public Component getDimensionText(){
+        return Component.literal(this.getDimensionString());
     }
 
     public String getDimensionString(){

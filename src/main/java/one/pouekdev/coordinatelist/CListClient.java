@@ -3,13 +3,13 @@ package one.pouekdev.coordinatelist;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.LevelResource;
 import org.lwjgl.glfw.GLFW;
 import eu.midnightdust.lib.config.MidnightConfig;
 
@@ -20,28 +20,28 @@ import java.util.Random;
 public class CListClient implements ClientModInitializer{
     public static CListVariables variables = new CListVariables();
     static Random rand = new Random();
-    KeyBinding openWaypointsKeybind;
-    KeyBinding addAWaypoint;
-    KeyBinding toggleVisibility;
-    public static KeyBinding.Category MOD_CATEGORY = new KeyBinding.Category(Identifier.of(CList.MOD_ID));
+    KeyMapping openWaypointsKeybind;
+    KeyMapping addAWaypoint;
+    KeyMapping toggleVisibility;
+    public static KeyMapping.Category MOD_CATEGORY = new KeyMapping.Category(ResourceLocation.parse(CList.MOD_ID));
 
     @Override
     public void onInitializeClient(){
-        openWaypointsKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        openWaypointsKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "keybinds.waypoints.menu",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_M,
                 MOD_CATEGORY
         ));
-        addAWaypoint = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        addAWaypoint = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "keybinds.waypoint.add",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_B,
                 MOD_CATEGORY
         ));
-        toggleVisibility = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        toggleVisibility = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "keybinds.waypoints.toggle",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_J,
                 MOD_CATEGORY
         ));
@@ -55,20 +55,20 @@ public class CListClient implements ClientModInitializer{
                     }
                 }
             }
-            while(openWaypointsKeybind.wasPressed()){
-                client.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
+            while(openWaypointsKeybind.consumeClick()){
+                client.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
             }
-            while(addAWaypoint.wasPressed()){
-                if(!Objects.equals(client.currentScreen, new CListWaypointScreen(Text.literal("Waypoints")))){
-                    PlayerEntity player = CListVariables.minecraftClient.player;
+            while(addAWaypoint.consumeClick()){
+                if(!Objects.equals(client.screen, new CListWaypointScreen(Component.literal("Waypoints")))){
+                    Player player = CListVariables.minecraftClient.player;
                     addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, true);
                 }
             }
-            while(toggleVisibility.wasPressed()){
+            while(toggleVisibility.consumeClick()){
                 CListConfig.waypointsToggled = !CListConfig.waypointsToggled;
                 MidnightConfig.write(CList.MOD_ID);
             }
-            if(client.world == null){
+            if(client.level == null){
                 variables.loadedLastWorld = false;
                 variables.waypoints.clear();
                 variables.colors.clear();
@@ -79,23 +79,23 @@ public class CListClient implements ClientModInitializer{
             else{
                 if(!variables.isWorldError){
                     try{
-                        variables.lastWorld = client.world;
+                        variables.lastWorld = client.level;
                         checkForWorldChanges(variables.lastWorld);
                         checkIfSaveIsNeeded(false);
-                        if(client.isInSingleplayer()){
-                            variables.worldName = client.getServer().getSavePath(WorldSavePath.ROOT).getParent().getFileName().toString();
+                        if(client.isLocalServer()){
+                            variables.worldName = client.getSingleplayerServer().getWorldPath(LevelResource.ROOT).getParent().getFileName().toString();
                         }
                         else{
-                            if(client.getCurrentServerEntry().isRealm()){
-                                variables.worldName = client.getCurrentServerEntry().name;
+                            if(client.getCurrentServer().isRealm()){
+                                variables.worldName = client.getCurrentServer().name;
                             }
                             else{
-                                variables.worldName = client.getCurrentServerEntry().address;
+                                variables.worldName = client.getCurrentServer().ip;
                                 variables.worldName = variables.worldName.replace(":", "P");
                             }
                         }
                         if(!client.player.isAlive() && !variables.hadDeathWaypointPlaced && CListConfig.canPlaceDeathpoints){
-                            PlayerEntity player = client.player;
+                            Player player = client.player;
                             addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), true, false);
                             variables.hadDeathWaypointPlaced = true;
                         }
@@ -115,19 +115,19 @@ public class CListClient implements ClientModInitializer{
     }
 
     public static void addNewWaypoint(int x, int y, int z, boolean death, boolean viaKeybind){
-        CList.LOGGER.info("New waypoint for dimension " + variables.lastWorld.getRegistryKey().getValue().toString());
+        CList.LOGGER.info("New waypoint for dimension " + variables.lastWorld.dimension().location());
         String waypointName;
         if(death){
-            waypointName = Text.translatable("waypoint.last.death").getString();
+            waypointName = Component.translatable("waypoint.last.death").getString();
         }
         else{
-            waypointName = Text.translatable("waypoint.new.waypoint").getString();
+            waypointName = Component.translatable("waypoint.new.waypoint").getString();
         }
-        variables.waypoints.add(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.getRegistryKey().getValue().toString(), true, death));
+        variables.waypoints.add(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.dimension().location().toString(), true, death));
         variables.colors.add(new CListWaypointColor(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
         variables.savedSinceLastUpdate = false;
         if(!death){
-            CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Text.literal("Config"), variables.waypoints.size() - 1, viaKeybind));
+            CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), variables.waypoints.size() - 1, viaKeybind));
         }
     }
 
@@ -140,7 +140,7 @@ public class CListClient implements ClientModInitializer{
         catch(IndexOutOfBoundsException ignored){}
     }
 
-    public static void checkForWorldChanges(ClientWorld currentWorld){
+    public static void checkForWorldChanges(ClientLevel currentWorld){
         if(!variables.loadedLastWorld && variables.worldName != null){
             CList.LOGGER.info("New world " + variables.worldName);
             variables.lastWorld = currentWorld;
@@ -163,11 +163,11 @@ public class CListClient implements ClientModInitializer{
             }
             else{
                 // Check for post 1.0 saves
-                if(!CListVariables.minecraftClient.isInSingleplayer()){
-                    List<CListWaypoint> ways = CListData.loadListFromFile("clist_" + CListVariables.minecraftClient.getCurrentServerEntry().name);
+                if(!CListVariables.minecraftClient.isLocalServer()){
+                    List<CListWaypoint> ways = CListData.loadListFromFile("clist_" + CListVariables.minecraftClient.getCurrentServer().name);
                     if(ways != null && !ways.isEmpty()){
                         variables.waypoints = ways;
-                        CListData.deleteLegacyFile("clist_" + CListVariables.minecraftClient.getCurrentServerEntry().name);
+                        CListData.deleteLegacyFile("clist_" + CListVariables.minecraftClient.getCurrentServer().name);
                         CList.LOGGER.info("Loaded old multiplier server data");
                         checkIfSaveIsNeeded(true);
                     }

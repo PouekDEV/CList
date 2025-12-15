@@ -1,16 +1,20 @@
 package one.pouekdev.coordinatelist;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.texture.TextureSetup;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import org.joml.Matrix3x2f;
 import org.lwjgl.glfw.GLFW;
 
@@ -21,14 +25,14 @@ public class CListWaypointConfig extends Screen{
     private boolean renderColorPicker = false;
     private final boolean viaKeybind;
     private final CListWaypoint waypoint;
-    private TextFieldWidget waypointName;
-    private static TextFieldWidget waypointColor;
-    private TextFieldWidget x, y, z;
+    private EditBox waypointName;
+    private static EditBox waypointColor;
+    private EditBox x, y, z;
     private SpriteButton changeColor;
     private HSVSlider h, s, v;
     private static float[] hsv;
 
-    public CListWaypointConfig(Text title, int waypointId, boolean viaKeybind){
+    public CListWaypointConfig(Component title, int waypointId, boolean viaKeybind){
         super(title);
         id = waypointId;
         this.waypoint = CListClient.variables.waypoints.get(id);
@@ -37,77 +41,77 @@ public class CListWaypointConfig extends Screen{
 
     @Override
     protected void init(){
-        GridWidget gridWidget = new GridWidget();
+        GridLayout gridWidget = new GridLayout();
         hsv = CListClient.variables.colors.get(id).getHSV();
-        gridWidget.getMainPositioner().margin(4, 4, 4, 0);
-        GridWidget.Adder adder = gridWidget.createAdder(2);
-        adder.add(ButtonWidget.builder(Text.translatable("selectWorld.delete"), button -> {
+        gridWidget.defaultCellSetting().padding(4, 4, 4, 0);
+        GridLayout.RowHelper adder = gridWidget.createRowHelper(2);
+        adder.addChild(Button.builder(Component.translatable("selectWorld.delete"), button -> {
             CListClient.deleteWaypoint(id);
             if(!viaKeybind){
-                CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
+                CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
             }
             else{
-                close();
+                onClose();
             }
-        }).width(150).build(), 1, gridWidget.copyPositioner().marginBottom(10));
-        adder.add(ButtonWidget.builder(Text.translatable("gui.done"), button -> {
+        }).width(150).build(), 1, gridWidget.newCellSettings().paddingBottom(10));
+        adder.addChild(Button.builder(Component.translatable("gui.done"), button -> {
             CListClient.variables.savedSinceLastUpdate = false;
             if(!viaKeybind){
-                CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Text.literal("Waypoints")));
+                CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
             }
             else{
-                close();
+                onClose();
             }
-        }).width(150).build(), 1, gridWidget.copyPositioner().marginBottom(10));
-        this.waypointName = new TextFieldWidget(textRenderer, (this.width - 150) / 2, (this.height - 20) / 2 - 80, 150, 20, Text.literal(""));
-        this.waypointName.setFocusUnlocked(true);
+        }).width(150).build(), 1, gridWidget.newCellSettings().paddingBottom(10));
+        this.waypointName = new EditBox(font, (this.width - 150) / 2, (this.height - 20) / 2 - 80, 150, 20, Component.literal(""));
+        this.waypointName.setCanLoseFocus(true);
         this.waypointName.setMaxLength(25);
-        this.waypointName.setText(waypoint.name);
-        waypointColor = new TextFieldWidget(textRenderer, (this.width - 70) / 2, (this.height - 20) / 2 + 50, 70, 20, Text.literal(""));
-        waypointColor.setFocusUnlocked(true);
+        this.waypointName.setValue(waypoint.name);
+        waypointColor = new EditBox(font, (this.width - 70) / 2, (this.height - 20) / 2 + 50, 70, 20, Component.literal(""));
+        waypointColor.setCanLoseFocus(true);
         waypointColor.setMaxLength(6);
-        waypointColor.setText(CListClient.variables.colors.get(id).getHexNoAlpha());
-        this.x = new TextFieldWidget(textRenderer, (this.width - 50) / 2 - 60, (this.height - 20) / 2 - 50, 50, 20, Text.literal(""));
-        this.x.setFocusUnlocked(true);
-        this.x.setText(String.valueOf(waypoint.x));
-        this.y = new TextFieldWidget(textRenderer, (this.width - 50) / 2, (this.height - 20) / 2 - 50, 50, 20, Text.literal(""));
-        this.y.setFocusUnlocked(true);
-        this.y.setText(String.valueOf(waypoint.y));
-        this.z = new TextFieldWidget(textRenderer, (this.width - 50) / 2 + 60, (this.height - 20) / 2 - 50, 50, 20, Text.literal(""));
-        this.z.setFocusUnlocked(true);
-        this.z.setText(String.valueOf(waypoint.z));
-        gridWidget.refreshPositions();
-        SimplePositioningWidget.setPos(gridWidget, 0, 0, this.width, this.height, 0.5f, 1f);
-        gridWidget.forEachChild(this::addDrawableChild);
-        addDrawableChild(this.waypointName);
-        addDrawableChild(waypointColor);
-        addDrawableChild(this.x);
-        addDrawableChild(this.y);
-        addDrawableChild(this.z);
+        waypointColor.setValue(CListClient.variables.colors.get(id).getHexNoAlpha());
+        this.x = new EditBox(font, (this.width - 50) / 2 - 60, (this.height - 20) / 2 - 50, 50, 20, Component.literal(""));
+        this.x.setCanLoseFocus(true);
+        this.x.setValue(String.valueOf(waypoint.x));
+        this.y = new EditBox(font, (this.width - 50) / 2, (this.height - 20) / 2 - 50, 50, 20, Component.literal(""));
+        this.y.setCanLoseFocus(true);
+        this.y.setValue(String.valueOf(waypoint.y));
+        this.z = new EditBox(font, (this.width - 50) / 2 + 60, (this.height - 20) / 2 - 50, 50, 20, Component.literal(""));
+        this.z.setCanLoseFocus(true);
+        this.z.setValue(String.valueOf(waypoint.z));
+        gridWidget.arrangeElements();
+        FrameLayout.alignInRectangle(gridWidget, 0, 0, this.width, this.height, 0.5f, 1f);
+        gridWidget.visitWidgets(this::addRenderableWidget);
+        addRenderableWidget(this.waypointName);
+        addRenderableWidget(waypointColor);
+        addRenderableWidget(this.x);
+        addRenderableWidget(this.y);
+        addRenderableWidget(this.z);
         changeColor = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 15, 12, 12, button -> renderColorPicker = !renderColorPicker);
-        this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 15, 110, 15, Text.literal("H: " + hsv[0]), hsv[0] / 360, 0);
-        this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 3, 110, 15, Text.literal("S: " + hsv[1]), hsv[1] / 100, 1);
-        this.v = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 20, 110, 15, Text.literal("V: " + hsv[2]), hsv[2] / 100, 2);
+        this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 15, 110, 15, Component.literal("H: " + hsv[0]), hsv[0] / 360, 0);
+        this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 3, 110, 15, Component.literal("S: " + hsv[1]), hsv[1] / 100, 1);
+        this.v = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 20, 110, 15, Component.literal("V: " + hsv[2]), hsv[2] / 100, 2);
         this.h.visible = false;
         this.s.visible = false;
         this.v.visible = false;
-        addDrawableChild(changeColor);
-        addDrawableChild(this.h);
-        addDrawableChild(this.s);
-        addDrawableChild(this.v);
+        addRenderableWidget(changeColor);
+        addRenderableWidget(this.h);
+        addRenderableWidget(this.s);
+        addRenderableWidget(this.v);
     }
 
-    public static class HSVSlider extends SliderWidget{
+    public static class HSVSlider extends AbstractSliderButton{
         private float trueValue;
         private final int max;
         private final int type;
         private final String prefix;
         private boolean force = false;
-        private static final Identifier HANDLE_TEXTURE = Identifier.ofVanilla("widget/slider_handle");
-        private static final Identifier HANDLE_HIGHLIGHTED_TEXTURE = Identifier.ofVanilla("widget/slider_handle_highlighted");
+        private static final ResourceLocation HANDLE_TEXTURE = ResourceLocation.withDefaultNamespace("widget/slider_handle");
+        private static final ResourceLocation HANDLE_HIGHLIGHTED_TEXTURE = ResourceLocation.withDefaultNamespace("widget/slider_handle_highlighted");
         private boolean sliderFocused;
 
-        public HSVSlider(int x, int y, int width, int height, Text text, float value, int type){
+        public HSVSlider(int x, int y, int width, int height, Component text, float value, int type){
             super(x, y, width, height, text, value);
             this.type = type;
             this.max = type == 0 ? 360 : 100;
@@ -116,7 +120,7 @@ public class CListWaypointConfig extends Screen{
 
         public void setValue(float value){
             double d = this.value;
-            this.value = MathHelper.clamp(value, 0.0, 1.0);
+            this.value = Mth.clamp(value, 0.0, 1.0);
             if(d != this.value){
                 this.force = true;
                 this.applyValue();
@@ -126,7 +130,7 @@ public class CListWaypointConfig extends Screen{
 
         @Override
         protected void updateMessage(){
-            this.setMessage(Text.literal(prefix + trueValue));
+            this.setMessage(Component.literal(prefix + trueValue));
         }
 
         @Override
@@ -135,7 +139,7 @@ public class CListWaypointConfig extends Screen{
             hsv[type] = this.trueValue;
             if(!this.force){
                 CListClient.variables.colors.get(id).set(hsv);
-                waypointColor.setText(CListClient.variables.colors.get(id).getHexNoAlpha());
+                waypointColor.setValue(CListClient.variables.colors.get(id).getHexNoAlpha());
                 CListClient.variables.savedSinceLastUpdate = false;
             }
             else{
@@ -143,12 +147,12 @@ public class CListWaypointConfig extends Screen{
             }
         }
 
-        private Identifier getHandleTexture(){
-            return !this.hovered && !this.sliderFocused ? HANDLE_TEXTURE : HANDLE_HIGHLIGHTED_TEXTURE;
+        private ResourceLocation getHandleTexture(){
+            return !this.isHovered && !this.sliderFocused ? HANDLE_TEXTURE : HANDLE_HIGHLIGHTED_TEXTURE;
         }
 
         @Override
-        public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta){
+        public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta){
             GlStateManager._enableBlend();
             GlStateManager._enableDepthTest();
             // consider the following https://github.com/0x3C50/Renderer
@@ -158,7 +162,7 @@ public class CListWaypointConfig extends Screen{
                 for(int i = 0; i < this.width; i++){
                     float hue = i / (float) this.width;
                     int colorH = Color.HSBtoRGB(hue, colorFloat[1], colorFloat[2]);
-                    context.drawVerticalLine(this.getX() + i, this.getY() - 1, this.getY() + this.height, colorH);
+                    context.vLine(this.getX() + i, this.getY() - 1, this.getY() + this.height, colorH);
                 }
             }
             else{
@@ -171,30 +175,30 @@ public class CListWaypointConfig extends Screen{
                     colorStart = 0xFF000000;
                     colorEnd = Color.HSBtoRGB(colorFloat[0], colorFloat[1], 1.0f);
                 }
-                context.state.addSimpleElement(new CListReverseColoredQuadGuiElementRenderState(RenderPipelines.GUI, TextureSetup.empty(), new Matrix3x2f(context.getMatrices()), this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, colorStart, colorEnd, context.scissorStack.peekLast()));
+                context.guiRenderState.submitGuiElement(new CListReverseColoredQuadGuiElementRenderState(RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(context.pose()), this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, colorStart, colorEnd, context.scissorStack.peek()));
             }
-            context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, this.getHandleTexture(), this.getX() + (int) (this.value * (double) (this.width - 8)), this.getY(), 8, this.height);
+            context.blitSprite(RenderPipelines.GUI_TEXTURED, this.getHandleTexture(), this.getX() + (int) (this.value * (double) (this.width - 8)), this.getY(), 8, this.height);
             int i = this.active ? 16777215 : 10526880;
-            this.drawScrollableText(context, CListVariables.minecraftClient.textRenderer, 2, i | MathHelper.ceil(this.alpha * 255.0F) << 24);
+            this.renderScrollingString(context, CListVariables.minecraftClient.font, 2, i | Mth.ceil(this.alpha * 255.0F) << 24);
         }
     }
 
-    private static class SpriteButton extends ButtonWidget{
-        public SpriteButton(int x, int y, int width, int height, PressAction onPress){
-            super(x, y, width, height, Text.literal(""), onPress, DEFAULT_NARRATION_SUPPLIER);
+    private static class SpriteButton extends Button{
+        public SpriteButton(int x, int y, int width, int height, OnPress onPress){
+            super(x, y, width, height, Component.literal(""), onPress, DEFAULT_NARRATION);
         }
 
         @Override
-        public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta){
-            Identifier icon = Identifier.of("coordinatelist", "icon/change");
+        public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta){
+            ResourceLocation icon = ResourceLocation.fromNamespaceAndPath("coordinatelist", "icon/change");
             GlStateManager._enableBlend();
-            context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, icon, getX(), getY(), width, height);
+            context.blitSprite(RenderPipelines.GUI_TEXTURED, icon, getX(), getY(), width, height);
             GlStateManager._disableBlend();
         }
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta){
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta){
         int SQUARE_SIZE = 50;
         int centerX = this.width / 2;
         int centerY = this.height / 2;
@@ -235,75 +239,75 @@ public class CListWaypointConfig extends Screen{
     }
 
     @Override
-    public boolean charTyped(CharInput input){
+    public boolean charTyped(CharacterEvent input){
         boolean result = super.charTyped(input);
         if(this.waypointName.isFocused()){
-            waypoint.name = waypointName.getText();
+            waypoint.name = waypointName.getValue();
         }
         if(waypointColor.isFocused()){
-            CListClient.variables.colors.get(id).set(waypointColor.getText());
+            CListClient.variables.colors.get(id).set(waypointColor.getValue());
             hsv = CListClient.variables.colors.get(id).getHSV();
             h.setValue(hsv[0] / 360);
             s.setValue(hsv[1] / 100);
             v.setValue(hsv[2] / 100);
         }
-        if(this.x.isFocused() && isParsableToInt(x.getText())){
-            waypoint.x = Integer.parseInt(x.getText());
+        if(this.x.isFocused() && isParsableToInt(x.getValue())){
+            waypoint.x = Integer.parseInt(x.getValue());
         }
-        if(this.y.isFocused() && isParsableToInt(y.getText())){
-            waypoint.y = Integer.parseInt(y.getText());
+        if(this.y.isFocused() && isParsableToInt(y.getValue())){
+            waypoint.y = Integer.parseInt(y.getValue());
         }
-        if(this.z.isFocused() && isParsableToInt(z.getText())){
-            waypoint.z = Integer.parseInt(z.getText());
+        if(this.z.isFocused() && isParsableToInt(z.getValue())){
+            waypoint.z = Integer.parseInt(z.getValue());
         }
         CListClient.variables.savedSinceLastUpdate = false;
         return true;
     }
 
     @Override
-    public boolean keyPressed(KeyInput input){
+    public boolean keyPressed(KeyEvent input){
         super.keyPressed(input);
-        if(input.getKeycode() == GLFW.GLFW_KEY_V && input.hasCtrl()){
+        if(input.input() == GLFW.GLFW_KEY_V && input.hasControlDown()){
             if(this.waypointName.isFocused()){
-                waypoint.name = waypointName.getText();
+                waypoint.name = waypointName.getValue();
             }
             if(waypointColor.isFocused()){
-                CListClient.variables.colors.get(id).set(waypointColor.getText());
+                CListClient.variables.colors.get(id).set(waypointColor.getValue());
                 hsv = CListClient.variables.colors.get(id).getHSV();
                 h.setValue(hsv[0] / 360);
                 s.setValue(hsv[1] / 100);
                 v.setValue(hsv[2] / 100);
             }
-            if(this.x.isFocused() && isParsableToInt(x.getText())){
-                waypoint.x = Integer.parseInt(x.getText());
+            if(this.x.isFocused() && isParsableToInt(x.getValue())){
+                waypoint.x = Integer.parseInt(x.getValue());
             }
-            if(this.y.isFocused() && isParsableToInt(y.getText())){
-                waypoint.y = Integer.parseInt(y.getText());
+            if(this.y.isFocused() && isParsableToInt(y.getValue())){
+                waypoint.y = Integer.parseInt(y.getValue());
             }
-            if(this.z.isFocused() && isParsableToInt(z.getText())){
-                waypoint.z = Integer.parseInt(z.getText());
+            if(this.z.isFocused() && isParsableToInt(z.getValue())){
+                waypoint.z = Integer.parseInt(z.getValue());
             }
             CListClient.variables.savedSinceLastUpdate = false;
         }
-        if(input.getKeycode() == GLFW.GLFW_KEY_BACKSPACE){
+        if(input.input() == GLFW.GLFW_KEY_BACKSPACE){
             if(this.waypointName.isFocused()){
-                waypoint.name = waypointName.getText();
+                waypoint.name = waypointName.getValue();
             }
             if(waypointColor.isFocused()){
-                CListClient.variables.colors.get(id).set(waypointColor.getText());
+                CListClient.variables.colors.get(id).set(waypointColor.getValue());
                 hsv = CListClient.variables.colors.get(id).getHSV();
                 h.setValue(hsv[0] / 360);
                 s.setValue(hsv[1] / 100);
                 v.setValue(hsv[2] / 100);
             }
-            if(this.x.isFocused() && isParsableToInt(x.getText())){
-                waypoint.x = Integer.parseInt(x.getText());
+            if(this.x.isFocused() && isParsableToInt(x.getValue())){
+                waypoint.x = Integer.parseInt(x.getValue());
             }
-            if(this.y.isFocused() && isParsableToInt(y.getText())){
-                waypoint.y = Integer.parseInt(y.getText());
+            if(this.y.isFocused() && isParsableToInt(y.getValue())){
+                waypoint.y = Integer.parseInt(y.getValue());
             }
-            if(this.z.isFocused() && isParsableToInt(z.getText())){
-                waypoint.z = Integer.parseInt(z.getText());
+            if(this.z.isFocused() && isParsableToInt(z.getValue())){
+                waypoint.z = Integer.parseInt(z.getValue());
             }
             CListClient.variables.savedSinceLastUpdate = false;
         }

@@ -1,7 +1,7 @@
 package one.pouekdev.coordinatelist;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import org.apache.commons.compress.utils.Lists;
 
 import java.util.List;
@@ -11,8 +11,8 @@ public class CListVariables{
     public List<CListWaypointColor> colors = Lists.newArrayList();
     public static List<CListDelayedEvent> delayedEvents = Lists.newArrayList();
     public String worldName;
-    public ClientWorld lastWorld;
-    public static MinecraftClient minecraftClient = MinecraftClient.getInstance();
+    public ClientLevel lastWorld;
+    public static Minecraft minecraftClient = Minecraft.getInstance();
     public boolean savedSinceLastUpdate;
     public boolean loadedLastWorld;
     public boolean hadDeathWaypointPlaced;

@@ -5,11 +5,11 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.commands.CommandBuildContext;
 
 public class CListCommand implements ClientCommandRegistrationCallback{
     @Override
-    public void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess){
+    public void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess){
         dispatcher.register(ClientCommandManager.literal("clist")
                 .then(ClientCommandManager.argument("x", IntegerArgumentType.integer(Integer.MIN_VALUE, Integer.MAX_VALUE))
                         .then(ClientCommandManager.argument("y", IntegerArgumentType.integer(Integer.MIN_VALUE, Integer.MAX_VALUE))

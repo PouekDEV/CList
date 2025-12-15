@@ -3,22 +3,22 @@ package one.pouekdev.coordinatelist;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.texture.TextureSetup;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.gui.render.TextureSetup;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 
 @Environment(EnvType.CLIENT)
-public class CListReverseColoredQuadGuiElementRenderState implements SimpleGuiElementRenderState{
+public class CListReverseColoredQuadGuiElementRenderState implements GuiElementRenderState{
     int x0, x1, y0, y1, col1, col2;
     RenderPipeline pipeline;
     TextureSetup textureSetup;
-    ScreenRect scissorArea, bounds;
+    ScreenRectangle scissorArea, bounds;
     Matrix3x2f pose;
 
-    public CListReverseColoredQuadGuiElementRenderState(RenderPipeline pipeline, TextureSetup textureSetup, Matrix3x2f pose, int x0, int y0, int x1, int y1, int col1, int col2, @Nullable ScreenRect scissorArea){
+    public CListReverseColoredQuadGuiElementRenderState(RenderPipeline pipeline, TextureSetup textureSetup, Matrix3x2f pose, int x0, int y0, int x1, int y1, int col1, int col2, @Nullable ScreenRectangle scissorArea){
         this.pipeline = pipeline;
         this.textureSetup = textureSetup;
         this.pose = pose;
@@ -32,16 +32,16 @@ public class CListReverseColoredQuadGuiElementRenderState implements SimpleGuiEl
         this.bounds = createBounds(x0, y0, x1, y1, pose, scissorArea);
     }
 
-    public void setupVertices(VertexConsumer vertices){
-        vertices.vertex(this.pose(), (float) this.x0(), (float) this.y0()).color(this.col1());
-        vertices.vertex(this.pose(), (float) this.x0(), (float) this.y1()).color(this.col1());
-        vertices.vertex(this.pose(), (float) this.x1(), (float) this.y1()).color(this.col2());
-        vertices.vertex(this.pose(), (float) this.x1(), (float) this.y0()).color(this.col2());
+    public void buildVertices(VertexConsumer vertices){
+        vertices.addVertexWith2DPose(this.pose(), (float) this.x0(), (float) this.y0()).setColor(this.col1());
+        vertices.addVertexWith2DPose(this.pose(), (float) this.x0(), (float) this.y1()).setColor(this.col1());
+        vertices.addVertexWith2DPose(this.pose(), (float) this.x1(), (float) this.y1()).setColor(this.col2());
+        vertices.addVertexWith2DPose(this.pose(), (float) this.x1(), (float) this.y0()).setColor(this.col2());
     }
 
     @Nullable
-    private static ScreenRect createBounds(int x0, int y0, int x1, int y1, Matrix3x2f pose, @Nullable ScreenRect scissorArea){
-        ScreenRect screenRect = (new ScreenRect(x0, y0, x1 - x0, y1 - y0)).transformEachVertex(pose);
+    private static ScreenRectangle createBounds(int x0, int y0, int x1, int y1, Matrix3x2f pose, @Nullable ScreenRectangle scissorArea){
+        ScreenRectangle screenRect = (new ScreenRectangle(x0, y0, x1 - x0, y1 - y0)).transformMaxBounds(pose);
         return scissorArea != null ? scissorArea.intersection(screenRect) : screenRect;
     }
 
@@ -82,12 +82,12 @@ public class CListReverseColoredQuadGuiElementRenderState implements SimpleGuiEl
     }
 
     @Nullable
-    public ScreenRect scissorArea(){
+    public ScreenRectangle scissorArea(){
         return this.scissorArea;
     }
 
     @Nullable
-    public ScreenRect bounds(){
+    public ScreenRectangle bounds(){
         return this.bounds;
     }
 }
