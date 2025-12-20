@@ -26,12 +26,13 @@
   "mixins": [
     "coordinatelist.mixins.json"
   ],
+  "accessWidener": "coordinatelist.accesswidener",
   "depends": {
-    "fabricloader": ">=0.17.3",
+    "fabricloader": ">=0.18.2",
     "fabric-api": "*",
-    "minecraft": "~1.21.9",
+    "minecraft": "~1.21.11",
     "java": ">=21",
-    "midnightlib": ">=1.8.3"
+    "midnightlib": ">=1.9.2"
   },
   "suggests": {
     "another-mod": "*"

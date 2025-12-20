@@ -6,10 +6,11 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.CommandBuildContext;
+import org.jspecify.annotations.NonNull;
 
 public class CListCommand implements ClientCommandRegistrationCallback{
     @Override
-    public void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess){
+    public void register(CommandDispatcher<FabricClientCommandSource> dispatcher, @NonNull CommandBuildContext buildContext){
         dispatcher.register(ClientCommandManager.literal("clist")
                 .then(ClientCommandManager.argument("x", IntegerArgumentType.integer(Integer.MIN_VALUE, Integer.MAX_VALUE))
                         .then(ClientCommandManager.argument("y", IntegerArgumentType.integer(Integer.MIN_VALUE, Integer.MAX_VALUE))

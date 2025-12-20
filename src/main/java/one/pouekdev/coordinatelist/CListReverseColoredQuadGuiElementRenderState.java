@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.gui.render.TextureSetup;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
+import org.jspecify.annotations.NonNull;
 
 @Environment(EnvType.CLIENT)
 public class CListReverseColoredQuadGuiElementRenderState implements GuiElementRenderState{
@@ -45,11 +46,11 @@ public class CListReverseColoredQuadGuiElementRenderState implements GuiElementR
         return scissorArea != null ? scissorArea.intersection(screenRect) : screenRect;
     }
 
-    public RenderPipeline pipeline(){
+    public @NonNull RenderPipeline pipeline(){
         return this.pipeline;
     }
 
-    public TextureSetup textureSetup(){
+    public @NonNull TextureSetup textureSetup(){
         return this.textureSetup;
     }
 

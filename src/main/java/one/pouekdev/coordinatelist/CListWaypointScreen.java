@@ -1,6 +1,7 @@
 package one.pouekdev.coordinatelist;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
+import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.FrameLayout;
@@ -14,10 +15,11 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.components.Tooltip;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.compress.utils.Lists;
+import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -35,17 +37,17 @@ public class CListWaypointScreen extends Screen{
 
     @Override
     protected void init(){
-        GridLayout gridWidget = new GridLayout();
-        GridLayout gridWidgetBottom = new GridLayout();
-        gridWidget.defaultCellSetting().padding(4, 4, 4, 0);
-        gridWidgetBottom.defaultCellSetting().padding(4, 4, 4, 0);
-        GridLayout.RowHelper adder = gridWidget.createRowHelper(2);
-        GridLayout.RowHelper adderBottom = gridWidgetBottom.createRowHelper(3);
-        adder.addChild(Button.builder(Component.translatable("buttons.add.new.waypoint"), button -> {
+        GridLayout gridLayout = new GridLayout();
+        GridLayout gridLayoutBottom = new GridLayout();
+        gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
+        gridLayoutBottom.defaultCellSetting().padding(4, 4, 4, 0);
+        GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(2);
+        GridLayout.RowHelper rowHelperBottom = gridLayoutBottom.createRowHelper(3);
+        rowHelper.addChild(Button.builder(Component.translatable("buttons.add.new.waypoint"), button -> {
             Player player = CListVariables.minecraftClient.player;
             CListClient.addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, false);
             list.refreshElements();
-        }).width(300).build(), 2, gridWidget.newCellSettings().paddingTop(10));
+        }).width(300).build(), 2, gridLayout.newCellSettings().paddingTop(10));
         copyCoordinatesButton = Button.builder(Component.literal("---"), button -> {
             Window window = CListVariables.minecraftClient.getWindow();
             CListWaypoint waypoint = CListClient.variables.waypoints.get(selectedWaypointId);
@@ -69,23 +71,23 @@ public class CListWaypointScreen extends Screen{
             }
             list.refreshScrollAmount();
         }).width(100).build();
-        adderBottom.addChild(deleteWaypointButton, 1, gridWidgetBottom.newCellSettings().paddingBottom(10));
-        adderBottom.addChild(copyCoordinatesButton, 1, gridWidgetBottom.newCellSettings().paddingBottom(10));
-        adderBottom.addChild(editWaypointButton, 1, gridWidgetBottom.newCellSettings().paddingBottom(10));
+        rowHelperBottom.addChild(deleteWaypointButton, 1, gridLayoutBottom.newCellSettings().paddingBottom(10));
+        rowHelperBottom.addChild(copyCoordinatesButton, 1, gridLayoutBottom.newCellSettings().paddingBottom(10));
+        rowHelperBottom.addChild(editWaypointButton, 1, gridLayoutBottom.newCellSettings().paddingBottom(10));
         list = new ScrollList();
         list.setupEntries();
         addRenderableWidget(list);
-        gridWidget.arrangeElements();
-        gridWidgetBottom.arrangeElements();
-        FrameLayout.alignInRectangle(gridWidget, 0, 0, this.width, this.height, 0.5f, 0f);
-        FrameLayout.alignInRectangle(gridWidgetBottom, 0, 0, this.width, this.height, 0.5f, 1f);
-        gridWidget.visitWidgets(this::addRenderableWidget);
-        gridWidgetBottom.visitWidgets(this::addRenderableWidget);
+        gridLayout.arrangeElements();
+        gridLayoutBottom.arrangeElements();
+        FrameLayout.alignInRectangle(gridLayout, 0, 0, this.width, this.height, 0.5f, 0f);
+        FrameLayout.alignInRectangle(gridLayoutBottom, 0, 0, this.width, this.height, 0.5f, 1f);
+        gridLayout.visitWidgets(this::addRenderableWidget);
+        gridLayoutBottom.visitWidgets(this::addRenderableWidget);
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta){
-        super.render(context, mouseX, mouseY, delta);
+    public void render(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta){
+        super.render(guiGraphics, mouseX, mouseY, delta);
         if(selectedWaypointId >= 0){
             copyCoordinatesButton.active = true;
             editWaypointButton.active = true;
@@ -99,13 +101,13 @@ public class CListWaypointScreen extends Screen{
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent click, boolean doubled){
-        return super.mouseClicked(click, doubled);
+    public boolean mouseClicked(@NonNull MouseButtonEvent mouseButtonEvent, boolean doubled){
+        return super.mouseClicked(mouseButtonEvent, doubled);
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent click){
-        return super.mouseReleased(click);
+    public boolean mouseReleased(@NonNull MouseButtonEvent mouseButtonEvent){
+        return super.mouseReleased(mouseButtonEvent);
     }
 
     @Override
@@ -135,7 +137,7 @@ public class CListWaypointScreen extends Screen{
             return 245;
         }
 
-        public void updateWidgetNarration(NarrationElementOutput builder){}
+        public void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput){}
 
         private static class InvisibleButton extends Button{
             public InvisibleButton(int x, int y, int width, int height, OnPress onPress){
@@ -143,7 +145,7 @@ public class CListWaypointScreen extends Screen{
             }
 
             @Override
-            public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta){}
+            public void renderContents(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta){}
         }
 
         private static class SpriteButton extends Button{
@@ -155,16 +157,16 @@ public class CListWaypointScreen extends Screen{
             }
 
             @Override
-            public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta){
-                ResourceLocation eyeIcon;
+            public void renderContents(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta){
+                Identifier eyeIcon;
                 if(CListClient.variables.waypoints.get(id).render){
-                    eyeIcon = ResourceLocation.fromNamespaceAndPath("coordinatelist", "icon/visible");
+                    eyeIcon = Identifier.fromNamespaceAndPath("coordinatelist", "icon/visible");
                 }
                 else{
-                    eyeIcon = ResourceLocation.fromNamespaceAndPath("coordinatelist", "icon/not_visible");
+                    eyeIcon = Identifier.fromNamespaceAndPath("coordinatelist", "icon/not_visible");
                 }
                 GlStateManager._enableBlend();
-                context.blitSprite(RenderPipelines.GUI_TEXTURED, eyeIcon, getX(), getY(), width, height);
+                guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, eyeIcon, getX(), getY(), width, height);
                 GlStateManager._disableBlend();
             }
         }
@@ -198,42 +200,43 @@ public class CListWaypointScreen extends Screen{
             }
 
             @Override
-            public void renderContent(GuiGraphics context, int mouseX, int mouseY, boolean hovered, float deltaTicks){
+            public void renderContent(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovered, float deltaTicks){
                 int x = this.getX();
                 int y = this.getY();
                 visibility.setX(x + 5);
                 visibility.setY(y + 6);
                 select.setX(x);
                 select.setY(y);
-                visibility.render(context, mouseX, mouseY, deltaTicks);
-                select.render(context, mouseX, mouseY, deltaTicks);
-                renderScrollingString(context, CListVariables.minecraftClient.font, dimension, x + 183, y + 2, x + font.width("The nether") + 183, y + font.lineHeight + 12, 0xFFFFFFFF);
-                context.drawString(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, CListClient.variables.colors.get(id).getHex());
+                visibility.render(guiGraphics, mouseX, mouseY, deltaTicks);
+                select.render(guiGraphics, mouseX, mouseY, deltaTicks);
+                ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphics.HoveredTextEffects.TOOLTIP_AND_CURSOR);
+                collector.acceptScrolling(dimension, x + 183 + font.width("The nether") / 2, x + 183, x + 183 + font.width("The nether"), y + 2, y + font.lineHeight + 12);
+                guiGraphics.drawString(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, CListClient.variables.colors.get(id).getHex());
             }
 
             @Override
-            public boolean mouseClicked(MouseButtonEvent click, boolean doubled){
+            public boolean mouseClicked(@NonNull MouseButtonEvent mouseButtonEvent, boolean doubled){
                 boolean handled = false;
                 for(GuiEventListener E: children){
-                    if(E.mouseClicked(click, doubled)){
+                    if(E.mouseClicked(mouseButtonEvent, doubled)){
                         handled = true;
                         break;
                     }
                 }
-                visibility.mouseClicked(click, doubled);
-                return handled || super.mouseClicked(click, doubled);
+                visibility.mouseClicked(mouseButtonEvent, doubled);
+                return handled || super.mouseClicked(mouseButtonEvent, doubled);
             }
 
             @Override
-            public boolean mouseReleased(MouseButtonEvent click){
+            public boolean mouseReleased(@NonNull MouseButtonEvent mouseButtonEvent){
                 boolean handled = false;
                 for(GuiEventListener E: children){
-                    if(E.mouseReleased(click)){
+                    if(E.mouseReleased(mouseButtonEvent)){
                         handled = true;
                         break;
                     }
                 }
-                return handled || super.mouseReleased(click);
+                return handled || super.mouseReleased(mouseButtonEvent);
             }
         }
     }

@@ -6,9 +6,9 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.LevelResource;
 import org.lwjgl.glfw.GLFW;
 import eu.midnightdust.lib.config.MidnightConfig;
@@ -23,7 +23,7 @@ public class CListClient implements ClientModInitializer{
     KeyMapping openWaypointsKeybind;
     KeyMapping addAWaypoint;
     KeyMapping toggleVisibility;
-    public static KeyMapping.Category MOD_CATEGORY = new KeyMapping.Category(ResourceLocation.parse(CList.MOD_ID));
+    public static KeyMapping.Category MOD_CATEGORY = new KeyMapping.Category(Identifier.parse(CList.MOD_ID));
 
     @Override
     public void onInitializeClient(){
@@ -115,7 +115,7 @@ public class CListClient implements ClientModInitializer{
     }
 
     public static void addNewWaypoint(int x, int y, int z, boolean death, boolean viaKeybind){
-        CList.LOGGER.info("New waypoint for dimension " + variables.lastWorld.dimension().location());
+        CList.LOGGER.info("New waypoint for dimension " + variables.lastWorld.dimension().identifier());
         String waypointName;
         if(death){
             waypointName = Component.translatable("waypoint.last.death").getString();
@@ -123,7 +123,7 @@ public class CListClient implements ClientModInitializer{
         else{
             waypointName = Component.translatable("waypoint.new.waypoint").getString();
         }
-        variables.waypoints.add(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.dimension().location().toString(), true, death));
+        variables.waypoints.add(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.dimension().identifier().toString(), true, death));
         variables.colors.add(new CListWaypointColor(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
         variables.savedSinceLastUpdate = false;
         if(!death){
