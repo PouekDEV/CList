@@ -1,8 +1,20 @@
 {
   "key.category.minecraft.coordinatelist": "Сочетания Клавиш CList",
-  "keybinds.waypoint.add": "Добавить путевую точку в текущей позиции",
-  "keybinds.waypoints.menu": "Открыть меню путевых точек",
+  "keybinds.waypoint.add": "Добавить метку в текущем месте",
+  "keybinds.waypoints.menu": "Открыть меню меток",
+  "keybinds.waypoints.toggle": "Изменить видимость меток",
+  "coordinatelist.midnightconfig.title": "Конфигурация CList",
+  "coordinatelist.midnightconfig.multiplier": "Размер меток",
+  "coordinatelist.midnightconfig.renderDistance": "Расстояние, на котором метка видна (0 — без ограничений)",
+  "coordinatelist.midnightconfig.waypointsToggled": "Показать метки",
+  "coordinatelist.midnightconfig.canPlaceDeathpoints": "Создавать метки при смерти",
+  "coordinatelist.midnightconfig.waypointTextBackground": "Показывать фон за названием метки",
+  "coordinatelist.midnightconfig.squareWaypoints": "Использовать квадратный значок метки вместо круглого",
+  "modmenu.summaryTranslation.coordinatelist": "Простой минималистичный мод Fabric для сохранения координат",
+  "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (короче CList) это Простой минималистичный мод Fabric для сохранения координат. Ноль миникарт. Только простой список с метками, отображаемыми прямо в игре.",
   "waypoint.last.death": "Последняя смерть",
-  "waypoint.new.waypoint": "Новая Путевая Точка",
-  "buttons.add.new.waypoint": "Создать новую путевую точку в текущей позиции"
+  "waypoint.new.waypoint": "Новая метка",
+  "buttons.add.new.waypoint": "Создать новую метку в текущей позиции",
+  "tooltip.copy.waypoint.coordinates": "Нажмите, чтобы скопировать координаты выбранной метки.\n\nИспользуйте CTRL, чтобы скопировать их как команду телепортации.",
+  "chat.create.waypoint.message": "[Создать метку]"
 }
