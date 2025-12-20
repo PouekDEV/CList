@@ -52,7 +52,7 @@ public class CListWaypointScreen extends Screen{
             Window window = CListVariables.minecraftClient.getWindow();
             CListWaypoint waypoint = CListClient.variables.waypoints.get(selectedWaypointId);
             if(InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL)){
-                GLFW.glfwSetClipboardString(window.handle(), "/execute in " + waypoint.dimension + " run tp @p " + waypoint.x + " " + waypoint.y + " " + waypoint.z);
+                GLFW.glfwSetClipboardString(window.handle(), "/execute in " + waypoint.dimension + " run tp @s " + waypoint.x + " " + waypoint.y + " " + waypoint.z);
             }
             else{
                 GLFW.glfwSetClipboardString(window.handle(), waypoint.x + " " + waypoint.y + " " + waypoint.z);
@@ -209,8 +209,9 @@ public class CListWaypointScreen extends Screen{
                 select.setY(y);
                 visibility.render(guiGraphics, mouseX, mouseY, deltaTicks);
                 select.render(guiGraphics, mouseX, mouseY, deltaTicks);
+                int fontWidth = font.width("The nether");
                 ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphics.HoveredTextEffects.TOOLTIP_AND_CURSOR);
-                collector.acceptScrolling(dimension, x + 183 + font.width("The nether") / 2, x + 183, x + 183 + font.width("The nether"), y + 2, y + font.lineHeight + 12);
+                collector.acceptScrolling(dimension, x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
                 guiGraphics.drawString(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, CListClient.variables.colors.get(id).getHex());
             }
 
