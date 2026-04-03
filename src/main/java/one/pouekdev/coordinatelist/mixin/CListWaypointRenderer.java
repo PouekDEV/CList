@@ -8,7 +8,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -140,10 +139,10 @@ public abstract class CListWaypointRenderer{
                     float h = (float) (-textWidth / 2);
                     MultiBufferSource.BufferSource b = CListVariables.minecraftClient.renderBuffers().bufferSource();
                     if(CListConfig.waypointTextBackground){
-                        font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x90000000, LightTexture.FULL_BRIGHT);
+                        font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x90000000, 0xF000F0);
                     }
                     else{
-                        font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x00000000, LightTexture.FULL_BRIGHT);
+                        font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x00000000, 0xF000F0);
                     }
                     b.endBatch();
                 }
