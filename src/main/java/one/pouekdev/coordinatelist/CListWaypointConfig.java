@@ -10,7 +10,7 @@ import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -158,7 +158,7 @@ public class CListWaypointConfig extends Screen{
         }
 
         @Override
-        public void renderWidget(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta){
+        public void extractWidgetRenderState(@NonNull  GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
             GlStateManager._enableBlend();
             GlStateManager._enableDepthTest();
             // consider the following https://github.com/0x3C50/Renderer
@@ -168,7 +168,7 @@ public class CListWaypointConfig extends Screen{
                 for(int i = 0; i < this.width; i++){
                     float hue = i / (float) this.width;
                     int colorH = Color.HSBtoRGB(hue, colorFloat[1], colorFloat[2]);
-                    guiGraphics.vLine(this.getX() + i, this.getY() - 1, this.getY() + this.height, colorH);
+                    guiGraphics.verticalLine(this.getX() + i, this.getY() - 1, this.getY() + this.height, colorH);
                 }
             }
             else{
@@ -181,10 +181,10 @@ public class CListWaypointConfig extends Screen{
                     colorStart = 0xFF000000;
                     colorEnd = Color.HSBtoRGB(colorFloat[0], colorFloat[1], 1.0f);
                 }
-                guiGraphics.guiRenderState.submitGuiElement(new CListReverseColoredQuadGuiElementRenderState(RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(guiGraphics.pose()), this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, colorStart, colorEnd, guiGraphics.scissorStack.peek()));
+                guiGraphics.guiRenderState.addGuiElement(new CListReverseColoredQuadGuiElementRenderState(RenderPipelines.GUI, TextureSetup.noTexture(), new Matrix3x2f(guiGraphics.pose()), this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, colorStart, colorEnd, guiGraphics.scissorStack.peek()));
             }
             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.getHandleSprite(), this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, this.getHeight(), ARGB.white(this.alpha));
-            this.renderScrollingStringOverContents(guiGraphics.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE), this.getMessage(), 2);
+            this.extractScrollingStringOverContents(guiGraphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE), this.getMessage(), 2);
             if(this.isHovered()){
                 guiGraphics.requestCursor(this.dragging ? CursorTypes.RESIZE_EW : CursorTypes.POINTING_HAND);
             }
@@ -211,7 +211,7 @@ public class CListWaypointConfig extends Screen{
         }
 
         @Override
-        public void renderContents(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta){
+        public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
             Identifier icon = Identifier.fromNamespaceAndPath("coordinatelist", "icon/change");
             GlStateManager._enableBlend();
             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, getX(), getY(), width, height);
@@ -220,7 +220,7 @@ public class CListWaypointConfig extends Screen{
     }
 
     @Override
-    public void render(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta){
+    public void extractRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
         int SQUARE_SIZE = 50;
         int centerX = this.width / 2;
         int centerY = this.height / 2;
@@ -235,9 +235,9 @@ public class CListWaypointConfig extends Screen{
         int top = centerY - SQUARE_SIZE / 2;
         int right = centerX + SQUARE_SIZE / 2;
         int bottom = centerY + SQUARE_SIZE / 2;
-        super.render(guiGraphics, mouseX, mouseY, delta);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         guiGraphics.fill(left, top, right, bottom, CListClient.variables.colors.get(id).getHex());
-        changeColor.render(guiGraphics, mouseX, mouseY, delta);
+        changeColor.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         if(renderColorPicker){
             this.h.visible = true;
             this.s.visible = true;
