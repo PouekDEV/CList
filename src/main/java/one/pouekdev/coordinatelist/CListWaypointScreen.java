@@ -8,7 +8,7 @@ import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -86,8 +86,8 @@ public class CListWaypointScreen extends Screen{
     }
 
     @Override
-    public void render(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta){
-        super.render(guiGraphics, mouseX, mouseY, delta);
+    public void extractRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
+        super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         if(selectedWaypointId >= 0){
             copyCoordinatesButton.active = true;
             editWaypointButton.active = true;
@@ -145,7 +145,7 @@ public class CListWaypointScreen extends Screen{
             }
 
             @Override
-            public void renderContents(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta){}
+            public void extractContents(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){}
         }
 
         private static class SpriteButton extends Button{
@@ -157,7 +157,7 @@ public class CListWaypointScreen extends Screen{
             }
 
             @Override
-            public void renderContents(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, float delta){
+            public void extractContents(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
                 Identifier eyeIcon;
                 if(CListClient.variables.waypoints.get(id).render){
                     eyeIcon = Identifier.fromNamespaceAndPath("coordinatelist", "icon/visible");
@@ -200,19 +200,19 @@ public class CListWaypointScreen extends Screen{
             }
 
             @Override
-            public void renderContent(@NonNull GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovered, float deltaTicks){
+            public void extractContent(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float deltaTicks){
                 int x = this.getX();
                 int y = this.getY();
                 visibility.setX(x + 5);
                 visibility.setY(y + 6);
                 select.setX(x);
                 select.setY(y);
-                visibility.render(guiGraphics, mouseX, mouseY, deltaTicks);
-                select.render(guiGraphics, mouseX, mouseY, deltaTicks);
+                visibility.extractRenderState(guiGraphics, mouseX, mouseY, deltaTicks);
+                select.extractRenderState(guiGraphics, mouseX, mouseY, deltaTicks);
                 int fontWidth = font.width("The nether");
-                ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphics.HoveredTextEffects.TOOLTIP_AND_CURSOR);
+                ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
                 collector.acceptScrolling(dimension, x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
-                guiGraphics.drawString(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, CListClient.variables.colors.get(id).getHex());
+                guiGraphics.text(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, CListClient.variables.colors.get(id).getHex());
             }
 
             @Override
