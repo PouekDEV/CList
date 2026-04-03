@@ -15,6 +15,6 @@
   "waypoint.last.death": "Last death",
   "waypoint.new.waypoint": "New Waypoint",
   "buttons.add.new.waypoint": "Add a new waypoint in current position",
-  "tooltip.copy.waypoint.coordinates": "Click to copy selected waypoints coordinates.\n\nUse with CTRL to copy as a teleport command.",
+  "tooltip.copy.waypoint.coordinates": "Click to copy selected waypoints coordinates.\n\nUse with CTRL to copy as a teleport command.\n\nRight Click to convert selected coordinates between Overworld and Nether coordinates.",
   "chat.create.waypoint.message": "[Create a waypoint]"
 }
