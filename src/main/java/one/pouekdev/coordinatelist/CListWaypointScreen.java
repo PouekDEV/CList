@@ -102,6 +102,32 @@ public class CListWaypointScreen extends Screen{
 
     @Override
     public boolean mouseClicked(@NonNull MouseButtonEvent mouseButtonEvent, boolean doubled){
+        if(mouseButtonEvent.button() == 1 && selectedWaypointId >= 0){
+            if(mouseButtonEvent.x() >= copyCoordinatesButton.getX() &&
+               mouseButtonEvent.x() <= copyCoordinatesButton.getX() + copyCoordinatesButton.getWidth() &&
+               mouseButtonEvent.y() >= copyCoordinatesButton.getY() &&
+               mouseButtonEvent.y() <= copyCoordinatesButton.getY() + copyCoordinatesButton.getHeight()){
+                CListWaypoint waypoint = CListClient.variables.waypoints.get(selectedWaypointId);
+                if(waypoint.dimension.equals("minecraft:the_nether")){
+                    waypoint.x = waypoint.x * 8;
+                    waypoint.z = waypoint.z * 8;
+                    waypoint.dimension = "minecraft:overworld";
+                }
+                else if(waypoint.dimension.equals("minecraft:overworld")){
+                    waypoint.x = Math.floorDiv(waypoint.x, 8);
+                    waypoint.z = Math.floorDiv(waypoint.z, 8);
+                    waypoint.dimension = "minecraft:the_nether";
+                }
+                else{
+                    return super.mouseClicked(mouseButtonEvent, doubled);
+                }
+                copyCoordinatesButton.setMessage(Component.literal(waypoint.x + " " + waypoint.y + " " + waypoint.z));
+                list.refreshElements();
+                list.setFocused(list.children().get(selectedWaypointId));
+                CListClient.variables.savedSinceLastUpdate = false;
+                return true;
+            }
+        }
         return super.mouseClicked(mouseButtonEvent, doubled);
     }
 
