@@ -1,7 +1,7 @@
 package one.pouekdev.coordinatelist.mixin;
 
 import net.minecraft.client.gui.components.ChatComponent;
-import net.minecraft.client.GuiMessage;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
@@ -36,7 +36,7 @@ public abstract class CListChatGrabber{
             int y = Math.round(Float.parseFloat(numbersList.get(1)));
             int z = Math.round(Float.parseFloat(numbersList.get(2)));
             Component clickableMessage = Component.translatable("chat.create.waypoint.message").withStyle(ChatFormatting.GREEN).withStyle(style -> style.withClickEvent(new ClickEvent.RunCommand("/clist " + x + " " + y + " " + z)));
-            CListVariables.delayedEvents.add(new CListDelayedEvent(0.1f, () -> CListVariables.minecraftClient.gui.getChat().addMessage(clickableMessage)));
+            CListVariables.delayedEvents.add(new CListDelayedEvent(0.1f, () -> CListVariables.minecraftClient.gui.getChat().addClientSystemMessage(clickableMessage)));
         }
     }
 }
