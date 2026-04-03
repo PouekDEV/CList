@@ -15,6 +15,6 @@
   "waypoint.last.death": "Tu última muerte",
   "waypoint.new.waypoint": "Nuevo punto de referencia",
   "buttons.add.new.waypoint": "Agregá un nuevo punto de referencia en la posición actual",
-  "tooltip.copy.waypoint.coordinates": "Hacé clic para copiar las coordenadas del punto de referencia seleccionado.\n\nUsá CTRL para copiarlo como comando de teletransporte.",
+  "tooltip.copy.waypoint.coordinates": "Hacé clic para copiar las coordenadas del punto de referencia seleccionado.\n\nUsá CTRL para copiarlo como comando de teletransporte.\n\nHacé click derecho para convertir las coordenadas seleccionadas entre Overworld y Nether.",
   "chat.create.waypoint.message": "[Crear un punto de referencia]"
 }
