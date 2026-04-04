@@ -109,13 +109,33 @@ public class CListWaypointScreen extends Screen{
                mouseButtonEvent.y() <= copyCoordinatesButton.getY() + copyCoordinatesButton.getHeight()){
                 CListWaypoint waypoint = CListClient.variables.waypoints.get(selectedWaypointId);
                 if(waypoint.dimension.equals("minecraft:the_nether")){
-                    waypoint.x = waypoint.x * 8;
-                    waypoint.z = waypoint.z * 8;
+                    if(waypoint.hasOriginalCoords){
+                        waypoint.x = waypoint.originalX;
+                        waypoint.z = waypoint.originalZ;
+                        waypoint.hasOriginalCoords = false;
+                    }
+                    else{
+                        waypoint.originalX = waypoint.x;
+                        waypoint.originalZ = waypoint.z;
+                        waypoint.hasOriginalCoords = true;
+                        waypoint.x = waypoint.x * 8;
+                        waypoint.z = waypoint.z * 8;
+                    }
                     waypoint.dimension = "minecraft:overworld";
                 }
                 else if(waypoint.dimension.equals("minecraft:overworld")){
-                    waypoint.x = Math.floorDiv(waypoint.x, 8);
-                    waypoint.z = Math.floorDiv(waypoint.z, 8);
+                    if(waypoint.hasOriginalCoords){
+                        waypoint.x = waypoint.originalX;
+                        waypoint.z = waypoint.originalZ;
+                        waypoint.hasOriginalCoords = false;
+                    }
+                    else{
+                        waypoint.originalX = waypoint.x;
+                        waypoint.originalZ = waypoint.z;
+                        waypoint.hasOriginalCoords = true;
+                        waypoint.x = (int) Math.round(waypoint.x / 8.0);
+                        waypoint.z = (int) Math.round(waypoint.z / 8.0);
+                    }
                     waypoint.dimension = "minecraft:the_nether";
                 }
                 else{
