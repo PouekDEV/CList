@@ -10,10 +10,13 @@
   "coordinatelist.midnightconfig.canPlaceDeathpoints": "Crear un punto de referencia al morir",
   "coordinatelist.midnightconfig.waypointTextBackground": "Mostrar un fondo detrás del nombre del punto de referencia",
   "coordinatelist.midnightconfig.squareWaypoints": "Usar un icono cuadrado en lugar de circular para los puntos de referencia",
+  "coordinatelist.midnightconfig.maxDeathWaypoints": "“Máximo puntos de referencia de muerte (0 = sin límite)”",
   "modmenu.summaryTranslation.coordinatelist": "Un mod simple y minimalista de Fabric para guardar tus coordenadas.",
   "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (CList) es un mod simple y minimalista de Fabric para guardar tus coordenadas. Nada de minimapas. Solo una lista de puntos de referencia dentro del juego.",
   "waypoint.last.death": "Tu última muerte",
   "waypoint.new.waypoint": "Nuevo punto de referencia",
+  "waypoint.permanent.on": "Permanente: ON",
+  "waypoint.permanent.off": "Permanente: OFF",
   "buttons.add.new.waypoint": "Agregá un nuevo punto de referencia en la posición actual",
   "tooltip.copy.waypoint.coordinates": "Hacé clic para copiar las coordenadas del punto de referencia seleccionado.\n\nUsá CTRL para copiarlo como comando de teletransporte.\n\nHacé click derecho para convertir las coordenadas seleccionadas entre Overworld y Nether.",
   "chat.create.waypoint.message": "[Crear un punto de referencia]"
