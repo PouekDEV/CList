@@ -9,4 +9,5 @@ public class CListConfig extends MidnightConfig {
     @Entry public static boolean canPlaceDeathpoints = true;
     @Entry public static boolean waypointTextBackground = true;
     @Entry public static boolean squareWaypoints = false;
+    @Entry(min=0) public static int maxDeathWaypoints = 1;
 }
