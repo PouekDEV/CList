@@ -119,6 +119,21 @@ public class CListClient implements ClientModInitializer{
         String waypointName;
         if(death){
             waypointName = Component.translatable("waypoint.last.death").getString();
+            if(CListConfig.maxDeathWaypoints >= 1){
+                List<Integer> deathIndices = new java.util.ArrayList<>();
+                for(int i = 0; i < variables.waypoints.size(); i++){
+                    if(variables.waypoints.get(i).deathpoint && !variables.waypoints.get(i).permanent){
+                        deathIndices.add(i);
+                    }
+                }
+                while(deathIndices.size() >= CListConfig.maxDeathWaypoints){
+                    deleteWaypoint(deathIndices.get(0));
+                    deathIndices.remove(0);
+                    for(int i = 0; i < deathIndices.size(); i++){
+                        deathIndices.set(i, deathIndices.get(i) - 1);
+                    }
+                }
+            }
         }
         else{
             waypointName = Component.translatable("waypoint.new.waypoint").getString();
