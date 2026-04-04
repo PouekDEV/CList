@@ -10,6 +10,10 @@ public class CListWaypoint{
     private int bugFix;
     public boolean render;
     public boolean deathpoint;
+    public boolean permanent;
+    public int originalX;
+    public int originalZ;
+    public boolean hasOriginalCoords;
 
     CListWaypoint(String coords, String waypointName, String waypointDimension, boolean isRendered, boolean isDeathpoint){
         String s = coords;
@@ -25,6 +29,7 @@ public class CListWaypoint{
         this.dimension = waypointDimension;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
+        this.permanent = false;
         this.bugFix = 0;
     }
 
@@ -36,6 +41,7 @@ public class CListWaypoint{
         this.dimension = waypointDimension;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
+        this.permanent = false;
         this.bugFix = 0;
     }
 
