@@ -20,7 +20,7 @@ public class CListData{
         File file = new File(dataDir, fileName);
         try(PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)))){
             for(int i = 0; i < waypointList.size(); i++){
-                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).name.replaceAll("~", "") + "~" + CListClient.variables.waypoints.get(i).dimension + "~" + CListClient.variables.colors.get(i).getHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint);
+                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).name.replaceAll("~", "") + "~" + CListClient.variables.waypoints.get(i).dimension + "~" + CListClient.variables.colors.get(i).getHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint + "~" + CListClient.variables.waypoints.get(i).permanent+ "~" + CListClient.variables.waypoints.get(i).originalX + "~" + CListClient.variables.waypoints.get(i).originalZ + "~" + CListClient.variables.waypoints.get(i).hasOriginalCoords);
             }
         }
         catch(IOException ignored){}
@@ -41,14 +41,22 @@ public class CListData{
                     String coords = segments[0];
                     String name = segments[1];
                     String dimension = segments[2];
-                    String color = null, bool = null, deathpoint = null;
+                    String color = null, bool = null, deathpoint = null, permanent = null, originalX = null, originalZ = null, hasOriginals = null;
                     try{
                         color = segments[3];
                         bool = segments[4];
                         deathpoint = segments[5];
+                        permanent = segments[6];
+                        originalX = segments[7];
+                        originalZ = segments[8];
+                        hasOriginals = segments[9];
                     }
                     catch(IndexOutOfBoundsException ignored){}
                     CListWaypoint waypoint = new CListWaypoint(coords, name, dimension, Boolean.parseBoolean(bool), Boolean.parseBoolean(deathpoint));
+                    waypoint.permanent = Boolean.parseBoolean(permanent);
+                    if(originalX != null) waypoint.originalX = Integer.parseInt(originalX);
+                    if(originalZ != null) waypoint.originalZ = Integer.parseInt(originalZ);
+                    waypoint.hasOriginalCoords = Boolean.parseBoolean(hasOriginals);
                     if(color == null){
                         CListClient.addRandomWaypointColor();
                     }
