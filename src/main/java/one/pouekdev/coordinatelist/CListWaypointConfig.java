@@ -36,6 +36,7 @@ public class CListWaypointConfig extends Screen{
     private SpriteButton changeColor;
     private HSVSlider h, s, v;
     private static float[] hsv;
+    private Button permanentButton;
 
     public CListWaypointConfig(Component title, int waypointId, boolean viaKeybind){
         super(title);
@@ -93,6 +94,17 @@ public class CListWaypointConfig extends Screen{
         addRenderableWidget(this.x);
         addRenderableWidget(this.y);
         addRenderableWidget(this.z);
+        
+        if(waypoint.deathpoint){
+            permanentButton = Button.builder(getPermanentText(), button -> {
+                waypoint.permanent = !waypoint.permanent;
+                permanentButton.setMessage(getPermanentText());
+                CListClient.variables.savedSinceLastUpdate = false;
+            }).width(150).build();
+            permanentButton.setX((this.width - 150) / 2);
+            permanentButton.setY((this.height - 20) / 2 + 80);
+            addRenderableWidget(permanentButton);
+        }
         changeColor = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 15, 12, 12, button -> renderColorPicker = !renderColorPicker);
         this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 15, 110, 15, Component.literal("H: " + hsv[0]), hsv[0] / 360, 0);
         this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 3, 110, 15, Component.literal("S: " + hsv[1]), hsv[1] / 100, 1);
@@ -273,12 +285,16 @@ public class CListWaypointConfig extends Screen{
         }
         if(this.x.isFocused() && isParsableToInt(x.getValue())){
             waypoint.x = Integer.parseInt(x.getValue());
+            waypoint.originalX = 0;
+            waypoint.hasOriginalCoords = false;
         }
         if(this.y.isFocused() && isParsableToInt(y.getValue())){
             waypoint.y = Integer.parseInt(y.getValue());
         }
         if(this.z.isFocused() && isParsableToInt(z.getValue())){
             waypoint.z = Integer.parseInt(z.getValue());
+            waypoint.originalZ = 0;
+            waypoint.hasOriginalCoords = false;
         }
         CListClient.variables.savedSinceLastUpdate = false;
     }
@@ -300,5 +316,11 @@ public class CListWaypointConfig extends Screen{
             setValues();
         }
         return true;
+    }
+    
+    private Component getPermanentText(){
+        return waypoint.permanent
+            ? Component.translatable("waypoint.permanent.on")
+            : Component.translatable("waypoint.permanent.off");
     }
 }
