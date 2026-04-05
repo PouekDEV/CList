@@ -10,7 +10,7 @@
   "coordinatelist.midnightconfig.canPlaceDeathpoints": "Crear un punto de referencia al morir",
   "coordinatelist.midnightconfig.waypointTextBackground": "Mostrar un fondo detrás del nombre del punto de referencia",
   "coordinatelist.midnightconfig.squareWaypoints": "Usar un icono cuadrado en lugar de circular para los puntos de referencia",
-  "coordinatelist.midnightconfig.maxDeathWaypoints": "“Máximo puntos de referencia de muerte (0 = sin límite)”",
+  "coordinatelist.midnightconfig.maxDeathWaypoints": "Máximo puntos de referencia de muerte (0 = sin límite)",
   "modmenu.summaryTranslation.coordinatelist": "Un mod simple y minimalista de Fabric para guardar tus coordenadas.",
   "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (CList) es un mod simple y minimalista de Fabric para guardar tus coordenadas. Nada de minimapas. Solo una lista de puntos de referencia dentro del juego.",
   "waypoint.last.death": "Tu última muerte",
