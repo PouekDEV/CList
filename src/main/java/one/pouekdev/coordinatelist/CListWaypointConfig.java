@@ -37,6 +37,7 @@ public class CListWaypointConfig extends Screen{
     private HSVSlider h, s, v;
     private static float[] hsv;
     private Button permanentButton;
+    private Button dimensionButton;
 
     public CListWaypointConfig(Component title, int waypointId, boolean viaKeybind){
         super(title);
@@ -105,6 +106,14 @@ public class CListWaypointConfig extends Screen{
             permanentButton.setY((this.height - 20) / 2 + 80);
             addRenderableWidget(permanentButton);
         }
+        
+        dimensionButton = Button.builder(getDimensionText(), button -> {
+            cycleDimension();
+        }).width(150).build();
+        dimensionButton.setX((this.width - 150) / 2);
+        dimensionButton.setY((this.height - 20) / 2 + 100);
+        addRenderableWidget(dimensionButton);
+        
         changeColor = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 15, 12, 12, button -> renderColorPicker = !renderColorPicker);
         this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 15, 110, 15, Component.literal("H: " + hsv[0]), hsv[0] / 360, 0);
         this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 3, 110, 15, Component.literal("S: " + hsv[1]), hsv[1] / 100, 1);
@@ -323,4 +332,25 @@ public class CListWaypointConfig extends Screen{
             ? Component.translatable("waypoint.permanent.on")
             : Component.translatable("waypoint.permanent.off");
     }
+    
+    private Component getDimensionText(){
+        return switch(waypoint.dimension){
+            case "minecraft:overworld" -> Component.translatable("dimension.overworld");
+            case "minecraft:the_nether" -> Component.translatable("dimension.the_nether");
+            case "minecraft:the_end" -> Component.translatable("dimension.the_end");
+            default -> Component.literal(waypoint.getDimensionString());
+        };
+    }
+
+    private void cycleDimension(){
+        waypoint.dimension = switch(waypoint.dimension){
+            case "minecraft:overworld" -> "minecraft:the_nether";
+            case "minecraft:the_nether" -> "minecraft:the_end";
+            default -> "minecraft:overworld";
+        };
+        waypoint.hasOriginalCoords = false;
+        dimensionButton.setMessage(getDimensionText());
+        CListClient.variables.savedSinceLastUpdate = false;
+    }
+    
 }
