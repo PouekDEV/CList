@@ -230,6 +230,10 @@ public class CListClient implements ClientModInitializer{
     }
     
     public static void checkNearbyDeathpoints() {
+
+        if (CListVariables.minecraftClient.screen instanceof CListWaypointConfig) return;
+        if (CListVariables.minecraftClient.screen instanceof CListWaypointScreen) return;
+        
         Player player = CListVariables.minecraftClient.player;
         if (player == null || variables.lastWorld == null) return;
 
@@ -237,7 +241,7 @@ public class CListClient implements ClientModInitializer{
         
         for (int i = variables.waypoints.size() - 1; i >= 0; i--) {
             CListWaypoint wp = variables.waypoints.get(i);
-            if (!wp.deathpoint || !wp.render) continue;
+            if (!wp.deathpoint || !wp.render || wp.permanent) continue;
             if (!wp.dimension.equals(currentDimension)) continue;
 
             double dist = Math.sqrt(
