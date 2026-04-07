@@ -102,6 +102,11 @@ public class CListClient implements ClientModInitializer{
                         else if(client.player.isAlive() && variables.hadDeathWaypointPlaced){
                             variables.hadDeathWaypointPlaced = false;
                         }
+                        
+                        if (client.player.isAlive()) {
+                            checkNearbyDeathpoints();
+                        }
+                        
                     }
                     catch(NullPointerException e){
                         CList.LOGGER.info("Can't get the current world. Player probably uses ReplayMod and is now watching the replay");
@@ -223,4 +228,28 @@ public class CListClient implements ClientModInitializer{
             variables.savedSinceLastUpdate = true;
         }
     }
+    
+    public static void checkNearbyDeathpoints() {
+        Player player = CListVariables.minecraftClient.player;
+        if (player == null || variables.lastWorld == null) return;
+
+        String currentDimension = variables.lastWorld.dimension().identifier().toString();
+        
+        for (int i = variables.waypoints.size() - 1; i >= 0; i--) {
+            CListWaypoint wp = variables.waypoints.get(i);
+            if (!wp.deathpoint || !wp.render) continue;
+            if (!wp.dimension.equals(currentDimension)) continue;
+
+            double dist = Math.sqrt(
+                Math.pow(player.getX() - wp.x, 2) +
+                Math.pow(player.getY() - wp.y, 2) +
+                Math.pow(player.getZ() - wp.z, 2)
+            );
+
+            if (dist <= 5.0) {
+                deleteWaypoint(i);
+            }
+        }
+    }
+    
 }
