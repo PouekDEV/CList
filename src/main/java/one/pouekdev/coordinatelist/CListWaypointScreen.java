@@ -260,6 +260,9 @@ public class CListWaypointScreen extends Screen{
     private class WaypointList extends AbstractSelectionList<WaypointList.WaypointEntry>{
         private final int listLeft;
         private final int listWidth;
+        private int dragSourceVisualIndex = -1;
+        private int dropTargetVisualIndex = -1;
+        private boolean isDragging = false;
 
         public WaypointList(int left, int top, int width, int height){
             super(CListWaypointScreen.this.minecraft, width, height, top, 25);
@@ -278,6 +281,7 @@ public class CListWaypointScreen extends Screen{
                     addEntry(new WaypointEntry(i));
                 }
             }
+            setScrollAmount(0);
         }
 
         @Override
@@ -291,6 +295,98 @@ public class CListWaypointScreen extends Screen{
         }
 
         public void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput){}
+
+        @Override
+        protected void extractListItems(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float deltaTicks){
+            super.extractListItems(guiGraphics, mouseX, mouseY, deltaTicks);
+            if(isDragging && dropTargetVisualIndex >= 0 && dropTargetVisualIndex != dragSourceVisualIndex){
+                int rowLeft = getRowLeft();
+                int rowRight = rowLeft + getRowWidth();
+                if(scrollable()){
+                    rowRight = scrollBarX() - 4;
+                }
+                int lineY;
+                if(dropTargetVisualIndex >= children().size()){
+                    lineY = getRowBottom(children().size() - 1) + 1;
+                } else {
+                    lineY = getRowTop(dropTargetVisualIndex) - 2;
+                }
+                guiGraphics.fill(rowLeft - 2, lineY - 1, rowRight + 2, lineY + 1, 0xFFFFFFFF);
+                guiGraphics.fill(rowLeft - 4, lineY - 3, rowLeft, lineY + 3, 0xFFFFFFFF);
+                guiGraphics.fill(rowRight, lineY - 3, rowRight + 4, lineY + 3, 0xFFFFFFFF);
+            }
+        }
+
+        private int getDropIndex(double mouseY){
+            for(int i = 0; i < children().size(); i++){
+                int top = getRowTop(i);
+                int bottom = getRowBottom(i);
+                int mid = (top + bottom) / 2;
+                if(mouseY < mid) return i;
+            }
+            return children().size();
+        }
+
+        @Override
+        public boolean mouseClicked(@NonNull MouseButtonEvent mouseButtonEvent, boolean doubled){
+            if(mouseButtonEvent.button() == 0){
+                WaypointEntry entry = getEntryAtPosition(mouseButtonEvent.x(), mouseButtonEvent.y());
+                if(entry != null){
+                    int idx = children().indexOf(entry);
+                    if(idx >= 0){
+                        dragSourceVisualIndex = idx;
+                        dropTargetVisualIndex = idx;
+                        isDragging = false;
+                    }
+                }
+            }
+            return super.mouseClicked(mouseButtonEvent, doubled);
+        }
+
+        @Override
+        public boolean mouseDragged(@NonNull MouseButtonEvent mouseButtonEvent, double deltaX, double deltaY){
+            if(mouseButtonEvent.button() == 0 && dragSourceVisualIndex >= 0){
+                isDragging = true;
+                dropTargetVisualIndex = getDropIndex(mouseButtonEvent.y());
+                return true;
+            }
+            return super.mouseDragged(mouseButtonEvent, deltaX, deltaY);
+        }
+
+        @Override
+        public boolean mouseReleased(@NonNull MouseButtonEvent mouseButtonEvent){
+            if(mouseButtonEvent.button() == 0 && isDragging && dragSourceVisualIndex >= 0){
+                int from = dragSourceVisualIndex;
+                int to = dropTargetVisualIndex;
+                if(from >= 0 && to >= 0 && from != to && from < children().size()){
+                    int fromGlobal = children().get(from).waypointIndex;
+                    int toGlobal;
+                    if(to >= children().size()){
+                        toGlobal = children().get(children().size() - 1).waypointIndex + 1;
+                    } else {
+                        toGlobal = children().get(to).waypointIndex;
+                    }
+                    CListWaypoint wp = CListClient.variables.waypoints.remove(fromGlobal);
+                    CListWaypointColor color = CListClient.variables.colors.remove(fromGlobal);
+                    int insertAt = toGlobal > fromGlobal ? toGlobal - 1 : toGlobal;
+                    insertAt = Math.min(insertAt, CListClient.variables.waypoints.size());
+                    CListClient.variables.waypoints.add(insertAt, wp);
+                    CListClient.variables.colors.add(insertAt, color);
+                    CListClient.variables.savedSinceLastUpdate = false;
+                    selectedWaypointId = insertAt;
+                    copyCoordinatesButton.setMessage(Component.literal(wp.x + " " + wp.y + " " + wp.z));
+                    refreshEntries();
+                }
+                dragSourceVisualIndex = -1;
+                dropTargetVisualIndex = -1;
+                isDragging = false;
+                return true;
+            }
+            dragSourceVisualIndex = -1;
+            dropTargetVisualIndex = -1;
+            isDragging = false;
+            return super.mouseReleased(mouseButtonEvent);
+        }
 
         private class WaypointEntry extends AbstractSelectionList.Entry<WaypointEntry>{
             private final int waypointIndex;
@@ -324,6 +420,14 @@ public class CListWaypointScreen extends Screen{
             public void extractContent(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float deltaTicks){
                 int x = this.getX();
                 int y = this.getY();
+                int visualIdx = WaypointList.this.children().indexOf(this);
+                boolean beingDragged = isDragging && visualIdx == dragSourceVisualIndex;
+
+                if(beingDragged){
+                    int rowWidth = getRowWidth();
+                    guiGraphics.fill(x, y, x + rowWidth, y + 25, 0x40FFFFFF);
+                }
+
                 visibility.setX(x + 5);
                 visibility.setY(y + 6);
                 select.setX(x);
@@ -333,7 +437,8 @@ public class CListWaypointScreen extends Screen{
                 int fontWidth = font.width("The nether");
                 ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
                 collector.acceptScrolling(dimension, x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
-                guiGraphics.text(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, CListClient.variables.colors.get(waypointIndex).getHex());
+                int nameColor = beingDragged ? 0x80FFFFFF : CListClient.variables.colors.get(waypointIndex).getHex();
+                guiGraphics.text(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, nameColor);
             }
 
             @Override
