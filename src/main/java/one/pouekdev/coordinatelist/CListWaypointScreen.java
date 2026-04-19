@@ -47,6 +47,12 @@ public class CListWaypointScreen extends Screen{
     }
 
     @Override
+    public void onClose(){
+        selectedCategory = null;
+        super.onClose();
+    }
+
+    @Override
     protected void init(){
         if(selectedCategory == null && CListClient.variables.lastWorld != null){
             selectedCategory = CListClient.variables.lastWorld.dimension().identifier().toString();

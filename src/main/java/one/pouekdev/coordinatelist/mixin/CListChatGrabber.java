@@ -5,6 +5,7 @@ import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
+import one.pouekdev.coordinatelist.CListConfig;
 import one.pouekdev.coordinatelist.CListDelayedEvent;
 import one.pouekdev.coordinatelist.CListVariables;
 import org.apache.commons.compress.utils.Lists;
@@ -32,6 +33,7 @@ public abstract class CListChatGrabber{
         }
         catch(NullPointerException ignored){}
         if(numbersList.size() >= 3){
+            if(!CListConfig.showCreateWaypointMessage) return;
             int x = Math.round(Float.parseFloat(numbersList.get(0)));
             int y = Math.round(Float.parseFloat(numbersList.get(1)));
             int z = Math.round(Float.parseFloat(numbersList.get(2)));

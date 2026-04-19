@@ -36,12 +36,24 @@ public class CListWaypointConfig extends Screen{
     private SpriteButton changeColor;
     private HSVSlider h, s, v;
     private static float[] hsv;
+    private boolean confirmed = false;
+    private String origName;
+    private int origX, origY, origZ;
+    private String origColorHex;
+    private boolean origLocked;
+    private Button lockedBtn;
 
     public CListWaypointConfig(Component title, int waypointId, boolean viaKeybind){
         super(title);
         id = waypointId;
         this.waypoint = CListClient.variables.waypoints.get(id);
         this.viaKeybind = viaKeybind;
+        this.origName = waypoint.name;
+        this.origX = waypoint.x;
+        this.origY = waypoint.y;
+        this.origZ = waypoint.z;
+        this.origColorHex = CListClient.variables.colors.get(id).getHexNoAlpha();
+        this.origLocked = waypoint.locked;
     }
 
     @Override
@@ -51,6 +63,7 @@ public class CListWaypointConfig extends Screen{
         gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
         GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(2);
         rowHelper.addChild(Button.builder(Component.translatable("selectWorld.delete"), button -> {
+            confirmed = true;
             CListClient.deleteWaypoint(id);
             if(!viaKeybind){
                 CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
@@ -60,6 +73,7 @@ public class CListWaypointConfig extends Screen{
             }
         }).width(150).build(), 1, gridLayout.newCellSettings().paddingBottom(10));
         rowHelper.addChild(Button.builder(Component.translatable("gui.done"), button -> {
+            confirmed = true;
             CListClient.variables.savedSinceLastUpdate = false;
             if(!viaKeybind){
                 CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
@@ -93,6 +107,14 @@ public class CListWaypointConfig extends Screen{
         addRenderableWidget(this.x);
         addRenderableWidget(this.y);
         addRenderableWidget(this.z);
+        if(waypoint.deathpoint){
+            lockedBtn = Button.builder(Component.literal("Locked: " + (waypoint.locked ? "ON" : "OFF")), button -> {
+                waypoint.locked = !waypoint.locked;
+                button.setMessage(Component.literal("Locked: " + (waypoint.locked ? "ON" : "OFF")));
+                CListClient.variables.savedSinceLastUpdate = false;
+            }).bounds((this.width - 150) / 2, (this.height - 20) / 2 + 75, 150, 20).build();
+            addRenderableWidget(lockedBtn);
+        }
         changeColor = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 15, 12, 12, button -> renderColorPicker = !renderColorPicker);
         this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 15, 110, 15, Component.literal("H: " + hsv[0]), hsv[0] / 360, 0);
         this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 3, 110, 15, Component.literal("S: " + hsv[1]), hsv[1] / 100, 1);
@@ -311,5 +333,18 @@ public class CListWaypointConfig extends Screen{
             setValues();
         }
         return true;
+    }
+
+    @Override
+    public void onClose(){
+        if(!confirmed && CListConfig.escapeDiscardsChanges && id < CListClient.variables.waypoints.size()){
+            waypoint.name = origName;
+            waypoint.x = origX;
+            waypoint.y = origY;
+            waypoint.z = origZ;
+            CListClient.variables.colors.get(id).set(origColorHex);
+            waypoint.locked = origLocked;
+        }
+        super.onClose();
     }
 }

@@ -126,6 +126,19 @@ public class CListClient implements ClientModInitializer{
         variables.waypoints.add(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.dimension().identifier().toString(), true, death));
         variables.colors.add(new CListWaypointColor(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
         variables.savedSinceLastUpdate = false;
+        if(death && CListConfig.maxDeathWaypoints > 0){
+            int deathCount = 0;
+            int oldestUnlockedIndex = -1;
+            for(int i = 0; i < variables.waypoints.size(); i++){
+                if(variables.waypoints.get(i).deathpoint){
+                    deathCount++;
+                    if(oldestUnlockedIndex == -1 && !variables.waypoints.get(i).locked) oldestUnlockedIndex = i;
+                }
+            }
+            if(deathCount > CListConfig.maxDeathWaypoints && oldestUnlockedIndex >= 0){
+                deleteWaypoint(oldestUnlockedIndex);
+            }
+        }
         if(!death){
             CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), variables.waypoints.size() - 1, viaKeybind));
         }

@@ -36,6 +36,10 @@ public class CListFolderConfig extends Screen{
     private CListWaypointColor colorObj;
     private Button dimButton;
     private String selectedDimension;
+    private boolean confirmed = false;
+    private String origName;
+    private String origColorHex;
+    private String origDimension;
 
     public CListFolderConfig(Component title, CListFolder folder, boolean isNew){
         super(title);
@@ -44,6 +48,9 @@ public class CListFolderConfig extends Screen{
         this.colorObj = new CListWaypointColor(0, 0, 0);
         this.colorObj.set(folder.colorHex);
         this.selectedDimension = folder.dimension;
+        this.origName = folder.name;
+        this.origColorHex = folder.colorHex;
+        this.origDimension = folder.dimension;
     }
 
     @Override
@@ -54,6 +61,7 @@ public class CListFolderConfig extends Screen{
         gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
         GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(2);
         rowHelper.addChild(Button.builder(Component.translatable("selectWorld.delete"), button -> {
+            confirmed = true;
             CListClient.variables.folders.remove(folder);
             for(CListWaypoint wp : CListClient.variables.waypoints){
                 if(folder.id.equals(wp.folderId)){
@@ -69,6 +77,7 @@ public class CListFolderConfig extends Screen{
             CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
         }).width(150).build(), 1, gridLayout.newCellSettings().paddingBottom(10));
         rowHelper.addChild(Button.builder(Component.translatable("gui.done"), button -> {
+            confirmed = true;
             CListClient.variables.savedSinceLastUpdate = false;
             CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
         }).width(150).build(), 1, gridLayout.newCellSettings().paddingBottom(10));
@@ -237,6 +246,20 @@ public class CListFolderConfig extends Screen{
             setValues();
         }
         return true;
+    }
+
+    @Override
+    public void onClose(){
+        if(!confirmed && CListConfig.escapeDiscardsChanges){
+            if(isNew){
+                CListClient.variables.folders.remove(folder);
+            } else {
+                folder.name = origName;
+                folder.colorHex = origColorHex;
+                folder.dimension = origDimension;
+            }
+        }
+        super.onClose();
     }
 
     private static class SpriteButton extends Button{

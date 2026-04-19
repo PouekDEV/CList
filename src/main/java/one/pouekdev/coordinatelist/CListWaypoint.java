@@ -10,6 +10,7 @@ public class CListWaypoint{
     private int bugFix;
     public boolean render;
     public boolean deathpoint;
+    public boolean locked;
     public String folderId;
     public String globalFolderId;
 
@@ -27,6 +28,7 @@ public class CListWaypoint{
         this.dimension = waypointDimension;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
+        this.locked = false;
         this.folderId = null;
         this.globalFolderId = null;
         this.bugFix = 0;
@@ -40,6 +42,7 @@ public class CListWaypoint{
         this.dimension = waypointDimension;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
+        this.locked = false;
         this.folderId = null;
         this.globalFolderId = null;
         this.bugFix = 0;

@@ -24,7 +24,7 @@ public class CListData{
                 if(folderId == null) folderId = "";
                 String globalFolderId = CListClient.variables.waypoints.get(i).globalFolderId;
                 if(globalFolderId == null) globalFolderId = "";
-                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).name.replaceAll("~", "") + "~" + CListClient.variables.waypoints.get(i).dimension + "~" + CListClient.variables.colors.get(i).getHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint + "~" + folderId + "~" + globalFolderId);
+                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).name.replaceAll("~", "") + "~" + CListClient.variables.waypoints.get(i).dimension + "~" + CListClient.variables.colors.get(i).getHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint + "~" + folderId + "~" + globalFolderId + "~" + CListClient.variables.waypoints.get(i).locked);
             }
         }
         catch(IOException ignored){}
@@ -45,13 +45,14 @@ public class CListData{
                     String coords = segments[0];
                     String name = segments[1];
                     String dimension = segments[2];
-                    String color = null, bool = null, deathpoint = null, folderId = null, globalFolderId = null;
+                    String color = null, bool = null, deathpoint = null, folderId = null, globalFolderId = null, locked = null;
                     try{
                         color = segments[3];
                         bool = segments[4];
                         deathpoint = segments[5];
                         folderId = segments[6];
                         globalFolderId = segments[7];
+                        locked = segments[8];
                     }
                     catch(IndexOutOfBoundsException ignored){}
                     CListWaypoint waypoint = new CListWaypoint(coords, name, dimension, Boolean.parseBoolean(bool), Boolean.parseBoolean(deathpoint));
@@ -60,6 +61,9 @@ public class CListData{
                     }
                     if(globalFolderId != null && !globalFolderId.isEmpty()){
                         waypoint.globalFolderId = globalFolderId;
+                    }
+                    if(locked != null){
+                        waypoint.locked = Boolean.parseBoolean(locked);
                     }
                     if(color == null){
                         CListClient.addRandomWaypointColor();
