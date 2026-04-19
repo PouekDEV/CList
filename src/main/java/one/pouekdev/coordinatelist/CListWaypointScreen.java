@@ -92,7 +92,7 @@ public class CListWaypointScreen extends Screen{
                 GLFW.glfwSetClipboardString(window.handle(), waypoint.x + " " + waypoint.y + " " + waypoint.z);
             }
         }).bounds(GAP + (btnWidth + GAP), buttonY, btnWidth, 20).build();
-        copyCoordinatesButton.setTooltip(Tooltip.create(Component.translatable("tooltip.copy.waypoint.coordinates")));
+        copyCoordinatesButton.setTooltip(Tooltip.create(Component.translatable("tooltip.copy.waypoint.coordinates").append(Component.literal("\n\nRight-click to convert between Overworld and Nether coords.\nCTRL + Right-click to convert and create without editing."))));
 
         editWaypointButton = Button.builder(Component.translatable("selectWorld.edit"), button -> CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), selectedWaypointId, false))).bounds(GAP + (btnWidth + GAP) * 2, buttonY, btnWidth, 20).build();
 
@@ -137,6 +137,40 @@ public class CListWaypointScreen extends Screen{
 
     @Override
     public boolean mouseClicked(@NonNull MouseButtonEvent mouseButtonEvent, boolean doubled){
+        if(mouseButtonEvent.button() == 1 && copyCoordinatesButton.active && copyCoordinatesButton.isMouseOver(mouseButtonEvent.x(), mouseButtonEvent.y())){
+            CListWaypoint wp = CListClient.variables.waypoints.get(selectedWaypointId);
+            int newX, newY, newZ;
+            String targetDim;
+            if(wp.dimension.equals("minecraft:the_nether")){
+                newX = wp.x * 8;
+                newY = wp.y;
+                newZ = wp.z * 8;
+                targetDim = "minecraft:overworld";
+            } else if(wp.dimension.equals("minecraft:overworld")){
+                newX = Math.round(wp.x / 8.0f);
+                newY = wp.y;
+                newZ = Math.round(wp.z / 8.0f);
+                targetDim = "minecraft:the_nether";
+            } else {
+                return super.mouseClicked(mouseButtonEvent, doubled);
+            }
+            Window window = CListVariables.minecraftClient.getWindow();
+            boolean ctrlHeld = InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL);
+            String name = wp.name + " (" + formatDimension(targetDim) + ")";
+            CListClient.variables.waypoints.add(new CListWaypoint(newX, newY, newZ, name, targetDim, true, false));
+            CListClient.variables.colors.add(new CListWaypointColor(
+                    CListClient.variables.colors.get(selectedWaypointId).getHSV()[0] / 360f,
+                    CListClient.variables.colors.get(selectedWaypointId).getHSV()[1] / 100f,
+                    CListClient.variables.colors.get(selectedWaypointId).getHSV()[2] / 100f));
+            CListClient.variables.savedSinceLastUpdate = false;
+            int newId = CListClient.variables.waypoints.size() - 1;
+            if(ctrlHeld){
+                refreshAll();
+            } else {
+                CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), newId, false));
+            }
+            return true;
+        }
         return super.mouseClicked(mouseButtonEvent, doubled);
     }
 
