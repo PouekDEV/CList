@@ -107,11 +107,11 @@ public class CListWaypointConfig extends Screen{
     }
 
     public static class HSVSlider extends AbstractSliderButton{
-        private float trueValue;
+        protected float trueValue;
         private final int max;
-        private final int type;
+        protected final int type;
         private final String prefix;
-        private boolean force = false;
+        protected boolean force = false;
         private static final Identifier SLIDER_HANDLE_SPRITE = Identifier.withDefaultNamespace("widget/slider_handle");
         private static final Identifier SLIDER_HANDLE_HIGHLIGHTED_SPRITE = Identifier.withDefaultNamespace("widget/slider_handle_highlighted");
         protected boolean canChangeValue;
@@ -122,6 +122,17 @@ public class CListWaypointConfig extends Screen{
             this.type = type;
             this.max = type == 0 ? 360 : 100;
             this.prefix = type == 0 ? "H: " : type == 1 ? "S: " : "V: ";
+        }
+
+        public int getType(){ return type; }
+        public float getTrueValue(){ return trueValue; }
+
+        public void applyValueRaw(){
+            this.trueValue = (float) Math.round((this.value * (this.max)) * (double) ((float) 100)) / (float) 100;
+        }
+
+        protected int getGradientColor(){
+            return CListClient.variables.colors.get(id).getHex();
         }
 
         public void setValue(float value){
@@ -141,7 +152,7 @@ public class CListWaypointConfig extends Screen{
 
         @Override
         protected void applyValue(){
-            this.trueValue = (float) Math.round((this.value * (this.max)) * (double) ((float) 100)) / (float) 100;
+            applyValueRaw();
             hsv[type] = this.trueValue;
             if(!this.force){
                 CListClient.variables.colors.get(id).set(hsv);
@@ -162,7 +173,7 @@ public class CListWaypointConfig extends Screen{
             GlStateManager._enableBlend();
             GlStateManager._enableDepthTest();
             // consider the following https://github.com/0x3C50/Renderer
-            int color = CListClient.variables.colors.get(id).getHex();
+            int color = getGradientColor();
             float[] colorFloat = Color.RGBtoHSB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, null);
             if(type == 0){
                 for(int i = 0; i < this.width; i++){

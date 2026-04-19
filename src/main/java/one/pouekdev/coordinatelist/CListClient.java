@@ -194,6 +194,42 @@ public class CListClient implements ClientModInitializer{
                 }
             }
             variables.loadedLastWorld = true;
+            loadFolders();
+            rebuildFolderIndices();
+        }
+    }
+
+    public static void loadFolders(){
+        List<CListFolder> folders = CListData.loadFoldersFromFile("clist_folders_" + variables.worldName);
+        if(folders != null){
+            variables.folders = folders;
+        }
+    }
+
+    public static void rebuildFolderIndices(){
+        for(CListFolder folder : variables.folders){
+            folder.waypointIndices.clear();
+        }
+        for(int i = 0; i < variables.waypoints.size(); i++){
+            CListWaypoint wp = variables.waypoints.get(i);
+            if(wp.folderId != null){
+                for(CListFolder folder : variables.folders){
+                    if(folder.id.equals(wp.folderId)){
+                        folder.waypointIndices.add(i);
+                        break;
+                    }
+                }
+            }
+            if(wp.globalFolderId != null){
+                for(CListFolder folder : variables.folders){
+                    if(folder.id.equals(wp.globalFolderId)){
+                        if(!folder.waypointIndices.contains(i)){
+                            folder.waypointIndices.add(i);
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -204,7 +240,9 @@ public class CListClient implements ClientModInitializer{
     public static void checkIfSaveIsNeeded(boolean force){
         if(!variables.savedSinceLastUpdate || force){
             CList.LOGGER.info("Saving data for world " + variables.worldName);
+            rebuildFolderIndices();
             CListData.saveListToFile("clist_" + variables.worldName, variables.waypoints);
+            CListData.saveFoldersToFile("clist_folders_" + variables.worldName, variables.folders);
             variables.savedSinceLastUpdate = true;
         }
     }

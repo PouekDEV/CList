@@ -10,6 +10,8 @@ public class CListWaypoint{
     private int bugFix;
     public boolean render;
     public boolean deathpoint;
+    public String folderId;
+    public String globalFolderId;
 
     CListWaypoint(String coords, String waypointName, String waypointDimension, boolean isRendered, boolean isDeathpoint){
         String s = coords;
@@ -25,6 +27,8 @@ public class CListWaypoint{
         this.dimension = waypointDimension;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
+        this.folderId = null;
+        this.globalFolderId = null;
         this.bugFix = 0;
     }
 
@@ -36,7 +40,18 @@ public class CListWaypoint{
         this.dimension = waypointDimension;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
+        this.folderId = null;
+        this.globalFolderId = null;
         this.bugFix = 0;
+    }
+
+    public String getFolderId(String category){
+        return category == null ? globalFolderId : folderId;
+    }
+
+    public void setFolderId(String category, String id){
+        if(category == null) globalFolderId = id;
+        else folderId = id;
     }
 
     public String getCoordinates(){
