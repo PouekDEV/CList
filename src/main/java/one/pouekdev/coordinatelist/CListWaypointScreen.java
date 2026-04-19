@@ -281,6 +281,7 @@ public class CListWaypointScreen extends Screen{
         private final int listWidth;
         private int dragSourceVisualIndex = -1;
         private int dropTargetVisualIndex = -1;
+        private int dropTargetDepth = 0;
         private boolean isDragging = false;
         private boolean dropOnFolder = false;
         private boolean folderBtnClicked = false;
@@ -366,8 +367,9 @@ public class CListWaypointScreen extends Screen{
                     } else {
                         lineY = getRowTop(dropTargetVisualIndex) - 2;
                     }
-                    guiGraphics.fill(rowLeft - 2, lineY - 1, rowRight + 2, lineY + 1, 0xFFFFFFFF);
-                    guiGraphics.fill(rowLeft - 4, lineY - 3, rowLeft, lineY + 3, 0xFFFFFFFF);
+                    int indentedLeft = rowLeft + dropTargetDepth * INDENT;
+                    guiGraphics.fill(indentedLeft - 2, lineY - 1, rowRight + 2, lineY + 1, 0xFFFFFFFF);
+                    guiGraphics.fill(indentedLeft - 4, lineY - 3, indentedLeft, lineY + 3, 0xFFFFFFFF);
                     guiGraphics.fill(rowRight, lineY - 3, rowRight + 4, lineY + 3, 0xFFFFFFFF);
                 }
             }
@@ -381,6 +383,35 @@ public class CListWaypointScreen extends Screen{
                 if(mouseY < mid) return i;
             }
             return children().size();
+        }
+
+        private int getDropDepth(double mouseX, int dropIndex){
+            int maxDepth = 0;
+            if(dropIndex > 0 && dropIndex - 1 < children().size()){
+                ListEntry above = children().get(dropIndex - 1);
+                if(above instanceof WaypointEntry we) maxDepth = we.depth;
+                else if(above instanceof FolderEntry fe) maxDepth = fe.depth + 1;
+            } else if(dropIndex < children().size()){
+                ListEntry at = children().get(dropIndex);
+                if(at instanceof WaypointEntry we) maxDepth = we.depth;
+                else if(at instanceof FolderEntry fe) maxDepth = fe.depth;
+            }
+            double relX = mouseX - getRowLeft();
+            int depth = (int)(relX / INDENT);
+            return Math.max(0, Math.min(depth, maxDepth));
+        }
+
+        private String getFolderIdForDepth(int dropIndex, int targetDepth){
+            if(targetDepth == 0) return null;
+            int searchFrom = Math.min(dropIndex, children().size()) - 1;
+            for(int i = searchFrom; i >= 0; i--){
+                ListEntry entry = children().get(i);
+                if(entry instanceof FolderEntry fe){
+                    if(fe.depth == targetDepth - 1) return fe.folder.id;
+                    if(fe.depth < targetDepth - 1) return null;
+                }
+            }
+            return null;
         }
 
         private boolean isOverFolderEntry(double mouseX, double mouseY){
@@ -439,9 +470,11 @@ public class CListWaypointScreen extends Screen{
                 if(isOverFolderEntry(mouseButtonEvent.x(), mouseButtonEvent.y())){
                     dropOnFolder = true;
                     dropTargetVisualIndex = getEntryVisualIndex(mouseButtonEvent.x(), mouseButtonEvent.y());
+                    dropTargetDepth = 0;
                 } else {
                     dropOnFolder = false;
                     dropTargetVisualIndex = getDropIndex(mouseButtonEvent.y());
+                    dropTargetDepth = getDropDepth(mouseButtonEvent.x(), dropTargetVisualIndex);
                 }
                 return true;
             }
@@ -564,21 +597,21 @@ public class CListWaypointScreen extends Screen{
                                 ListEntry lastEntry = children().get(children().size() - 1);
                                 if(lastEntry instanceof WaypointEntry we){
                                     toGlobal = we.waypointIndex + 1;
-                                    targetFolderId = CListClient.variables.waypoints.get(we.waypointIndex).getFolderId(selectedCategory);
                                 } else {
                                     toGlobal = CListClient.variables.waypoints.size();
                                 }
+                                targetFolderId = getFolderIdForDepth(to, dropTargetDepth);
                             } else {
                                 ListEntry toEntry = children().get(to);
                                 if(toEntry instanceof WaypointEntry we){
                                     toGlobal = we.waypointIndex;
-                                    targetFolderId = CListClient.variables.waypoints.get(we.waypointIndex).getFolderId(selectedCategory);
+                                    targetFolderId = getFolderIdForDepth(to, dropTargetDepth);
                                 } else if(toEntry instanceof FolderEntry){
                                     if(to > 0){
                                         ListEntry prev = children().get(to - 1);
                                         if(prev instanceof WaypointEntry we){
                                             toGlobal = we.waypointIndex + 1;
-                                            targetFolderId = CListClient.variables.waypoints.get(we.waypointIndex).getFolderId(selectedCategory);
+                                            targetFolderId = getFolderIdForDepth(to, dropTargetDepth);
                                         } else {
                                             toGlobal = fromGlobal;
                                         }
