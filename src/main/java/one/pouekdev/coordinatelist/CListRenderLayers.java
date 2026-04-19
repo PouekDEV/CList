@@ -1,7 +1,9 @@
 package one.pouekdev.coordinatelist;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
+import com.mojang.blaze3d.platform.CompareOp;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.LayeringTransform;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
@@ -9,6 +11,7 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.util.Util;
 import net.minecraft.resources.Identifier;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public class CListRenderLayers{
@@ -16,9 +19,8 @@ public class CListRenderLayers{
             RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
                     .withLocation("pipeline/position_tex_color")
                     .withCull(false)
-                    .withoutBlend()
-                    .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-                    .withDepthWrite(true)
+                    .withColorTargetState(new ColorTargetState(Optional.empty(), ColorTargetState.WRITE_ALL))
+                    .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
                     .build()
     );
     public static final Function<Identifier, RenderType> POSITION_TEX_COLOR = Util.memoize(
