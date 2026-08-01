@@ -12,8 +12,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -21,7 +19,6 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.joml.Matrix3x2f;
 import org.jspecify.annotations.NonNull;
-import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 
@@ -60,7 +57,7 @@ public class CListWaypointConfig extends Screen{
             }
         }).width(150).build(), 1, gridLayout.newCellSettings().paddingBottom(10));
         rowHelper.addChild(Button.builder(Component.translatable("gui.done"), button -> {
-            CListClient.variables.savedSinceLastUpdate = false;
+            setValues();
             if(!viaKeybind){
                 CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
             }
@@ -281,24 +278,5 @@ public class CListWaypointConfig extends Screen{
             waypoint.z = Integer.parseInt(z.getValue());
         }
         CListClient.variables.savedSinceLastUpdate = false;
-    }
-
-    @Override
-    public boolean charTyped(@NonNull CharacterEvent characterEvent){
-        super.charTyped(characterEvent);
-        setValues();
-        return true;
-    }
-
-    @Override
-    public boolean keyPressed(@NonNull KeyEvent event){
-        super.keyPressed(event);
-        if(event.input() == GLFW.GLFW_KEY_V && event.hasControlDown()){
-            setValues();
-        }
-        if(event.input() == GLFW.GLFW_KEY_BACKSPACE){
-            setValues();
-        }
-        return true;
     }
 }
