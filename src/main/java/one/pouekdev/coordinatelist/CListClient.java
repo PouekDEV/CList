@@ -2,7 +2,7 @@ package one.pouekdev.coordinatelist;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -27,19 +27,19 @@ public class CListClient implements ClientModInitializer{
 
     @Override
     public void onInitializeClient(){
-        openWaypointsKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        openWaypointsKeybind = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "keybinds.waypoints.menu",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_M,
                 MOD_CATEGORY
         ));
-        addAWaypoint = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        addAWaypoint = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "keybinds.waypoint.add",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_B,
                 MOD_CATEGORY
         ));
-        toggleVisibility = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        toggleVisibility = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "keybinds.waypoints.toggle",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_J,

@@ -28,11 +28,11 @@
   ],
   "accessWidener": "coordinatelist.accesswidener",
   "depends": {
-    "fabricloader": ">=0.18.2",
+    "fabricloader": ">=0.19.3",
     "fabric-api": "*",
-    "minecraft": "~1.21.11",
-    "java": ">=21",
-    "midnightlib": ">=1.9.2"
+    "minecraft": "~26.1",
+    "java": ">=25",
+    "midnightlib": ">=1.9.3"
   },
   "suggests": {
     "another-mod": "*"
