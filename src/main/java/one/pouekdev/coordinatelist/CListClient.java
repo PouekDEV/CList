@@ -15,11 +15,9 @@ import eu.midnightdust.lib.config.MidnightConfig;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class CListClient implements ClientModInitializer{
     public static CListVariables variables = new CListVariables();
-    static Random rand = new Random();
     KeyMapping openWaypointsKeybind;
     KeyMapping addAWaypoint;
     KeyMapping toggleVisibility;
@@ -71,7 +69,6 @@ public class CListClient implements ClientModInitializer{
             if(client.level == null){
                 variables.loadedLastWorld = false;
                 variables.waypoints.clear();
-                variables.colors.clear();
                 variables.worldName = null;
                 variables.lastWorld = null;
                 variables.isWorldError = false;
@@ -123,8 +120,7 @@ public class CListClient implements ClientModInitializer{
         else{
             waypointName = Component.translatable("waypoint.new.waypoint").getString();
         }
-        variables.waypoints.add(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.dimension().identifier().toString(), true, death));
-        variables.colors.add(new CListWaypointColor(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
+        variables.waypoints.add(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.dimension().identifier().toString(), new CListWaypointColor(), true, death));
         variables.savedSinceLastUpdate = false;
         if(!death){
             CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), variables.waypoints.size() - 1, viaKeybind));
@@ -134,7 +130,6 @@ public class CListClient implements ClientModInitializer{
     public static void deleteWaypoint(int position){
         try{
             variables.waypoints.remove(position);
-            variables.colors.remove(position);
             variables.savedSinceLastUpdate = false;
         }
         catch(IndexOutOfBoundsException ignored){}
@@ -150,10 +145,7 @@ public class CListClient implements ClientModInitializer{
             if(names != null && !names.isEmpty()){
                 List<String> temp = CListData.loadListFromFileLegacy("clist_" + variables.worldName);
                 for(int i = 0; i < names.size(); i++){
-                    variables.waypoints.add(new CListWaypoint(temp.get(i), names.get(i), dimensions.get(i), true, false));
-                }
-                for(int i = 0; i < variables.waypoints.size(); i++){
-                    variables.colors.add(new CListWaypointColor(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
+                    variables.waypoints.add(new CListWaypoint(temp.get(i), names.get(i), dimensions.get(i), new CListWaypointColor(), true, false));
                 }
                 CListData.deleteLegacyFile("clist_names_" + variables.worldName);
                 CListData.deleteLegacyFile("clist_dimensions_" + variables.worldName);
@@ -195,10 +187,6 @@ public class CListClient implements ClientModInitializer{
             }
             variables.loadedLastWorld = true;
         }
-    }
-
-    public static void addRandomWaypointColor(){
-        variables.colors.add(new CListWaypointColor(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
     }
 
     public static void checkIfSaveIsNeeded(boolean force){

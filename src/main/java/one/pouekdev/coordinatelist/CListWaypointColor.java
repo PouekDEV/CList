@@ -1,9 +1,12 @@
 package one.pouekdev.coordinatelist;
 
+import java.util.Random;
+
 public class CListWaypointColor{
     public float r;
     public float g;
     public float b;
+    private final static Random rand = new Random();
 
     CListWaypointColor(float red, float green, float blue){
         r = red;
@@ -11,49 +14,10 @@ public class CListWaypointColor{
         b = blue;
     }
 
-    public void set(float[] hsv){
-        float h = hsv[0];
-        float s = hsv[1];
-        float v = hsv[2];
-        s /= 100;
-        v /= 100;
-        float c = v * s;
-        float x = c * (1 - Math.abs((h / 60) % 2 - 1));
-        float m = v - c;
-        float rPrime, gPrime, bPrime;
-        if(h < 60){
-            rPrime = c;
-            gPrime = x;
-            bPrime = 0;
-        }
-        else if(h < 120){
-            rPrime = x;
-            gPrime = c;
-            bPrime = 0;
-        }
-        else if(h < 180){
-            rPrime = 0;
-            gPrime = c;
-            bPrime = x;
-        }
-        else if(h < 240){
-            rPrime = 0;
-            gPrime = x;
-            bPrime = c;
-        }
-        else if(h < 300){
-            rPrime = x;
-            gPrime = 0;
-            bPrime = c;
-        }
-        else{
-            rPrime = c;
-            gPrime = 0;
-            bPrime = x;
-        }
-        this.r = (rPrime + m);
-        this.g = (gPrime + m);
-        this.b = (bPrime + m);
+    CListWaypointColor(){
+        r = rand.nextFloat();
+        g = rand.nextFloat();
+        b = rand.nextFloat();
     }
 
     public float[] getHSV(){
@@ -98,10 +62,7 @@ public class CListWaypointColor{
     }
 
     public String getHexNoAlpha(){
-        int red = (int) (r * 255);
-        int green = (int) (g * 255);
-        int blue = (int) (b * 255);
-        return String.format("%02X%02X%02X", red, green, blue);
+        return CListColorHelper.HexNoAlpha(new float[]{r, g, b});
     }
 
     public void set(String hex){

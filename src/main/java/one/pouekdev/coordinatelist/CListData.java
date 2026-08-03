@@ -20,7 +20,7 @@ public class CListData{
         File file = new File(dataDir, fileName);
         try(PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)))){
             for(int i = 0; i < waypointList.size(); i++){
-                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).name.replaceAll("~", "") + "~" + CListClient.variables.waypoints.get(i).dimension + "~" + CListClient.variables.colors.get(i).getHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint);
+                writer.println(CListClient.variables.waypoints.get(i).getCoordinates() + "~" + CListClient.variables.waypoints.get(i).name.replaceAll("~", "") + "~" + CListClient.variables.waypoints.get(i).dimension + "~" + CListClient.variables.waypoints.get(i).color.getHexNoAlpha() + "~" + CListClient.variables.waypoints.get(i).render + "~" + CListClient.variables.waypoints.get(i).deathpoint);
             }
         }
         catch(IOException ignored){}
@@ -48,14 +48,14 @@ public class CListData{
                         deathpoint = segments[5];
                     }
                     catch(IndexOutOfBoundsException ignored){}
-                    CListWaypoint waypoint = new CListWaypoint(coords, name, dimension, Boolean.parseBoolean(bool), Boolean.parseBoolean(deathpoint));
+                    CListWaypoint waypoint;
                     if(color == null){
-                        CListClient.addRandomWaypointColor();
+                        waypoint = new CListWaypoint(coords, name, dimension, new CListWaypointColor(), Boolean.parseBoolean(bool), Boolean.parseBoolean(deathpoint));
                     }
                     else{
                         CListWaypointColor color_class = new CListWaypointColor(0, 0, 0);
                         color_class.set(color);
-                        CListClient.variables.colors.add(color_class);
+                        waypoint = new CListWaypoint(coords, name, dimension, color_class, Boolean.parseBoolean(bool), Boolean.parseBoolean(deathpoint));
                     }
                     waypointList.add(waypoint);
                 }

@@ -16,23 +16,22 @@ import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
-import net.minecraft.util.Mth;
 import org.joml.Matrix3x2f;
 import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 
 public class CListWaypointConfig extends Screen{
-    private static int id;
+    private final int id;
     private boolean renderColorPicker = false;
     private final boolean viaKeybind;
     private final CListWaypoint waypoint;
     private EditBox waypointName;
-    private static EditBox waypointColor;
+    private EditBox waypointColor;
     private EditBox x, y, z;
     private SpriteButton changeColor;
     private HSVSlider h, s, v;
-    private static float[] hsv;
+    private float[] hsv;
 
     public CListWaypointConfig(Component title, int waypointId, boolean viaKeybind){
         super(title);
@@ -44,7 +43,7 @@ public class CListWaypointConfig extends Screen{
     @Override
     protected void init(){
         GridLayout gridLayout = new GridLayout();
-        hsv = CListClient.variables.colors.get(id).getHSV();
+        hsv = waypoint.color.getHSV();
         gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
         GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(2);
         rowHelper.addChild(Button.builder(Component.translatable("selectWorld.delete"), button -> {
@@ -72,7 +71,7 @@ public class CListWaypointConfig extends Screen{
         waypointColor = new EditBox(font, (this.width - 70) / 2, (this.height - 20) / 2 + 50, 70, 20, Component.literal(""));
         waypointColor.setCanLoseFocus(true);
         waypointColor.setMaxLength(6);
-        waypointColor.setValue(CListClient.variables.colors.get(id).getHexNoAlpha());
+        waypointColor.setValue(waypoint.color.getHexNoAlpha());
         this.x = new EditBox(font, (this.width - 50) / 2 - 60, (this.height - 20) / 2 - 50, 50, 20, Component.literal(""));
         this.x.setCanLoseFocus(true);
         this.x.setValue(String.valueOf(waypoint.x));
@@ -103,7 +102,7 @@ public class CListWaypointConfig extends Screen{
         addRenderableWidget(this.v);
     }
 
-    public static class HSVSlider extends AbstractSliderButton{
+    public class HSVSlider extends AbstractSliderButton{
         private float trueValue;
         private final int max;
         private final int type;
@@ -121,16 +120,6 @@ public class CListWaypointConfig extends Screen{
             this.prefix = type == 0 ? "H: " : type == 1 ? "S: " : "V: ";
         }
 
-        public void setValue(float value){
-            double d = this.value;
-            this.value = Mth.clamp(value, 0.0, 1.0);
-            if(d != this.value){
-                this.force = true;
-                this.applyValue();
-            }
-            this.updateMessage();
-        }
-
         @Override
         protected void updateMessage(){
             this.setMessage(Component.literal(prefix + trueValue));
@@ -141,9 +130,8 @@ public class CListWaypointConfig extends Screen{
             this.trueValue = (float) Math.round((this.value * (this.max)) * (double) ((float) 100)) / (float) 100;
             hsv[type] = this.trueValue;
             if(!this.force){
-                CListClient.variables.colors.get(id).set(hsv);
-                waypointColor.setValue(CListClient.variables.colors.get(id).getHexNoAlpha());
-                CListClient.variables.savedSinceLastUpdate = false;
+                float[] convertedColor = CListColorHelper.HSVtoRGB(hsv);
+                waypointColor.setValue(CListColorHelper.HexNoAlpha(convertedColor));
             }
             else{
                 this.force = false;
@@ -158,8 +146,7 @@ public class CListWaypointConfig extends Screen{
         public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
             GlStateManager._enableBlend();
             GlStateManager._enableDepthTest();
-            // consider the following https://github.com/0x3C50/Renderer
-            int color = CListClient.variables.colors.get(id).getHex();
+            int color = CListColorHelper.HSVtoRGB(hsv[0], hsv[1], hsv[2]);
             float[] colorFloat = Color.RGBtoHSB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, null);
             if(type == 0){
                 for(int i = 0; i < this.width; i++){
@@ -233,7 +220,7 @@ public class CListWaypointConfig extends Screen{
         int right = centerX + SQUARE_SIZE / 2;
         int bottom = centerY + SQUARE_SIZE / 2;
         super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
-        guiGraphics.fill(left, top, right, bottom, CListClient.variables.colors.get(id).getHex());
+        guiGraphics.fill(left, top, right, bottom, CListColorHelper.HSVtoRGB(hsv[0], hsv[1], hsv[2]));
         changeColor.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         if(renderColorPicker){
             this.h.visible = true;
@@ -258,23 +245,15 @@ public class CListWaypointConfig extends Screen{
     }
 
     private void setValues(){
-        if(this.waypointName.isFocused()){
-            waypoint.name = waypointName.getValue();
-        }
-        if(waypointColor.isFocused()){
-            CListClient.variables.colors.get(id).set(waypointColor.getValue());
-            hsv = CListClient.variables.colors.get(id).getHSV();
-            h.setValue(hsv[0] / 360);
-            s.setValue(hsv[1] / 100);
-            v.setValue(hsv[2] / 100);
-        }
-        if(this.x.isFocused() && isParsableToInt(x.getValue())){
+        waypoint.name = waypointName.getValue();
+        waypoint.color.set(waypointColor.getValue());
+        if(isParsableToInt(x.getValue())){
             waypoint.x = Integer.parseInt(x.getValue());
         }
-        if(this.y.isFocused() && isParsableToInt(y.getValue())){
+        if(isParsableToInt(y.getValue())){
             waypoint.y = Integer.parseInt(y.getValue());
         }
-        if(this.z.isFocused() && isParsableToInt(z.getValue())){
+        if(isParsableToInt(z.getValue())){
             waypoint.z = Integer.parseInt(z.getValue());
         }
         CListClient.variables.savedSinceLastUpdate = false;

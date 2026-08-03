@@ -7,11 +7,12 @@ public class CListWaypoint{
     public int x, y, z;
     public String name;
     public String dimension;
-    private int bugFix;
+    public CListWaypointColor color;
     public boolean render;
     public boolean deathpoint;
+    private int bugFix;
 
-    CListWaypoint(String coords, String waypointName, String waypointDimension, boolean isRendered, boolean isDeathpoint){
+    CListWaypoint(String coords, String waypointName, String waypointDimension, CListWaypointColor waypointColor, boolean isRendered, boolean isDeathpoint){
         String s = coords;
         s = s.replace("X", "");
         s = s.replace("Y", "");
@@ -23,17 +24,19 @@ public class CListWaypoint{
         this.z = Integer.parseInt(segments[3]);
         this.name = waypointName;
         this.dimension = waypointDimension;
+        this.color = waypointColor;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
         this.bugFix = 0;
     }
 
-    CListWaypoint(int x, int y, int z, String waypointName, String waypointDimension, boolean isRendered, boolean isDeathpoint){
+    CListWaypoint(int x, int y, int z, String waypointName, String waypointDimension, CListWaypointColor waypointColor, boolean isRendered, boolean isDeathpoint){
         this.x = x;
         this.y = y;
         this.z = z;
         this.name = waypointName;
         this.dimension = waypointDimension;
+        this.color = waypointColor;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
         this.bugFix = 0;

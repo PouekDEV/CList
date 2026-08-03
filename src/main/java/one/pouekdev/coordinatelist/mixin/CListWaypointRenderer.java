@@ -111,7 +111,7 @@ public abstract class CListWaypointRenderer{
                     Matrix4f positionMatrix = poseStack.last().pose();
                     Tesselator tesselator = Tesselator.getInstance();
                     BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-                    CListWaypointColor color = variables.colors.get(i);
+                    CListWaypointColor color = waypoint.color;
                     buffer.addVertex(positionMatrix, 0, 1, 0).setColor(color.r, color.g, color.b, 1f).setUv(0f, 0f);
                     buffer.addVertex(positionMatrix, 0, 0, 0).setColor(color.r, color.g, color.b, 1f).setUv(0f, 1f);
                     buffer.addVertex(positionMatrix, 1, 0, 0).setColor(color.r, color.g, color.b, 1f).setUv(1f, 1f);

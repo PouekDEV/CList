@@ -184,9 +184,9 @@ public class CListWaypointScreen extends Screen{
                 this.waypointName = Component.nullToEmpty(CListClient.variables.waypoints.get(id).name);
                 this.dimension = CListClient.variables.waypoints.get(id).getDimensionText();
                 this.visibility = new SpriteButton(0, 0, 16, 12, button -> {
-                    CListClient.variables.waypoints.get(id).toggleVisibility();
                     selectedWaypointId = id;
                     CListWaypoint waypoint = CListClient.variables.waypoints.get(selectedWaypointId);
+                    waypoint.toggleVisibility();
                     copyCoordinatesButton.setMessage(Component.literal(waypoint.x + " " + waypoint.y + " " + waypoint.z));
                 }, id);
                 this.select = new InvisibleButton(0, 0, 240, 25, button -> {
@@ -212,7 +212,7 @@ public class CListWaypointScreen extends Screen{
                 int fontWidth = font.width("The nether");
                 ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
                 collector.acceptScrolling(dimension, x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
-                guiGraphics.text(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, CListClient.variables.colors.get(id).getHex());
+                guiGraphics.text(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, CListClient.variables.waypoints.get(id).color.getHex());
             }
 
             @Override

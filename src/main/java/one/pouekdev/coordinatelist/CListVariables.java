@@ -8,7 +8,6 @@ import java.util.List;
 
 public class CListVariables{
     public List<CListWaypoint> waypoints = Lists.newArrayList();
-    public List<CListWaypointColor> colors = Lists.newArrayList();
     public static List<CListDelayedEvent> delayedEvents = Lists.newArrayList();
     public String worldName;
     public ClientLevel lastWorld;
