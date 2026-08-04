@@ -10,6 +10,7 @@ public class CListWaypoint{
     public CListWaypointColor color;
     public boolean render;
     public boolean deathpoint;
+    public boolean locked;
     private int bugFix;
 
     CListWaypoint(String coords, String waypointName, String waypointDimension, CListWaypointColor waypointColor, boolean isRendered, boolean isDeathpoint){
@@ -27,6 +28,7 @@ public class CListWaypoint{
         this.color = waypointColor;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
+        this.locked = false;
         this.bugFix = 0;
     }
 
@@ -39,6 +41,7 @@ public class CListWaypoint{
         this.color = waypointColor;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
+        this.locked = false;
         this.bugFix = 0;
     }
 

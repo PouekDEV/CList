@@ -25,6 +25,7 @@ public class CListWaypointConfig extends Screen{
     private final int id;
     private boolean renderColorPicker = false;
     private final boolean viaKeybind;
+    private boolean lockedDeathpoint = false;
     private final CListWaypoint waypoint;
     private EditBox waypointName;
     private EditBox waypointColor;
@@ -68,10 +69,10 @@ public class CListWaypointConfig extends Screen{
         this.waypointName.setCanLoseFocus(true);
         this.waypointName.setMaxLength(25);
         this.waypointName.setValue(waypoint.name);
-        waypointColor = new EditBox(font, (this.width - 70) / 2, (this.height - 20) / 2 + 50, 70, 20, Component.literal(""));
-        waypointColor.setCanLoseFocus(true);
-        waypointColor.setMaxLength(6);
-        waypointColor.setValue(waypoint.color.getHexNoAlpha());
+        this.waypointColor = new EditBox(font, (this.width - 70) / 2, (this.height - 20) / 2 + 41, 70, 20, Component.literal(""));
+        this.waypointColor.setCanLoseFocus(true);
+        this.waypointColor.setMaxLength(6);
+        this.waypointColor.setValue(waypoint.color.getHexNoAlpha());
         this.x = new EditBox(font, (this.width - 50) / 2 - 60, (this.height - 20) / 2 - 50, 50, 20, Component.literal(""));
         this.x.setCanLoseFocus(true);
         this.x.setValue(String.valueOf(waypoint.x));
@@ -85,21 +86,29 @@ public class CListWaypointConfig extends Screen{
         FrameLayout.alignInRectangle(gridLayout, 0, 0, this.width, this.height, 0.5f, 1f);
         gridLayout.visitWidgets(this::addRenderableWidget);
         addRenderableWidget(this.waypointName);
-        addRenderableWidget(waypointColor);
+        addRenderableWidget(this.waypointColor);
         addRenderableWidget(this.x);
         addRenderableWidget(this.y);
         addRenderableWidget(this.z);
-        changeColor = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 15, 12, 12, button -> renderColorPicker = !renderColorPicker);
-        this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 15, 110, 15, Component.literal("H: " + hsv[0]), hsv[0] / 360, 0);
-        this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 3, 110, 15, Component.literal("S: " + hsv[1]), hsv[1] / 100, 1);
-        this.v = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 20, 110, 15, Component.literal("V: " + hsv[2]), hsv[2] / 100, 2);
+        this.changeColor = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 20, 12, 12, button -> renderColorPicker = !renderColorPicker);
+        this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 20, 110, 15, Component.literal("H: " + hsv[0]), hsv[0] / 360, 0);
+        this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 2, 110, 15, Component.literal("S: " + hsv[1]), hsv[1] / 100, 1);
+        this.v = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 16, 110, 15, Component.literal("V: " + hsv[2]), hsv[2] / 100, 2);
         this.h.visible = false;
         this.s.visible = false;
         this.v.visible = false;
-        addRenderableWidget(changeColor);
+        addRenderableWidget(this.changeColor);
         addRenderableWidget(this.h);
         addRenderableWidget(this.s);
         addRenderableWidget(this.v);
+        if(waypoint.deathpoint){
+            lockedDeathpoint = waypoint.locked;
+            Button lockDeathpoint = Button.builder(Component.literal(Component.translatable("buttons.lock.deathpoint").getString() + ": " + (lockedDeathpoint ? Component.translatable("gui.no").getString() : Component.translatable("gui.yes").getString())), button -> {
+                lockedDeathpoint = !lockedDeathpoint;
+                button.setMessage(Component.literal(Component.translatable("buttons.lock.deathpoint").getString() + ": " + (lockedDeathpoint ? Component.translatable("gui.no").getString() : Component.translatable("gui.yes").getString())));
+            }).bounds((this.width - 150) / 2, (this.height - 20) / 2 + 71, 150, 20).build();
+            addRenderableWidget(lockDeathpoint);
+        }
     }
 
     public class HSVSlider extends AbstractSliderButton{
@@ -207,7 +216,7 @@ public class CListWaypointConfig extends Screen{
     public void extractRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
         int SQUARE_SIZE = 50;
         int centerX = this.width / 2;
-        int centerY = this.height / 2;
+        int centerY = this.height / 2 - 5;
         if(renderColorPicker){
             centerX = width / 2 - 60;
             changeColor.setX((this.width - 50) / 2 - 22);
@@ -218,7 +227,7 @@ public class CListWaypointConfig extends Screen{
         int left = centerX - SQUARE_SIZE / 2;
         int top = centerY - SQUARE_SIZE / 2;
         int right = centerX + SQUARE_SIZE / 2;
-        int bottom = centerY + SQUARE_SIZE / 2;
+        int bottom = centerY + SQUARE_SIZE / 2 + 1;
         super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         guiGraphics.fill(left, top, right, bottom, CListColorHelper.HSVtoRGB(hsv[0], hsv[1], hsv[2]));
         changeColor.extractRenderState(guiGraphics, mouseX, mouseY, delta);
@@ -255,6 +264,9 @@ public class CListWaypointConfig extends Screen{
         }
         if(isParsableToInt(z.getValue())){
             waypoint.z = Integer.parseInt(z.getValue());
+        }
+        if(waypoint.deathpoint){
+            waypoint.locked = lockedDeathpoint;
         }
         CListClient.variables.savedSinceLastUpdate = false;
     }

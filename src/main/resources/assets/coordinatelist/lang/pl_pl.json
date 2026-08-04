@@ -11,11 +11,14 @@
   "coordinatelist.midnightconfig.waypointTextBackground": "Wyświetlaj tło za nazwą punktu orientacyjnego",
   "coordinatelist.midnightconfig.squareWaypoints": "Zamiast koła wyświetlaj kwadratowy znaczek punktu orientacyjnego",
   "coordinatelist.midnightconfig.detectCoordsInChat": "Wykrywaj współrzędne z czatu",
+  "coordinatelist.midnightconfig.deathpointLimit": "Maksymalna ilość zapisanych punktów śmierci (0 - nielimitowana)",
   "modmenu.summaryTranslation.coordinatelist": "Prosty i minimalistyczny mod na Fabric'a do zapisywania swojej pozycji",
   "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (w skrócie CList) to prosty i minimalistyczny mod na Fabric'a do zapisywania swojej pozycji. Zero minimap. Tylko prosta lista z wyświetlanymi punktami orientacyjnymi w grze.",
   "waypoint.last.death": "Ostatnia śmierć",
+  "waypoint.old.death": "Dawna śmierć",
   "waypoint.new.waypoint": "Nowy Punkt Orientacyjny",
   "buttons.add.new.waypoint": "Dodaj nowy punkt orientacyjny w obecnym miejscu",
+  "buttons.lock.deathpoint": "Automatycznie usuń",
   "tooltip.copy.waypoint.coordinates": "Kliknij, aby skopiować współrzędne wybranego punktu orientacyjnego.\n\nUżyj z CTRL, aby skopiować jako komendę teleportującą.",
   "chat.create.waypoint.message": "[Stwórz punkt orientacyjny]"
 }

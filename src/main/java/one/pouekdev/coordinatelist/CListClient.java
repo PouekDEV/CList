@@ -92,6 +92,21 @@ public class CListClient implements ClientModInitializer{
                             }
                         }
                         if(!client.player.isAlive() && !variables.hadDeathWaypointPlaced && CListConfig.canPlaceDeathpoints){
+                            if(CListConfig.deathpointLimit > 0){
+                                int count = 0;
+                                for(int i = variables.waypoints.size()-1; i > 0; i--){
+                                    CListWaypoint waypoint = variables.waypoints.get(i);
+                                    if(waypoint.deathpoint && !waypoint.locked){
+                                        count++;
+                                        if(count >= CListConfig.deathpointLimit){
+                                            deleteWaypoint(i);
+                                        }
+                                        else if(Objects.equals(waypoint.name, Component.translatable("waypoint.last.death").getString()) && !Objects.equals(waypoint.name, Component.translatable("waypoint.old.death").getString())){
+                                            waypoint.name = Component.translatable("waypoint.old.death").getString();
+                                        }
+                                    }
+                                }
+                            }
                             Player player = client.player;
                             addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), true, false);
                             variables.hadDeathWaypointPlaced = true;
