@@ -11,4 +11,5 @@ public class CListConfig extends MidnightConfig {
     @Entry public static boolean squareWaypoints = false;
     @Entry public static boolean detectCoordsInChat = true;
     @Entry(min=0) public static int deathpointLimit = 10;
+    @Entry public static boolean deleteDeathpointsWhenReached = true;
 }

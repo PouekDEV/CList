@@ -96,12 +96,14 @@ public class CListClient implements ClientModInitializer{
                                 int count = 0;
                                 for(int i = variables.waypoints.size()-1; i > 0; i--){
                                     CListWaypoint waypoint = variables.waypoints.get(i);
-                                    if(waypoint.deathpoint && !waypoint.locked){
-                                        count++;
-                                        if(count >= CListConfig.deathpointLimit){
-                                            deleteWaypoint(i);
+                                    if(waypoint.deathpoint){
+                                        if(!waypoint.locked){
+                                            count++;
+                                            if(count >= CListConfig.deathpointLimit){
+                                                deleteWaypoint(i);
+                                            }
                                         }
-                                        else if(Objects.equals(waypoint.name, Component.translatable("waypoint.last.death").getString()) && !Objects.equals(waypoint.name, Component.translatable("waypoint.old.death").getString())){
+                                        if(Objects.equals(waypoint.name, Component.translatable("waypoint.last.death").getString()) && !Objects.equals(waypoint.name, Component.translatable("waypoint.old.death").getString())){
                                             waypoint.name = Component.translatable("waypoint.old.death").getString();
                                         }
                                     }

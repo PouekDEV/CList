@@ -88,12 +88,16 @@ public abstract class CListWaypointRenderer{
         return s;
     }
     // This is a temporary resolution to the WorldRenderEvents being removed. Honestly we'll just have to wait for a new implementation
-    @Inject(method ="renderLevel", at = @At("RETURN"))
+    @Inject(method = "renderLevel", at = @At("RETURN"))
     private void afterRender(CallbackInfo ci) {
         if(!variables.waypoints.isEmpty() && CListConfig.waypointsToggled && !CListVariables.minecraftClient.options.hideGui){
             for(int i = 0; i < variables.waypoints.size(); i++){
                 CListWaypoint waypoint = variables.waypoints.get(i);
                 int distanceWithoutDecimalPlaces = (int) distanceTo(waypoint);
+                if(CListVariables.minecraftClient.player.isAlive() && CListVariables.minecraftClient.screen == null && waypoint.deathpoint && !waypoint.locked && CListConfig.deleteDeathpointsWhenReached && distanceWithoutDecimalPlaces <= 4){
+                    CListClient.deleteWaypoint(i);
+                    break;
+                }
                 if(Objects.equals(waypoint.getDimensionString(), getDimension(variables.lastWorld.dimension().identifier().toString())) && waypoint.render && (CListConfig.renderDistance == 0 || CListConfig.renderDistance >= distanceWithoutDecimalPlaces)){
                     Camera camera = CListVariables.minecraftClient.gameRenderer.getMainCamera();
                     float size = calculateWaypointSize();
