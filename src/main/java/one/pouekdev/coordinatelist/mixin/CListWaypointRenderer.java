@@ -15,6 +15,7 @@ import net.minecraft.util.Mth;
 import com.mojang.math.Axis;
 import net.minecraft.world.phys.Vec3;
 import one.pouekdev.coordinatelist.*;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,6 +24,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 import static one.pouekdev.coordinatelist.CListClient.variables;
@@ -44,7 +48,7 @@ public abstract class CListWaypointRenderer{
         float f = (float) (CListVariables.minecraftClient.player.getX() - waypoint.x);
         float g = (float) (CListVariables.minecraftClient.player.getY() - waypoint.y);
         float h = (float) (CListVariables.minecraftClient.player.getZ() - waypoint.z);
-        return Math.round(Mth.sqrt(f * f + g * g + h * h));
+        return Mth.sqrt(f * f + g * g + h * h);
     }
 
     @Unique
@@ -87,15 +91,43 @@ public abstract class CListWaypointRenderer{
         s = StringUtils.capitalize(s);
         return s;
     }
+
+    private static class WaypointWithDistance{
+        public CListWaypoint waypoint;
+        public float distance;
+        public int index;
+
+        public WaypointWithDistance(CListWaypoint waypoint, int index, float distance){
+            this.waypoint = waypoint;
+            this.index = index;
+            this.distance = distance;
+        }
+    }
+
+    private static class DistanceComparator implements Comparator<WaypointWithDistance>{
+        @Override
+        public int compare(WaypointWithDistance o1, WaypointWithDistance o2){
+            return Float.compare(o2.distance, o1.distance);
+        }
+    }
+
     // This is a temporary resolution to the WorldRenderEvents being removed. Honestly we'll just have to wait for a new implementation
     @Inject(method = "renderLevel", at = @At("RETURN"))
-    private void afterRender(CallbackInfo ci) {
+    private void afterRender(CallbackInfo ci){
         if(!variables.waypoints.isEmpty() && CListConfig.waypointsToggled && !CListVariables.minecraftClient.options.hideGui){
+            List<WaypointWithDistance> waypoints = Lists.newArrayList();
             for(int i = 0; i < variables.waypoints.size(); i++){
                 CListWaypoint waypoint = variables.waypoints.get(i);
-                int distanceWithoutDecimalPlaces = (int) distanceTo(waypoint);
+                float distance = distanceTo(waypoint);
+                WaypointWithDistance waypointWithDistance = new WaypointWithDistance(waypoint, i, distance);
+                waypoints.add(waypointWithDistance);
+            }
+            Collections.sort(waypoints, new DistanceComparator());
+            for(WaypointWithDistance waypointWithDistance: waypoints){
+                CListWaypoint waypoint = waypointWithDistance.waypoint;
+                int distanceWithoutDecimalPlaces = Math.round(waypointWithDistance.distance);
                 if(CListVariables.minecraftClient.player.isAlive() && CListVariables.minecraftClient.screen == null && waypoint.deathpoint && !waypoint.locked && CListConfig.deleteDeathpointsWhenReached && distanceWithoutDecimalPlaces <= 4){
-                    CListClient.deleteWaypoint(i);
+                    CListClient.deleteWaypoint(waypointWithDistance.index);
                     break;
                 }
                 if(Objects.equals(waypoint.getDimensionString(), getDimension(variables.lastWorld.dimension().identifier().toString())) && waypoint.render && (CListConfig.renderDistance == 0 || CListConfig.renderDistance >= distanceWithoutDecimalPlaces)){
