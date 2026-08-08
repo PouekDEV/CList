@@ -3,9 +3,8 @@ package one.pouekdev.coordinatelist;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -15,11 +14,16 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.level.Level;
+import org.apache.commons.compress.utils.Lists;
 import org.joml.Matrix3x2f;
 import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
+import java.util.List;
+import java.util.Set;
 
 public class CListWaypointConfig extends Screen{
     private final int id;
@@ -28,17 +32,26 @@ public class CListWaypointConfig extends Screen{
     private boolean lockedDeathpoint = false;
     private final CListWaypoint waypoint;
     private EditBox waypointName;
+    private CListDropdown waypointDimension;
     private EditBox waypointColor;
     private EditBox x, y, z;
     private SpriteButton changeColor;
     private HSVSlider h, s, v;
     private float[] hsv;
+    private final List<String> dimensions = Lists.newArrayList();
+    private final List<Button> buttons = Lists.newArrayList();
+    private final List<Button> addedButtons = Lists.newArrayList();
 
     public CListWaypointConfig(Component title, int waypointId, boolean viaKeybind){
         super(title);
         id = waypointId;
         this.waypoint = CListClient.variables.waypoints.get(id);
         this.viaKeybind = viaKeybind;
+        Set<ResourceKey<Level>> levels =  CListVariables.minecraftClient.getConnection().levels();
+        for(ResourceKey<Level> key : levels){
+            Identifier id = key.identifier();
+            this.dimensions.add(id.toString());
+        }
     }
 
     @Override
@@ -65,10 +78,11 @@ public class CListWaypointConfig extends Screen{
                 onClose();
             }
         }).width(150).build(), 1, gridLayout.newCellSettings().paddingBottom(10));
-        this.waypointName = new EditBox(font, (this.width - 150) / 2, (this.height - 20) / 2 - 80, 150, 20, Component.literal(""));
+        this.waypointName = new EditBox(font, (this.width - 150) / 2, (this.height - 20) / 2 - 100, 150, 20, Component.literal(""));
         this.waypointName.setCanLoseFocus(true);
         this.waypointName.setMaxLength(25);
         this.waypointName.setValue(waypoint.name);
+        this.waypointDimension = new CListDropdown((this.width - 150) / 2, (this.height - 20) / 2 - 75, 150, 20, Component.literal(waypoint.dimension), dimensions, buttons);
         this.waypointColor = new EditBox(font, (this.width - 70) / 2, (this.height - 20) / 2 + 41, 70, 20, Component.literal(""));
         this.waypointColor.setCanLoseFocus(true);
         this.waypointColor.setMaxLength(6);
@@ -109,6 +123,7 @@ public class CListWaypointConfig extends Screen{
             }).bounds((this.width - 150) / 2, (this.height - 20) / 2 + 71, 150, 20).build();
             addRenderableWidget(lockDeathpoint);
         }
+        addRenderableWidget(this.waypointDimension);
     }
 
     public class HSVSlider extends AbstractSliderButton{
@@ -228,9 +243,38 @@ public class CListWaypointConfig extends Screen{
         int top = centerY - SQUARE_SIZE / 2;
         int right = centerX + SQUARE_SIZE / 2;
         int bottom = centerY + SQUARE_SIZE / 2 + 1;
-        super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         guiGraphics.fill(left, top, right, bottom, CListColorHelper.HSVtoRGB(hsv[0], hsv[1], hsv[2]));
         changeColor.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+        for(Button button: this.addedButtons){
+            removeWidget(button);
+        }
+        this.addedButtons.clear();
+        for(Button button: this.buttons){
+            addedButtons.add(addRenderableWidget(button));
+            //button.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+        }
+        if(this.addedButtons.isEmpty()){
+            this.x.active = true;
+            this.y.active = true;
+            this.z.active = true;
+            this.changeColor.active = true;
+            this.waypointColor.active = true;
+            this.h.active = true;
+            this.s.active = true;
+            this.v.active = true;
+
+        }
+        else{
+            this.x.active = false;
+            this.y.active = false;
+            this.z.active = false;
+            this.changeColor.active = false;
+            this.waypointColor.active = false;
+            this.h.active = false;
+            this.s.active = false;
+            this.v.active = false;
+        }
         if(renderColorPicker){
             this.h.visible = true;
             this.s.visible = true;
@@ -268,6 +312,7 @@ public class CListWaypointConfig extends Screen{
         if(waypoint.deathpoint){
             waypoint.locked = lockedDeathpoint;
         }
+        waypoint.dimension = waypointDimension.getMessage().getString();
         CListClient.variables.savedSinceLastUpdate = false;
     }
 }
