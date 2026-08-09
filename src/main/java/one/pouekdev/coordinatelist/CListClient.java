@@ -137,10 +137,10 @@ public class CListClient implements ClientModInitializer{
         else{
             waypointName = Component.translatable("waypoint.new.waypoint").getString();
         }
-        variables.waypoints.add(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.dimension().identifier().toString(), new CListWaypointColor(), true, death));
+        variables.waypoints.addFirst(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.dimension().identifier().toString(), new CListWaypointColor(), true, death));
         variables.savedSinceLastUpdate = false;
         if(!death){
-            CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), variables.waypoints.size() - 1, viaKeybind));
+            CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), 0, viaKeybind));
         }
     }
 
