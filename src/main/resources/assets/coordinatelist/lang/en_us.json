@@ -20,6 +20,7 @@
   "waypoint.new.waypoint": "New Waypoint",
   "buttons.add.new.waypoint": "Add a new waypoint in current position",
   "buttons.lock.deathpoint": "Auto delete",
+  "new.folder": "New Folder",
   "tooltip.copy.waypoint.coordinates": "Click to copy selected waypoints coordinates.\n\nUse with CTRL to copy as a teleport command.",
   "chat.create.waypoint.message": "[Create a waypoint]"
 }

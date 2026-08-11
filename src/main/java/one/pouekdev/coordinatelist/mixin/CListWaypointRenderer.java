@@ -29,8 +29,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import static one.pouekdev.coordinatelist.CListClient.variables;
-
 @Mixin(LevelRenderer.class)
 public abstract class CListWaypointRenderer{
     @Unique
@@ -95,11 +93,9 @@ public abstract class CListWaypointRenderer{
     private static class WaypointWithDistance{
         public CListWaypoint waypoint;
         public float distance;
-        public int index;
 
-        public WaypointWithDistance(CListWaypoint waypoint, int index, float distance){
+        public WaypointWithDistance(CListWaypoint waypoint, float distance){
             this.waypoint = waypoint;
-            this.index = index;
             this.distance = distance;
         }
     }
@@ -114,75 +110,75 @@ public abstract class CListWaypointRenderer{
     // This is a temporary resolution to the WorldRenderEvents being removed. Honestly we'll just have to wait for a new implementation
     @Inject(method = "renderLevel", at = @At("RETURN"))
     private void afterRender(CallbackInfo ci){
-        if(!variables.waypoints.isEmpty() && CListConfig.waypointsToggled && !CListVariables.minecraftClient.options.hideGui){
-            List<WaypointWithDistance> waypoints = Lists.newArrayList();
-            for(int i = 0; i < variables.waypoints.size(); i++){
-                CListWaypoint waypoint = variables.waypoints.get(i);
+        List<CListWaypoint> waypoints = CListVariables.data.getAllWaypoints(true);
+        if(!waypoints.isEmpty() && CListConfig.waypointsToggled && !CListVariables.minecraftClient.options.hideGui){
+            List<WaypointWithDistance> waypointsWithDistance = Lists.newArrayList();
+            for(CListWaypoint waypoint: waypoints){
                 float distance = distanceTo(waypoint);
-                WaypointWithDistance waypointWithDistance = new WaypointWithDistance(waypoint, i, distance);
-                waypoints.add(waypointWithDistance);
+                if(Objects.equals(waypoint.getDimensionString(), getDimension(CListVariables.lastWorld.dimension().identifier().toString())) && waypoint.render && (CListConfig.renderDistance == 0 || CListConfig.renderDistance >= distance)){
+                    WaypointWithDistance waypointWithDistance = new WaypointWithDistance(waypoint, distance);
+                    waypointsWithDistance.add(waypointWithDistance);
+                }
             }
-            Collections.sort(waypoints, new DistanceComparator());
-            for(WaypointWithDistance waypointWithDistance: waypoints){
+            Collections.sort(waypointsWithDistance, new DistanceComparator());
+            for(WaypointWithDistance waypointWithDistance: waypointsWithDistance){
                 CListWaypoint waypoint = waypointWithDistance.waypoint;
                 int distanceWithoutDecimalPlaces = Math.round(waypointWithDistance.distance);
                 if(CListVariables.minecraftClient.player.isAlive() && CListVariables.minecraftClient.screen == null && waypoint.deathpoint && !waypoint.locked && CListConfig.deleteDeathpointsWhenReached && distanceWithoutDecimalPlaces <= 4){
-                    CListClient.deleteWaypoint(waypointWithDistance.index);
+                    CListClient.deleteElement(waypointWithDistance.waypoint);
                     break;
                 }
-                if(Objects.equals(waypoint.getDimensionString(), getDimension(variables.lastWorld.dimension().identifier().toString())) && waypoint.render && (CListConfig.renderDistance == 0 || CListConfig.renderDistance >= distanceWithoutDecimalPlaces)){
-                    Camera camera = CListVariables.minecraftClient.gameRenderer.getMainCamera();
-                    float size = calculateWaypointSize();
-                    Vec3 renderCoords = calculateRenderCoords(waypoint, camera, distanceWithoutDecimalPlaces);
-                    Vec3 targetPosition = new Vec3(renderCoords.x + 0.5, renderCoords.y + 1, renderCoords.z + 0.5);
-                    Vec3 transformedPosition = targetPosition.subtract(camera.position());
-                    // TODO: Wait for a new implementation of WorldRenderEvents and then use the PoseStack from guiGraphics instead of recalculating everything by ourselves
-                    PoseStack poseStack = new PoseStack();
-                    poseStack.translate(0.25, 0, 0.25);
-                    poseStack.mulPose(Axis.XP.rotationDegrees(camera.xRot()));
-                    poseStack.mulPose(Axis.YP.rotationDegrees(camera.yRot() + 180.0F));
-                    poseStack.translate(transformedPosition.x, transformedPosition.y, transformedPosition.z);
-                    poseStack.mulPose(camera.rotation());
-                    poseStack.scale(-size, size, size);
-                    Matrix4f positionMatrix = poseStack.last().pose();
-                    Tesselator tesselator = Tesselator.getInstance();
-                    BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-                    CListWaypointColor color = waypoint.color;
-                    buffer.addVertex(positionMatrix, 0, 1, 0).setColor(color.r, color.g, color.b, 1f).setUv(0f, 0f);
-                    buffer.addVertex(positionMatrix, 0, 0, 0).setColor(color.r, color.g, color.b, 1f).setUv(0f, 1f);
-                    buffer.addVertex(positionMatrix, 1, 0, 0).setColor(color.r, color.g, color.b, 1f).setUv(1f, 1f);
-                    buffer.addVertex(positionMatrix, 1, 1, 0).setColor(color.r, color.g, color.b, 1f).setUv(1f, 0f);
-                    Identifier icon;
-                    if(waypoint.deathpoint){
-                        icon = Identifier.fromNamespaceAndPath("coordinatelist", "skull.png");
-                    }
-                    else{
-                        if(CListConfig.squareWaypoints){
-                            icon = Identifier.fromNamespaceAndPath("coordinatelist", "waypoint_icon_square.png");
-                        }
-                        else{
-                            icon = Identifier.fromNamespaceAndPath("coordinatelist", "waypoint_icon.png");
-                        }
-                    }
-                    CListRenderLayers.POSITION_TEX_COLOR.apply(icon).draw(buffer.buildOrThrow());
-                    Font font = CListVariables.minecraftClient.font;
-                    String labelText = waypoint.name + " (" + distanceWithoutDecimalPlaces + " m)";
-                    int textWidth = font.width(labelText);
-                    poseStack.scale(-0.025f, -0.025f, 0.025f);
-                    size = calculateTextSize();
-                    poseStack.scale((float) Math.log(size * 4), (float) Math.log(size * 4), (float) Math.log(size * 4));
-                    poseStack.translate(0, -20, 0);
-                    positionMatrix = poseStack.last().pose();
-                    float h = (float) (-textWidth / 2);
-                    MultiBufferSource.BufferSource b = CListVariables.minecraftClient.renderBuffers().bufferSource();
-                    if(CListConfig.waypointTextBackground){
-                        font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x90000000, LightCoordsUtil.FULL_BRIGHT);
-                    }
-                    else{
-                        font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x00000000, LightCoordsUtil.FULL_BRIGHT);
-                    }
-                    b.endBatch();
+                Camera camera = CListVariables.minecraftClient.gameRenderer.getMainCamera();
+                float size = calculateWaypointSize();
+                Vec3 renderCoords = calculateRenderCoords(waypoint, camera, distanceWithoutDecimalPlaces);
+                Vec3 targetPosition = new Vec3(renderCoords.x + 0.5, renderCoords.y + 1, renderCoords.z + 0.5);
+                Vec3 transformedPosition = targetPosition.subtract(camera.position());
+                // TODO: Wait for a new implementation of WorldRenderEvents and then use the PoseStack from guiGraphics instead of recalculating everything by ourselves
+                PoseStack poseStack = new PoseStack();
+                poseStack.translate(0.25, 0, 0.25);
+                poseStack.mulPose(Axis.XP.rotationDegrees(camera.xRot()));
+                poseStack.mulPose(Axis.YP.rotationDegrees(camera.yRot() + 180.0F));
+                poseStack.translate(transformedPosition.x, transformedPosition.y, transformedPosition.z);
+                poseStack.mulPose(camera.rotation());
+                poseStack.scale(-size, size, size);
+                Matrix4f positionMatrix = poseStack.last().pose();
+                Tesselator tesselator = Tesselator.getInstance();
+                BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                CListElementColor color = waypoint.color;
+                buffer.addVertex(positionMatrix, 0, 1, 0).setColor(color.r, color.g, color.b, 1f).setUv(0f, 0f);
+                buffer.addVertex(positionMatrix, 0, 0, 0).setColor(color.r, color.g, color.b, 1f).setUv(0f, 1f);
+                buffer.addVertex(positionMatrix, 1, 0, 0).setColor(color.r, color.g, color.b, 1f).setUv(1f, 1f);
+                buffer.addVertex(positionMatrix, 1, 1, 0).setColor(color.r, color.g, color.b, 1f).setUv(1f, 0f);
+                Identifier icon;
+                if(waypoint.deathpoint){
+                    icon = Identifier.fromNamespaceAndPath("coordinatelist", "skull.png");
                 }
+                else{
+                    if(CListConfig.squareWaypoints){
+                        icon = Identifier.fromNamespaceAndPath("coordinatelist", "waypoint_icon_square.png");
+                    }
+                    else{
+                        icon = Identifier.fromNamespaceAndPath("coordinatelist", "waypoint_icon.png");
+                    }
+                }
+                CListRenderLayers.POSITION_TEX_COLOR.apply(icon).draw(buffer.buildOrThrow());
+                Font font = CListVariables.minecraftClient.font;
+                String labelText = waypoint.name + " (" + distanceWithoutDecimalPlaces + " m)";
+                int textWidth = font.width(labelText);
+                poseStack.scale(-0.025f, -0.025f, 0.025f);
+                size = calculateTextSize();
+                poseStack.scale((float) Math.log(size * 4), (float) Math.log(size * 4), (float) Math.log(size * 4));
+                poseStack.translate(0, -20, 0);
+                positionMatrix = poseStack.last().pose();
+                float h = (float) (-textWidth / 2);
+                MultiBufferSource.BufferSource b = CListVariables.minecraftClient.renderBuffers().bufferSource();
+                if(CListConfig.waypointTextBackground){
+                    font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x90000000, LightCoordsUtil.FULL_BRIGHT);
+                }
+                else{
+                    font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x00000000, LightCoordsUtil.FULL_BRIGHT);
+                }
+                b.endBatch();
             }
         }
     }

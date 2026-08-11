@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class CListClient implements ClientModInitializer{
-    public static CListVariables variables = new CListVariables();
     KeyMapping openWaypointsKeybind;
     KeyMapping addAWaypoint;
     KeyMapping toggleVisibility;
@@ -54,10 +53,10 @@ public class CListClient implements ClientModInitializer{
                 }
             }
             while(openWaypointsKeybind.consumeClick()){
-                client.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
+                client.setScreen(new CListElementsScreen(Component.literal("Waypoints")));
             }
             while(addAWaypoint.consumeClick()){
-                if(!Objects.equals(client.screen, new CListWaypointScreen(Component.literal("Waypoints")))){
+                if(!Objects.equals(client.screen, new CListElementsScreen(Component.literal("Waypoints")))){
                     Player player = CListVariables.minecraftClient.player;
                     addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, true);
                 }
@@ -67,40 +66,41 @@ public class CListClient implements ClientModInitializer{
                 MidnightConfig.write(CList.MOD_ID);
             }
             if(client.level == null){
-                variables.loadedLastWorld = false;
-                variables.waypoints.clear();
-                variables.worldName = null;
-                variables.lastWorld = null;
-                variables.isWorldError = false;
+                CListVariables.loadedLastWorld = false;
+                CListVariables.data = new CListElementsContainer();
+                CListVariables.worldName = null;
+                CListVariables.lastWorld = null;
+                CListVariables.isWorldError = false;
             }
             else{
-                if(!variables.isWorldError){
+                if(!CListVariables.isWorldError){
                     try{
-                        variables.lastWorld = client.level;
-                        checkForWorldChanges(variables.lastWorld);
+                        CListVariables.lastWorld = client.level;
+                        checkForWorldChanges(CListVariables.lastWorld);
                         checkIfSaveIsNeeded(false);
                         if(client.isLocalServer()){
-                            variables.worldName = client.getSingleplayerServer().getWorldPath(LevelResource.ROOT).getParent().getFileName().toString();
+                            CListVariables.worldName = client.getSingleplayerServer().getWorldPath(LevelResource.ROOT).getParent().getFileName().toString();
                         }
                         else{
                             if(client.getCurrentServer().isRealm()){
-                                variables.worldName = client.getCurrentServer().name;
+                                CListVariables.worldName = client.getCurrentServer().name;
                             }
                             else{
-                                variables.worldName = client.getCurrentServer().ip;
-                                variables.worldName = variables.worldName.replace(":", "P");
+                                CListVariables.worldName = client.getCurrentServer().ip;
+                                CListVariables.worldName = CListVariables.worldName.replace(":", "P");
                             }
                         }
-                        if(!client.player.isAlive() && !variables.hadDeathWaypointPlaced && CListConfig.canPlaceDeathpoints){
+                        if(!client.player.isAlive() && !CListVariables.hadDeathWaypointPlaced && CListConfig.canPlaceDeathpoints){
                             if(CListConfig.deathpointLimit > 0){
                                 int count = 0;
-                                for(int i = variables.waypoints.size()-1; i > 0; i--){
-                                    CListWaypoint waypoint = variables.waypoints.get(i);
+                                List<CListWaypoint> waypoints = CListVariables.data.getAllWaypoints(false);
+                                for(int i = waypoints.size()-1; i > 0; i--){
+                                    CListWaypoint waypoint = waypoints.get(i);
                                     if(waypoint.deathpoint){
                                         if(!waypoint.locked){
                                             count++;
                                             if(count >= CListConfig.deathpointLimit){
-                                                deleteWaypoint(i);
+                                                deleteElement(waypoint);
                                             }
                                         }
                                         if(Objects.equals(waypoint.name, Component.translatable("waypoint.last.death").getString()) && !Objects.equals(waypoint.name, Component.translatable("waypoint.old.death").getString())){
@@ -111,25 +111,25 @@ public class CListClient implements ClientModInitializer{
                             }
                             Player player = client.player;
                             addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), true, false);
-                            variables.hadDeathWaypointPlaced = true;
+                            CListVariables.hadDeathWaypointPlaced = true;
                         }
-                        else if(client.player.isAlive() && variables.hadDeathWaypointPlaced){
-                            variables.hadDeathWaypointPlaced = false;
+                        else if(client.player.isAlive() && CListVariables.hadDeathWaypointPlaced){
+                            CListVariables.hadDeathWaypointPlaced = false;
                         }
                     }
                     catch(NullPointerException e){
                         CList.LOGGER.info("Can't get the current world. Player probably uses ReplayMod and is now watching the replay");
-                        variables.isWorldError = true;
+                        CListVariables.isWorldError = true;
                     }
                 }
             }
         });
-        variables.savedSinceLastUpdate = true;
-        variables.loadedLastWorld = false;
+        CListVariables.savedSinceLastUpdate = true;
+        CListVariables.loadedLastWorld = false;
     }
 
     public static void addNewWaypoint(int x, int y, int z, boolean death, boolean viaKeybind){
-        CList.LOGGER.info("New waypoint for dimension " + variables.lastWorld.dimension().identifier());
+        CList.LOGGER.info("New waypoint for dimension: " + CListVariables.lastWorld.dimension().identifier());
         String waypointName;
         if(death){
             waypointName = Component.translatable("waypoint.last.death").getString();
@@ -137,80 +137,102 @@ public class CListClient implements ClientModInitializer{
         else{
             waypointName = Component.translatable("waypoint.new.waypoint").getString();
         }
-        variables.waypoints.addFirst(new CListWaypoint(x, y, z, waypointName, variables.lastWorld.dimension().identifier().toString(), new CListWaypointColor(), true, death));
-        variables.savedSinceLastUpdate = false;
+        CListWaypoint waypoint = new CListWaypoint(x, y, z, waypointName, CListVariables.lastWorld.dimension().identifier().toString(), new CListElementColor(), true, death);
+        CListVariables.data.waypoints.addFirst(waypoint);
+        CListVariables.savedSinceLastUpdate = false;
         if(!death){
-            CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), 0, viaKeybind));
+            CListVariables.minecraftClient.setScreen(new CListElementConfig(Component.literal("Config"), waypoint, viaKeybind));
         }
     }
 
-    public static void deleteWaypoint(int position){
-        try{
-            variables.waypoints.remove(position);
-            variables.savedSinceLastUpdate = false;
+    public static void addNewFolder(){
+        CList.LOGGER.info("New folder for dimension: " + CListVariables.lastWorld.dimension().identifier());
+        CListFolder folder = new CListFolder(Component.translatable("new.folder").getString(), CListVariables.lastWorld.dimension().identifier().toString(), new CListElementColor(), true, true);
+        CListVariables.data.folders.addFirst(folder);
+        CListVariables.savedSinceLastUpdate = false;
+        CListVariables.minecraftClient.setScreen(new CListElementConfig(Component.literal("Config"), folder, false));
+    }
+
+    public static void findAndDeleteFromFolder(CListFolder folder, CListWaypoint waypoint){
+        if(folder.waypoints.contains(waypoint)){
+            folder.waypoints.remove(waypoint);
         }
-        catch(IndexOutOfBoundsException ignored){}
+        else{
+            if(!folder.folders.isEmpty()){
+                for(CListFolder f : folder.folders){
+                    findAndDeleteFromFolder(f, waypoint);
+                }
+            }
+        }
+    }
+
+    public static void findAndDeleteFolder(CListFolder folder, CListFolder needle){
+        if(folder.folders.contains(needle)){
+            folder.folders.remove(needle);
+        }
+        else{
+            if(!folder.folders.isEmpty()){
+                for(CListFolder f : folder.folders){
+                    findAndDeleteFolder(f, needle);
+                }
+            }
+        }
+    }
+
+    public static void deleteElement(CListElement element){
+        if(element instanceof CListWaypoint waypoint){
+            if(CListVariables.data.waypoints.contains(waypoint)){
+                CListVariables.data.waypoints.remove(waypoint);
+            }
+            else{
+                for(CListFolder folder : CListVariables.data.folders){
+                    findAndDeleteFromFolder(folder, waypoint);
+                }
+            }
+        }
+        if(element instanceof CListFolder folder){
+            if(CListVariables.data.folders.contains(folder)){
+                CListVariables.data.folders.remove(folder);
+            }
+            else{
+                for(CListFolder haystack : CListVariables.data.folders){
+                    findAndDeleteFolder(haystack, folder);
+                }
+            }
+        }
+        CListVariables.savedSinceLastUpdate = false;
     }
 
     public static void checkForWorldChanges(ClientLevel currentWorld){
-        if(!variables.loadedLastWorld && variables.worldName != null){
-            CList.LOGGER.info("New world " + variables.worldName);
-            variables.lastWorld = currentWorld;
-            // Check for old 1.0 saves and convert them
-            List<String> names = CListData.loadListFromFileLegacy("clist_names_" + variables.worldName);
-            List<String> dimensions = CListData.loadListFromFileLegacy("clist_dimensions_" + variables.worldName);
-            if(names != null && !names.isEmpty()){
-                List<String> temp = CListData.loadListFromFileLegacy("clist_" + variables.worldName);
-                for(int i = 0; i < names.size(); i++){
-                    variables.waypoints.add(new CListWaypoint(temp.get(i), names.get(i), dimensions.get(i), new CListWaypointColor(), true, false));
-                }
-                CListData.deleteLegacyFile("clist_names_" + variables.worldName);
-                CListData.deleteLegacyFile("clist_dimensions_" + variables.worldName);
-                CList.LOGGER.info("Loaded old 1.0 data for world " + variables.worldName);
-                // Force save converting it to a new format
+        if(!CListVariables.loadedLastWorld && CListVariables.worldName != null){
+            CList.LOGGER.info("New world: " + CListVariables.worldName);
+            CListVariables.lastWorld = currentWorld;
+            List<CListWaypoint> waypoints = CListData.loadListFromFileLegacy("clist_" + CListVariables.worldName);
+            if(waypoints != null && !waypoints.isEmpty()){
+                CListVariables.data.waypoints = waypoints;
+                CListData.deleteLegacyFile("clist_" + CListVariables.worldName);
+                CList.LOGGER.info("Loaded pre 2.0 data for " + CListVariables.worldName);
                 checkIfSaveIsNeeded(true);
             }
             else{
-                // Check for post 1.0 saves
-                if(!CListVariables.minecraftClient.isLocalServer()){
-                    List<CListWaypoint> ways = CListData.loadListFromFile("clist_" + CListVariables.minecraftClient.getCurrentServer().name);
-                    if(ways != null && !ways.isEmpty()){
-                        variables.waypoints = ways;
-                        CListData.deleteLegacyFile("clist_" + CListVariables.minecraftClient.getCurrentServer().name);
-                        CList.LOGGER.info("Loaded old multiplier server data");
-                        checkIfSaveIsNeeded(true);
-                    }
-                    else{
-                        ways = CListData.loadListFromFile("clist_" + variables.worldName);
-                        if(ways != null && !ways.isEmpty()){
-                            variables.waypoints = ways;
-                            CList.LOGGER.info("Loaded data for server " + variables.worldName);
-                        }
-                        else{
-                            CList.LOGGER.info("The file for " + variables.worldName + " doesn't exist");
-                        }
-                    }
+                CListElementsContainer dataContainer = CListData.loadListFromFile("clist_" + CListVariables.worldName + ".json");
+                if(dataContainer != null){
+                    CListVariables.data = dataContainer;
+                    CList.LOGGER.info("Loaded data for " + CListVariables.worldName);
                 }
                 else{
-                    List<CListWaypoint> ways = CListData.loadListFromFile("clist_" + variables.worldName);
-                    if(ways != null && !ways.isEmpty()){
-                        variables.waypoints = ways;
-                        CList.LOGGER.info("Loaded data for world " + variables.worldName);
-                    }
-                    else{
-                        CList.LOGGER.info("The file for " + variables.worldName + " doesn't exist");
-                    }
+                    CList.LOGGER.info("The file for " + CListVariables.worldName + " doesn't exist");
                 }
             }
-            variables.loadedLastWorld = true;
+            CListVariables.loadedLastWorld = true;
         }
     }
 
     public static void checkIfSaveIsNeeded(boolean force){
-        if(!variables.savedSinceLastUpdate || force){
-            CList.LOGGER.info("Saving data for world " + variables.worldName);
-            CListData.saveListToFile("clist_" + variables.worldName, variables.waypoints);
-            variables.savedSinceLastUpdate = true;
+        if(!CListVariables.savedSinceLastUpdate || force){
+            CList.LOGGER.info("Saving data for " + CListVariables.worldName);
+            CListData.saveListToFile("clist_" + CListVariables.worldName + ".json", CListVariables.data);
+            CListVariables.savedSinceLastUpdate = true;
         }
     }
 }

@@ -20,6 +20,7 @@
   "waypoint.new.waypoint": "Nowy Punkt Orientacyjny",
   "buttons.add.new.waypoint": "Dodaj nowy punkt orientacyjny w obecnym miejscu",
   "buttons.lock.deathpoint": "Automatycznie usuń",
+  "new.folder": "Nowy Folder",
   "tooltip.copy.waypoint.coordinates": "Kliknij, aby skopiować współrzędne wybranego punktu orientacyjnego.\n\nUżyj z CTRL, aby skopiować jako komendę teleportującą.",
   "chat.create.waypoint.message": "[Stwórz punkt orientacyjny]"
 }

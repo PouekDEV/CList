@@ -25,7 +25,7 @@ public class CListDropdown extends AbstractWidget{
     private boolean clicked;
     private final int buttonHeight;
 
-    public CListDropdown(int x, int y, int width, int height, int buttonHeight, Component message, List<String> options, boolean clicked){
+    CListDropdown(int x, int y, int width, int height, int buttonHeight, Component message, List<String> options, boolean clicked){
         super(x, y, width, height, message);
         this.buttonHeight = buttonHeight;
         this.clicked = clicked;
