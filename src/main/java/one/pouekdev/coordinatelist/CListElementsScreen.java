@@ -3,6 +3,7 @@ package one.pouekdev.coordinatelist;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -115,7 +116,8 @@ public class CListElementsScreen extends Screen{
         private boolean isDragging = false;
         private double dragStartX = 0;
         private double dragStartY = 0;
-        private FolderEntry selectedFolder;
+        private ScrollListEntry dropOffEntry;
+        private GhostFollower ghostFollower;
 
         public ScrollList(){
             super(CListElementsScreen.this.minecraft, CListElementsScreen.this.width, CListElementsScreen.this.height - 64, 32, 25);//32
@@ -131,7 +133,7 @@ public class CListElementsScreen extends Screen{
                     }
                 }
                 if(folder.waypoints != null && folder.extended){
-                    for(CListWaypoint waypoint: folder.waypoints){
+                    for(CListWaypoint waypoint : folder.waypoints){
                         WaypointEntry waypointEntry = new WaypointEntry(waypoint, depth + 1);
                         this.addEntry(waypointEntry);
                     }
@@ -140,12 +142,10 @@ public class CListElementsScreen extends Screen{
         }
 
         public void setupEntries(){
-            for(int i = 0; i < CListVariables.data.folders.size(); i++){
-                CListFolder folder = CListVariables.data.folders.get(i);
+            for(CListFolder folder : CListVariables.data.folders){
                 navigateFolder(folder, 0);
             }
-            for(int i = 0; i < CListVariables.data.waypoints.size(); i++){
-                CListWaypoint waypoint = CListVariables.data.waypoints.get(i);
+            for(CListWaypoint waypoint : CListVariables.data.waypoints){
                 WaypointEntry entry = new WaypointEntry(waypoint, 0);
                 this.addEntry(entry);
             }
@@ -163,19 +163,12 @@ public class CListElementsScreen extends Screen{
 
         public void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput){}
 
-        public FolderEntry isOverFolder(double mouseX, double mouseY){
-            ScrollListEntry entry = getEntryAtPosition(mouseX, mouseY);
-            if(entry instanceof FolderEntry){
-                return (FolderEntry) entry;
-            }
-            return null;
-        }
-
         @Override
         public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick){
             if(event.button() == 0){
                 isDragging = false;
-                selectedFolder = null;
+                dropOffEntry = null;
+                ghostFollower = null;
                 dragStartX = event.x();
                 dragStartY = event.y();
             }
@@ -197,23 +190,73 @@ public class CListElementsScreen extends Screen{
             return found;
         }
 
-        @Override
-        public boolean mouseReleased(@NonNull MouseButtonEvent event){
-            if(isDragging && selectedFolder != null){
-                if(selectedElement instanceof CListWaypoint waypoint){
-                    CListClient.deleteElement(selectedElement);
-                    selectedFolder.folder.waypoints.addFirst(waypoint);
-                }
-                else if(selectedElement instanceof CListFolder folder){
-                    if(!Objects.equals(folder, selectedFolder.folder) && !findFolder(folder, selectedFolder.folder)){
-                        CListClient.deleteElement(selectedElement);
-                        selectedFolder.folder.folders.addFirst(folder);
+        public CListFolder findParentFolder(CListFolder folder, CListWaypoint waypoint){
+            if(folder.waypoints.contains(waypoint)){
+                return folder;
+            }
+            else{
+                if(!folder.folders.isEmpty()){
+                    for(CListFolder f : folder.folders){
+                        CListFolder parent = findParentFolder(f, waypoint);
+                        if(parent != null){
+                            return parent;
+                        }
                     }
                 }
-                isDragging = false;
-                selectedFolder = null;
-                this.refreshElements();
             }
+            return null;
+        }
+
+        @Override
+        public boolean mouseReleased(@NonNull MouseButtonEvent event){
+            if(isDragging && dropOffEntry != null){
+                if(dropOffEntry instanceof FolderEntry folderEntry){
+                    if(selectedElement instanceof CListWaypoint waypoint){
+                        CListClient.deleteElement(selectedElement);
+                        folderEntry.folder.waypoints.addFirst(waypoint);
+                    }
+                    else if(selectedElement instanceof CListFolder folder){
+                        if(!Objects.equals(folder, folderEntry.folder) && !findFolder(folder, folderEntry.folder)){
+                            CListClient.deleteElement(selectedElement);
+                            folderEntry.folder.folders.addFirst(folder);
+                        }
+                    }
+                }
+                if(dropOffEntry instanceof WaypointEntry waypointEntry){
+                    if(selectedElement instanceof CListWaypoint waypoint){
+                        if(waypointEntry.depth == 0){
+                            int pos = CListVariables.data.waypoints.indexOf(waypointEntry.waypoint);
+                            if(pos != -1){
+                                CListClient.deleteElement(selectedElement);
+                                CListVariables.data.waypoints.add(pos, waypoint);
+                            }
+                        }
+                        else{
+                            CList.LOGGER.info(waypointEntry.waypoint.name);
+                            CListFolder folder = null;
+                            for(CListFolder f : CListVariables.data.folders){
+                                folder = findParentFolder(f, waypointEntry.waypoint);
+                                if(folder != null){
+                                    break;
+                                }
+                            }
+                            if(folder != null){
+                                int pos = folder.waypoints.indexOf(waypointEntry.waypoint);
+                                if(pos != -1){
+                                    CListClient.deleteElement(selectedElement);
+                                    folder.waypoints.add(pos, waypoint);
+                                }
+                            }
+                        }
+                    }
+                }
+                CListVariables.savedSinceLastUpdate = false;
+                this.refreshElements();
+                deselectCurrentEntry();
+            }
+            isDragging = false;
+            dropOffEntry = null;
+            ghostFollower = null;
             return super.mouseReleased(event);
         }
 
@@ -226,9 +269,69 @@ public class CListElementsScreen extends Screen{
                     return true;
                 }
                 isDragging = true;
-                selectedFolder = isOverFolder(event.x(), event.y());
+                CListElement element = null;
+                if(selectedElement instanceof CListFolder folder){
+                    element = folder;
+                }
+                else if(selectedElement instanceof CListWaypoint waypoint){
+                    element = waypoint;
+                }
+                if(element != null){
+                    ghostFollower = new GhostFollower(0, 0, 245, 25, element);
+                }
+                dropOffEntry = getEntryAtPosition(event.x(), event.y());
             }
             return super.mouseDragged(event, dx, dy);
+        }
+
+        @Override
+        protected void extractSelection(@NonNull GuiGraphicsExtractor graphics, @NonNull ScrollListEntry entry, int outlineColor){
+            if(!isDragging){
+                super.extractSelection(graphics, entry, outlineColor);
+            }
+        }
+
+        @Override
+        public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a){
+            super.extractWidgetRenderState(graphics, mouseX, mouseY, a);
+            if(isDragging && dropOffEntry != null && dropOffEntry instanceof WaypointEntry waypointEntry && this.getSelected() != null && this.getSelected() != dropOffEntry){
+                int modifier = 0;
+                if(dragStartY < mouseY && dropOffEntry.depth == this.getSelected().depth){
+                    modifier = this.defaultEntryHeight;
+                }
+                graphics.horizontalLine(waypointEntry.getX() - 5, waypointEntry.getX() + this.getRowWidth() + 5, waypointEntry.getY() + modifier, 0xFF2B87C7);
+            }
+            if(ghostFollower != null){
+                ghostFollower.extractWidgetRenderState(graphics, mouseX, mouseY, a);
+            }
+        }
+
+        public void deselectCurrentEntry(){
+            selectedElement = null;
+            updateCopyCoordinatesButtonText(NOTHING_SELECTED);
+            this.setSelected(null);
+        }
+
+        private class GhostFollower extends AbstractWidget{
+            private final CListElement element;
+
+            public GhostFollower(int x, int y, int width, int height, CListElement element){
+                super(x, y, width, height, Component.nullToEmpty(element.name));
+                this.element = element;
+            }
+
+            @Override
+            protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a){
+                int fontWidth = font.width("The nether");
+                graphics.fill(mouseX, mouseY, mouseX + this.getWidth(), mouseY + this.getHeight(), 0xFFFFFFFF);
+                graphics.fill(mouseX + 1, mouseY + 1, mouseX + this.getWidth() - 1, mouseY + this.getHeight() - 1, 0xFF888888);
+                ActiveTextCollector collector = graphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
+                collector.acceptScrolling(element.getDimensionText(), mouseX + 183 + fontWidth / 2, mouseX + 183, mouseX + 183 + fontWidth, mouseY + 2, mouseY + font.lineHeight + 12);
+                graphics.text(CListVariables.minecraftClient.font, element.name, mouseX + 7, mouseY + 8, element.color.getHex());
+            }
+
+            @Override
+            protected void updateWidgetNarration(NarrationElementOutput output){}
         }
 
         private static class TextureButton extends Button{
@@ -260,6 +363,7 @@ public class CListElementsScreen extends Screen{
 
         private abstract class ScrollListEntry extends AbstractSelectionList.Entry<ScrollListEntry>{
             protected int depth;
+            protected int fontWidth = font.width("The nether");
 
             ScrollListEntry(int depth){
                 this.depth = depth;
@@ -286,23 +390,48 @@ public class CListElementsScreen extends Screen{
                 this.folder = folder;
             }
 
+            private int getChildren(CListFolder folder){
+                int children = 0;
+                if(folder.extended){
+                    children += folder.waypoints.size();
+                    if(!folder.folders.isEmpty()){
+                        for(CListFolder child : folder.folders){
+                            children += 1;
+                            children += getChildren(child);
+                        }
+                    }
+                }
+                return children;
+            }
+
             @Override
             public void extractContent(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float deltaTicks){
                 int x = this.getX() + depth * 10;
                 int y = this.getY();
-                int color = 0x55FFFFFF;
-                if(ScrollList.this.selectedFolder == this && ScrollList.this.getSelected() != this){
-                    color = 0xFF2B87C7;
+                if(ScrollList.this.dropOffEntry == this && ScrollList.this.getSelected() != this){
+                    int extra = 0;
+                    if(folder.extended){
+                        extra += folder.waypoints.size();
+                        extra += folder.folders.size();
+                        for(CListFolder f : folder.folders){
+                            extra += getChildren(f);
+                        }
+                    }
+                    extra = 25 * extra;
+                    guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight() + extra, 0xFF2B87C7);
+                    guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight() - 1 + extra, -16777216);
                 }
-                guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight() - 1, color);
+                guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight() - 1, 0x55FFFFFF);
                 visibility.setX(x + 5);
                 visibility.setY(y + 6);
                 visibility.extractContents(guiGraphics, mouseX, mouseY, deltaTicks);
-                int fontWidth = font.width("The nether");
                 ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
-                collector.acceptScrolling(folder.getDimensionText(), x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
+                collector.acceptScrolling(folder.getDimensionText(), x + 193 + fontWidth / 2, x + 193, x + 193 + fontWidth, y + 2, y + font.lineHeight + 12);
                 guiGraphics.text(CListVariables.minecraftClient.font, (folder.extended ? "▼" : "▶"), x + 25, y + 8, folder.color.getHex());
                 guiGraphics.text(CListVariables.minecraftClient.font, folder.name, x + 35, y + 8, folder.color.getHex());
+                if(this.isFocused() && ScrollList.this.isDragging){
+                    guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight() - 1, 0x80000000);
+                }
             }
 
             @Override
@@ -316,6 +445,7 @@ public class CListElementsScreen extends Screen{
                 if(doubled){
                     folder.toggleExtended();
                     refreshElements();
+                    deselectCurrentEntry();
                 }
                 return super.mouseClicked(mouseButtonEvent, doubled);
             }
@@ -338,16 +468,18 @@ public class CListElementsScreen extends Screen{
             public void extractContent(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float deltaTicks){
                 int x = this.getX() + depth * 10;
                 int y = this.getY();
-                if(this.isFocused()){
+                if(this.isFocused() && !ScrollList.this.isDragging){
                     guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight() - 1, 0x88FFFFFF);
                 }
                 visibility.setX(x + 5);
                 visibility.setY(y + 6);
                 visibility.extractContents(guiGraphics, mouseX, mouseY, deltaTicks);
-                int fontWidth = font.width("The nether");
                 ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
                 collector.acceptScrolling(waypoint.getDimensionText(), x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
                 guiGraphics.text(CListVariables.minecraftClient.font, waypoint.name, x + 25, y + 8, waypoint.color.getHex());
+                if(this.isFocused() && ScrollList.this.isDragging){
+                    guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight() - 1, 0x80535353);
+                }
             }
 
             @Override
