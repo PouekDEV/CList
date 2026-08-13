@@ -30,6 +30,7 @@ public class CListWaypoint extends CListElement{
         this.name = waypointName;
         this.dimension = waypointDimension;
         this.color = waypointColor;
+        this.parent = null;
         this.render = isRendered;
         this.deathpoint = isDeathpoint;
         this.locked = false;

@@ -7,6 +7,7 @@ public abstract class CListElement{
     public String name;
     public String dimension;
     public CListElementColor color;
+    public transient CListFolder parent;
     public boolean render;
 
     public void toggleVisibility(){

@@ -13,6 +13,7 @@ public class CListFolder extends CListElement{
         this.name = name;
         this.dimension = dimension;
         this.color = color;
+        this.parent = null;
         this.folders = Lists.newArrayList();
         this.render = isRendered;
         this.extended = extended;

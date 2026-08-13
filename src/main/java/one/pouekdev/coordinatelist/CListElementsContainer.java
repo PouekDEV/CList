@@ -13,11 +13,10 @@ public class CListElementsContainer{
         waypoints = Lists.newArrayList();
     }
 
-    private void navigateFolder(CListFolder folder, List<CListWaypoint> waypoints, boolean ignoreHidden){
+    private void getAllWaypoints(CListFolder folder, List<CListWaypoint> waypoints, boolean ignoreHidden){
         if(folder.render || !ignoreHidden){
             if(folder.waypoints != null){
-                for(int i = 0; i < folder.waypoints.size(); i++){
-                    CListWaypoint waypoint = folder.waypoints.get(i);
+                for(CListWaypoint waypoint : folder.waypoints){
                     if(waypoint.render || !ignoreHidden){
                         waypoints.addFirst(waypoint);
                     }
@@ -25,7 +24,7 @@ public class CListElementsContainer{
             }
             if(!folder.folders.isEmpty()){
                 for(CListFolder f : folder.folders){
-                    navigateFolder(f, waypoints, ignoreHidden);
+                    getAllWaypoints(f, waypoints, ignoreHidden);
                 }
             }
         }
@@ -35,8 +34,28 @@ public class CListElementsContainer{
         List<CListWaypoint> waypoints = Lists.newArrayList();
         waypoints.addAll(this.waypoints);
         for(CListFolder folder: this.folders){
-            navigateFolder(folder, waypoints, ignoreHidden);
+            getAllWaypoints(folder, waypoints, ignoreHidden);
         }
         return waypoints;
+    }
+
+    private void assignParents(CListFolder parent, CListFolder folder, int depth){
+        if(folder.parent == null && depth > 0){
+            folder.parent = parent;
+        }
+        for(CListWaypoint waypoint : folder.waypoints){
+            if(waypoint.parent == null){
+                waypoint.parent = folder;
+            }
+        }
+        for(CListFolder f : folder.folders){
+            assignParents(folder, f, depth + 1);
+        }
+    }
+
+    public void assignParents(){
+        for(CListFolder folder: this.folders){
+            assignParents(null, folder, 0);
+        }
     }
 }

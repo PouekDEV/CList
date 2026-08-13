@@ -153,51 +153,21 @@ public class CListClient implements ClientModInitializer{
         CListVariables.minecraftClient.setScreen(new CListElementConfig(Component.literal("Config"), folder, false));
     }
 
-    public static void findAndDeleteFromFolder(CListFolder folder, CListWaypoint waypoint){
-        if(folder.waypoints.contains(waypoint)){
-            folder.waypoints.remove(waypoint);
-        }
-        else{
-            if(!folder.folders.isEmpty()){
-                for(CListFolder f : folder.folders){
-                    findAndDeleteFromFolder(f, waypoint);
-                }
-            }
-        }
-    }
-
-    public static void findAndDeleteFolder(CListFolder folder, CListFolder needle){
-        if(folder.folders.contains(needle)){
-            folder.folders.remove(needle);
-        }
-        else{
-            if(!folder.folders.isEmpty()){
-                for(CListFolder f : folder.folders){
-                    findAndDeleteFolder(f, needle);
-                }
-            }
-        }
-    }
-
     public static void deleteElement(CListElement element){
         if(element instanceof CListWaypoint waypoint){
             if(CListVariables.data.waypoints.contains(waypoint)){
                 CListVariables.data.waypoints.remove(waypoint);
             }
             else{
-                for(CListFolder folder : CListVariables.data.folders){
-                    findAndDeleteFromFolder(folder, waypoint);
-                }
+                waypoint.parent.waypoints.remove(waypoint);
             }
         }
-        if(element instanceof CListFolder folder){
+        else if(element instanceof CListFolder folder){
             if(CListVariables.data.folders.contains(folder)){
                 CListVariables.data.folders.remove(folder);
             }
             else{
-                for(CListFolder haystack : CListVariables.data.folders){
-                    findAndDeleteFolder(haystack, folder);
-                }
+                folder.parent.folders.remove(folder);
             }
         }
         CListVariables.savedSinceLastUpdate = false;
@@ -218,6 +188,7 @@ public class CListClient implements ClientModInitializer{
                 CListElementsContainer dataContainer = CListData.loadListFromFile("clist_" + CListVariables.worldName + ".json");
                 if(dataContainer != null){
                     CListVariables.data = dataContainer;
+                    CListVariables.data.assignParents();
                     CList.LOGGER.info("Loaded data for " + CListVariables.worldName);
                 }
                 else{
