@@ -93,7 +93,7 @@ public class CListElementConfig extends Screen{
             Identifier id = key.identifier();
             dimensions.add(id.toString());
         }
-        this.waypointDimension = new CListDropdown((this.width - 150) / 2, waypointDimensionY, 150, this.height - 40, 20, Component.literal(element.dimension), dimensions, false);
+        this.waypointDimension = new CListDropdown((this.width - 150) / 2, waypointDimensionY, 160, this.height / 2, 20, Component.literal(element.dimension), dimensions, false);
         this.waypointColor = new EditBox(font, (this.width - 70) / 2, (this.height - 20) / 2 + 41, 70, 20, Component.literal(""));
         this.waypointColor.setCanLoseFocus(true);
         this.waypointColor.setMaxLength(6);
