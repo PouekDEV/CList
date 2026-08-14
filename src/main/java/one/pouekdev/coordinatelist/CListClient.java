@@ -94,8 +94,7 @@ public class CListClient implements ClientModInitializer{
                             if(CListConfig.deathpointLimit > 0){
                                 int count = 0;
                                 List<CListWaypoint> waypoints = CListVariables.data.getAllWaypoints(false);
-                                for(int i = waypoints.size()-1; i > 0; i--){
-                                    CListWaypoint waypoint = waypoints.get(i);
+                                for(CListWaypoint waypoint : waypoints){
                                     if(waypoint.deathpoint){
                                         if(!waypoint.locked){
                                             count++;
