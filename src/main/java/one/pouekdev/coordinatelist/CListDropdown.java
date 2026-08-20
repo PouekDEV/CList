@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -21,17 +22,19 @@ public class CListDropdown extends AbstractWidget{
             Identifier.withDefaultNamespace("widget/text_field"), Identifier.withDefaultNamespace("widget/text_field_highlighted")
     );
     private final OptionList optionList;
-    private boolean clicked;
+    private final Runnable onSelect;
     private final int entryHeight;
     private final int entryWidth;
+    private boolean clicked;
     private boolean hoveringOverButton;
 
-    CListDropdown(int x, int y, int width, int height, int entryHeight, Component message, List<String> options, boolean clicked){
+    CListDropdown(int x, int y, int width, int height, int entryHeight, Component message, List<String> options, @Nullable Runnable onSelect, boolean clicked){
         super(x, y, width, height, message);
         this.entryHeight = entryHeight;
         this.entryWidth = width - 10;
         this.hoveringOverButton = false;
         this.clicked = clicked;
+        this.onSelect = onSelect;
         this.optionList = new OptionList(CListVariables.minecraftClient, width, height - entryHeight, x - 5, y + entryHeight - 2, entryHeight, entryWidth);
         for(String s : options){
             Component option = Component.nullToEmpty(s);
@@ -44,7 +47,7 @@ public class CListDropdown extends AbstractWidget{
         Identifier sprite = SPRITES.get(this.isActive(), this.isFocused());
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, this.getX(), this.getY(), entryWidth, entryHeight);
         ActiveTextCollector collector = graphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
-        collector.acceptScrolling(message, this.getX(), this.getRight() - this.getWidth() + 4, this.getRight() - 4, this.getY(), this.getY() + entryHeight);
+        collector.acceptScrolling(message, this.getX(), this.getX() + 4, this.getRight() - 14, this.getY(), this.getY() + entryHeight);
         if(clicked){
             optionList.extractWidgetRenderState(graphics, mouseX, mouseY, a);
         }
@@ -55,6 +58,18 @@ public class CListDropdown extends AbstractWidget{
         else{
             hoveringOverButton = false;
         }
+    }
+
+    @Override
+    public void setX(int x){
+        super.setX(x);
+        this.optionList.setX(x - 5);
+    }
+
+    @Override
+    public void setY(int y){
+        super.setY(y);
+        this.optionList.setY(y + entryHeight - 2);
     }
 
     public boolean isClicked(){
@@ -132,7 +147,6 @@ public class CListDropdown extends AbstractWidget{
 
     private class OptionList extends AbstractSelectionList<OptionList.OptionListEntry>{
         private final int rowWidth;
-        private OptionListEntry currentEntry;
 
         public OptionList(Minecraft minecraft, int width, int height, int x, int y, int defaultEntryHeight, int defaultEntryWidth){
             super(minecraft, width, height, y, defaultEntryHeight);
@@ -144,20 +158,9 @@ public class CListDropdown extends AbstractWidget{
             return rowWidth;
         }
 
-        public void setCurrentEntry(OptionListEntry currentEntry){
-            this.addEntry(this.currentEntry);
-            this.currentEntry = currentEntry;
-            this.removeEntry(currentEntry);
-        }
-
         public void addEntry(Component message){
             OptionListEntry entry = new OptionListEntry(message);
-            if(!message.getString().equals(CListDropdown.this.message.getString())){
-                this.addEntry(entry);
-            }
-            else{
-                currentEntry = entry;
-            }
+            this.addEntry(entry);
         }
 
         @Override
@@ -194,9 +197,11 @@ public class CListDropdown extends AbstractWidget{
                     if(CListDropdown.this.clicked){
                         playDownSound(CListVariables.minecraftClient.getSoundManager());
                     }
-                    setCurrentEntry(this);
                     CListDropdown.this.message = message;
                     CListDropdown.this.clicked = false;
+                    if(CListDropdown.this.onSelect != null){
+                        CListDropdown.this.onSelect.run();
+                    }
                     return super.mouseClicked(mouseButtonEvent, doubled);
                 }
                 return false;
@@ -212,7 +217,7 @@ public class CListDropdown extends AbstractWidget{
                     graphics.requestCursor(CursorTypes.POINTING_HAND);
                 }
                 ActiveTextCollector collector = graphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
-                collector.acceptScrolling(message, this.getX(), this.getX() + this.getWidth() - this.getWidth() + 4, this.getX() + this.getWidth() - 4, this.getY() + this.getHeight() - this.getHeight(), this.getY() + this.getHeight());
+                collector.acceptScrolling(message, this.getX(), this.getX() + 4, this.getX() + this.getWidth() - 4, this.getY(), this.getY() + this.getHeight());
             }
         }
     }

@@ -7,14 +7,15 @@ import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import org.lwjgl.glfw.GLFW;
 import eu.midnightdust.lib.config.MidnightConfig;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class CListClient implements ClientModInitializer{
     KeyMapping openWaypointsKeybind;
@@ -71,10 +72,18 @@ public class CListClient implements ClientModInitializer{
                 CListVariables.worldName = null;
                 CListVariables.lastWorld = null;
                 CListVariables.isWorldError = false;
+                CListVariables.dimensions.clear();
             }
             else{
                 if(!CListVariables.isWorldError){
                     try{
+                        if(CListVariables.dimensions.isEmpty()){
+                            Set<ResourceKey<Level>> levels =  CListVariables.minecraftClient.getConnection().levels();
+                            for(ResourceKey<Level> key : levels){
+                                CListVariables.dimensions.add(key.identifier().toString());
+                            }
+                            Collections.sort(CListVariables.dimensions);
+                        }
                         CListVariables.lastWorld = client.level;
                         checkForWorldChanges(CListVariables.lastWorld);
                         checkIfSaveIsNeeded(false);
@@ -146,7 +155,7 @@ public class CListClient implements ClientModInitializer{
 
     public static void addNewFolder(){
         CList.LOGGER.info("New folder for dimension: " + CListVariables.lastWorld.dimension().identifier());
-        CListFolder folder = new CListFolder(Component.translatable("new.folder").getString(), CListVariables.lastWorld.dimension().identifier().toString(), new CListElementColor(), true, true);
+        CListFolder folder = new CListFolder(Component.translatable("folder.new.folder").getString(), CListVariables.lastWorld.dimension().identifier().toString(), new CListElementColor(), true, true);
         CListVariables.data.folders.addFirst(folder);
         CListVariables.savedSinceLastUpdate = false;
         CListVariables.minecraftClient.setScreen(new CListElementConfig(Component.literal("Config"), folder, false));

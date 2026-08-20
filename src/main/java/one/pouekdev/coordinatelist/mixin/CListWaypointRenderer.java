@@ -27,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 @Mixin(LevelRenderer.class)
 public abstract class CListWaypointRenderer{
@@ -115,7 +114,7 @@ public abstract class CListWaypointRenderer{
             List<WaypointWithDistance> waypointsWithDistance = Lists.newArrayList();
             for(CListWaypoint waypoint: waypoints){
                 float distance = distanceTo(waypoint);
-                if(Objects.equals(waypoint.getDimensionString(), getDimension(CListVariables.lastWorld.dimension().identifier().toString())) && waypoint.render && (CListConfig.renderDistance == 0 || CListConfig.renderDistance >= distance)){
+                if(waypoint.getDimensionString().equals(getDimension(CListVariables.lastWorld.dimension().identifier().toString())) && waypoint.render && (CListConfig.renderDistance == 0 || CListConfig.renderDistance >= distance)){
                     WaypointWithDistance waypointWithDistance = new WaypointWithDistance(waypoint, distance);
                     waypointsWithDistance.add(waypointWithDistance);
                 }

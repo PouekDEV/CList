@@ -9,6 +9,7 @@ import java.util.List;
 public class CListVariables{
     public static CListElementsContainer data;
     public static List<CListDelayedEvent> delayedEvents = Lists.newArrayList();
+    public static List<String> dimensions = Lists.newArrayList();
     public static String worldName;
     public static ClientLevel lastWorld;
     public static Minecraft minecraftClient = Minecraft.getInstance();

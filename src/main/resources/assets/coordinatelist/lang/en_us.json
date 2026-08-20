@@ -13,14 +13,18 @@
   "coordinatelist.midnightconfig.detectCoordsInChat": "Detect coordinates from chat",
   "coordinatelist.midnightconfig.deathpointLimit": "Max deathpoints (0 - unlimited)",
   "coordinatelist.midnightconfig.deleteDeathpointsWhenReached": "Delete reached deathpoints",
+  "coordinatelist.midnightconfig.defaultDimensionSort": "Default sorting option in the waypoint menu",
   "modmenu.summaryTranslation.coordinatelist": "A simple minimalistic Fabric mod for saving your coordinates.",
   "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (CList for short) is a simple minimalistic Fabric mod for saving your coordinates. No minimaps. Just a list with in-game waypoints.",
   "waypoint.last.death": "Last death",
   "waypoint.old.death": "Old death",
-  "waypoint.new.waypoint": "New Waypoint",
-  "buttons.add.new.waypoint": "Add a new waypoint in current position",
+  "waypoint.new.waypoint": "New waypoint",
+  "buttons.add.new.waypoint": "Create a new waypoint",
   "buttons.lock.deathpoint": "Auto delete",
-  "new.folder": "New Folder",
+  "buttons.add.new.folder": "Create a new folder",
+  "folder.new.folder": "New folder",
   "tooltip.copy.waypoint.coordinates": "Click to copy selected waypoints coordinates.\n\nUse with CTRL to copy as a teleport command.",
-  "chat.create.waypoint.message": "[Create a waypoint]"
+  "chat.create.waypoint.message": "[Create a waypoint]",
+  "dimensions.all": "All",
+  "dimensions.current": "Current dimension"
 }

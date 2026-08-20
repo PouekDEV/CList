@@ -4,8 +4,6 @@ import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.layouts.FrameLayout;
-import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -13,16 +11,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ARGB;
-import net.minecraft.world.level.Level;
-import org.apache.commons.compress.utils.Lists;
 import org.joml.Matrix3x2f;
 import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
-import java.util.List;
-import java.util.Set;
 
 public class CListElementConfig extends Screen{
     private final CListElement element;
@@ -55,11 +48,8 @@ public class CListElementConfig extends Screen{
 
     @Override
     protected void init(){
-        GridLayout gridLayout = new GridLayout();
         hsv = element.color.getHSV();
-        gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
-        GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(2);
-        doneButton = rowHelper.addChild(Button.builder(Component.translatable("selectWorld.delete"), button -> {
+        doneButton = Button.builder(Component.translatable("selectWorld.delete"), _ -> {
             CListClient.deleteElement(element);
             if(!viaKeybind){
                 CListVariables.minecraftClient.setScreen(new CListElementsScreen(Component.literal("Waypoints")));
@@ -67,8 +57,9 @@ public class CListElementConfig extends Screen{
             else{
                 onClose();
             }
-        }).width(150).build(), 1, gridLayout.newCellSettings().paddingBottom(10));
-        deleteButton = rowHelper.addChild(Button.builder(Component.translatable("gui.done"), button -> {
+        }).bounds((this.width / 2) - 155, this.height - 30, 150, 20).build();
+        addRenderableWidget(doneButton);
+        deleteButton = Button.builder(Component.translatable("gui.done"), _ -> {
             setValues();
             if(!viaKeybind){
                 CListVariables.minecraftClient.setScreen(new CListElementsScreen(Component.literal("Waypoints")));
@@ -76,7 +67,8 @@ public class CListElementConfig extends Screen{
             else{
                 onClose();
             }
-        }).width(150).build(), 1, gridLayout.newCellSettings().paddingBottom(10));
+        }).bounds((this.width / 2) + 5, this.height - 30, 150, 20).build();
+        addRenderableWidget(deleteButton);
         int waypointNameY = (this.height - 20) / 2 - 100;
         int waypointDimensionY = (this.height - 20) / 2 - 75;
         if(waypoint == null){
@@ -87,13 +79,7 @@ public class CListElementConfig extends Screen{
         this.waypointName.setCanLoseFocus(true);
         this.waypointName.setMaxLength(25);
         this.waypointName.setValue(element.name);
-        List<String> dimensions = Lists.newArrayList();
-        Set<ResourceKey<Level>> levels =  CListVariables.minecraftClient.getConnection().levels();
-        for(ResourceKey<Level> key : levels){
-            Identifier id = key.identifier();
-            dimensions.add(id.toString());
-        }
-        this.waypointDimension = new CListDropdown((this.width - 150) / 2, waypointDimensionY, 160, this.height / 2, 20, Component.literal(element.dimension), dimensions, false);
+        this.waypointDimension = new CListDropdown((this.width - 150) / 2, waypointDimensionY, 160, this.height / 2, 20, Component.literal(element.dimension), CListVariables.dimensions, null, false);
         this.waypointColor = new EditBox(font, (this.width - 70) / 2, (this.height - 20) / 2 + 41, 70, 20, Component.literal(""));
         this.waypointColor.setCanLoseFocus(true);
         this.waypointColor.setMaxLength(6);
@@ -109,9 +95,6 @@ public class CListElementConfig extends Screen{
             this.z.setCanLoseFocus(true);
             this.z.setValue(String.valueOf(waypoint.z));
         }
-        gridLayout.arrangeElements();
-        FrameLayout.alignInRectangle(gridLayout, 0, 0, this.width, this.height, 0.5f, 1f);
-        gridLayout.visitWidgets(this::addRenderableWidget);
         addRenderableWidget(this.waypointName);
         addRenderableWidget(this.waypointColor);
         if(waypoint != null){
