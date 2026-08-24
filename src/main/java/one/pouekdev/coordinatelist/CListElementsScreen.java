@@ -247,6 +247,17 @@ public class CListElementsScreen extends Screen{
             return found;
         }
 
+        public int maxNestingDepth(CListFolder folder){
+            int currentDepth = 0;
+            for(CListFolder f : folder.folders){
+                if(folder.folders.getFirst() == f){
+                    currentDepth += 1;
+                }
+                currentDepth += maxNestingDepth(f);
+            }
+            return currentDepth;
+        }
+
         @Override
         public int maxScrollAmount(){
             return Math.max(0, this.contentHeight() - this.height + this.defaultEntryHeight);
@@ -263,7 +274,7 @@ public class CListElementsScreen extends Screen{
                             folderEntry.folder.waypoints.addFirst(waypoint);
                         }
                         else if(selectedElement instanceof CListFolder folder){
-                            if(folder != folderEntry.folder && !findFolder(folder, folderEntry.folder)){
+                            if(folder != folderEntry.folder && !findFolder(folder, folderEntry.folder) && folderEntry.depth + maxNestingDepth(folder) < 15){
                                 CListClient.deleteElement(selectedElement);
                                 folder.parent = folderEntry.folder;
                                 folderEntry.folder.folders.addFirst(folder);
@@ -299,7 +310,7 @@ public class CListElementsScreen extends Screen{
                                 CListVariables.data.folders.add(folder);
                             }
                             else{
-                                if(folder != waypointEntry.waypoint.parent && !findFolder(folder, waypointEntry.waypoint.parent)){
+                                if(folder != waypointEntry.waypoint.parent && !findFolder(folder, waypointEntry.waypoint.parent) && waypointEntry.depth + maxNestingDepth(folder) < 15){
                                     CListClient.deleteElement(selectedElement);
                                     folder.parent = waypointEntry.waypoint.parent;
                                     waypointEntry.waypoint.parent.folders.add(folder);
@@ -460,9 +471,20 @@ public class CListElementsScreen extends Screen{
         private abstract class ElementListEntry extends AbstractSelectionList.Entry<ElementListEntry>{
             public int depth;
             protected int fontWidth = font.width("The nether");
+            protected final int CONNECTOR_COLOR = 0xFFE5E4E2;
 
             ElementListEntry(int depth){
                 this.depth = depth;
+            }
+
+            protected void displayConnectors(GuiGraphicsExtractor guiGraphics, CListFolder previousFolder, CListFolder folder, int extra){
+                if(folder.folders.getLast() != previousFolder || !folder.waypoints.isEmpty()){
+                    int x = 10 * (depth - 2 - extra);
+                    guiGraphics.text(CListVariables.minecraftClient.font, "│", this.getX() + 5 + x, this.getY() + 1, CONNECTOR_COLOR, false);
+                }
+                if(folder.parent != null){
+                    displayConnectors(guiGraphics, folder, folder.parent, extra + 1);
+                }
             }
 
             @Override
@@ -521,6 +543,22 @@ public class CListElementsScreen extends Screen{
                 visibility.setX(x + 5);
                 visibility.setY(y + 6);
                 visibility.extractContents(guiGraphics, mouseX, mouseY, deltaTicks);
+                if(depth != 0){
+                    String character = "└";
+                    if(folder.parent.folders.getLast() != folder || !folder.parent.waypoints.isEmpty()){
+                        character = "├";
+                    }
+                    guiGraphics.pose().pushMatrix();
+                    guiGraphics.pose().scale(1, 2.5f);
+                    guiGraphics.pose().translate(0, -this.getY() / (25f/15f));
+                    guiGraphics.text(CListVariables.minecraftClient.font, character, this.getX() + 5 + 10 * (depth - 1), y + 1, CONNECTOR_COLOR, false);
+                    if(folder.parent.parent != null){
+                        if(depth > 1){
+                            displayConnectors(guiGraphics, folder.parent, folder.parent.parent, 0);
+                        }
+                    }
+                    guiGraphics.pose().popMatrix();
+                }
                 ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
                 collector.acceptScrolling(folder.getDimensionText(), x + 193 + fontWidth / 2, x + 193, x + 193 + fontWidth, y + 2, y + font.lineHeight + 12);
                 guiGraphics.text(CListVariables.minecraftClient.font, (folder.extended ? "▼" : "▶"), x + 25, y + 8, folder.color.getHex());
@@ -574,6 +612,22 @@ public class CListElementsScreen extends Screen{
                 visibility.setX(x + 5);
                 visibility.setY(y + 6);
                 visibility.extractContents(guiGraphics, mouseX, mouseY, deltaTicks);
+                if(depth != 0){
+                    String character = "└";
+                    if(waypoint.parent.waypoints.getLast() != waypoint){
+                        character = "├";
+                    }
+                    guiGraphics.pose().pushMatrix();
+                    guiGraphics.pose().scale(1, 2.5f);
+                    guiGraphics.pose().translate(0, -this.getY() / (25f/15f));
+                    guiGraphics.text(CListVariables.minecraftClient.font, character, this.getX() + 5 + 10 * (depth - 1), y + 1, CONNECTOR_COLOR, false);
+                    if(waypoint.parent.parent != null){
+                        if(depth > 1){
+                            displayConnectors(guiGraphics, waypoint.parent, waypoint.parent.parent, 0);
+                        }
+                    }
+                    guiGraphics.pose().popMatrix();
+                }
                 ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
                 collector.acceptScrolling(waypoint.getDimensionText(), x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
                 guiGraphics.text(CListVariables.minecraftClient.font, waypoint.name, x + 25, y + 8, waypoint.color.getHex());
