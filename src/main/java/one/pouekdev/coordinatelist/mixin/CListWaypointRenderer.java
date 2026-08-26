@@ -16,7 +16,6 @@ import com.mojang.math.Axis;
 import net.minecraft.world.phys.Vec3;
 import one.pouekdev.coordinatelist.*;
 import org.apache.commons.compress.utils.Lists;
-import org.apache.commons.lang3.StringUtils;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -79,16 +78,6 @@ public abstract class CListWaypointRenderer{
         return new Vec3(prx, pry, prz);
     }
 
-    @Unique
-    private static String getDimension(String text){
-        String s = text;
-        s = s.replace("minecraft:", "");
-        s = s.replace("_", " ");
-        s = s.replace(":", " ");
-        s = StringUtils.capitalize(s);
-        return s;
-    }
-
     private static class WaypointWithDistance{
         public CListWaypoint waypoint;
         public float distance;
@@ -114,7 +103,7 @@ public abstract class CListWaypointRenderer{
             List<WaypointWithDistance> waypointsWithDistance = Lists.newArrayList();
             for(CListWaypoint waypoint: waypoints){
                 float distance = distanceTo(waypoint);
-                if(waypoint.getDimensionString().equals(getDimension(CListVariables.lastWorld.dimension().identifier().toString())) && waypoint.render && (CListConfig.renderDistance == 0 || CListConfig.renderDistance >= distance)){
+                if(waypoint.getDimensionString().equals(CListElement.dimensionNoRegistryName(CListVariables.lastWorld.dimension().identifier().toString())) && waypoint.render && (CListConfig.renderDistance == 0 || CListConfig.renderDistance >= distance)){
                     WaypointWithDistance waypointWithDistance = new WaypointWithDistance(waypoint, distance);
                     waypointsWithDistance.add(waypointWithDistance);
                 }

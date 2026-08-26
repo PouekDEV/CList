@@ -18,7 +18,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.compress.utils.Lists;
-import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -41,23 +40,14 @@ public class CListElementsScreen extends Screen{
         super(title);
         dimensions.add(Component.translatable("dimensions.all").getString());
         for(String dimension : CListVariables.dimensions){
-            dimensions.add(dimensionNoRegistryName(dimension));
+            dimensions.add(CListElement.dimensionNoRegistryName(dimension));
         }
-    }
-
-    private String dimensionNoRegistryName(String dimension){
-        String s = dimension;
-        s = s.replace("minecraft:", "");
-        s = s.replace("_", " ");
-        s = s.replace(":", " ");
-        s = StringUtils.capitalize(s);
-        return s;
     }
 
     @Override
     protected void init(){
         int upperRowElementWidth = (this.width - 40) / 4;
-        String selectedDimension = dimensionNoRegistryName(CListVariables.lastWorld.dimension().identifier().toString());
+        String selectedDimension = CListElement.dimensionNoRegistryName(CListVariables.lastWorld.dimension().identifier().toString());
         if(CListConfig.defaultDimensionSort == CListConfig.DefaultDimensionSort.ALL){
             selectedDimension = dimensions.getFirst();
         }
@@ -164,11 +154,19 @@ public class CListElementsScreen extends Screen{
         private GhostFollower ghostFollower;
 
         public ElementList(){
-            super(CListElementsScreen.this.minecraft, CListElementsScreen.this.width, CListElementsScreen.this.height - 64, 32, 25);//32
+            super(CListElementsScreen.this.minecraft, CListElementsScreen.this.width, CListElementsScreen.this.height - 64, 32, 25);
+        }
+
+        private boolean isInCurrentSort(CListElement element){
+            boolean isGlobal = false;
+            if(element instanceof CListFolder folder){
+                isGlobal = folder.dimension.equals(CListElement.GLOBAL_DIMENSION);
+            }
+            return element.getDimensionString().equals(dropdown.getMessage().getString()) || dropdown.getMessage().getString().equals(dimensions.getFirst()) || isGlobal;
         }
 
         private void setupEntries(CListFolder folder, int depth){
-            if(folder.getDimensionString().equals(dropdown.getMessage().getString()) || dropdown.getMessage().getString().equals(dimensions.getFirst())){
+            if(isInCurrentSort(folder)){
                 FolderEntry folderEntry = new FolderEntry(folder, depth);
                 this.addEntry(folderEntry);
                 if(folder.extended){
@@ -179,8 +177,10 @@ public class CListElementsScreen extends Screen{
                     }
                     if(folder.waypoints != null && folder.extended){
                         for(CListWaypoint waypoint : folder.waypoints){
-                            WaypointEntry waypointEntry = new WaypointEntry(waypoint, depth + 1);
-                            this.addEntry(waypointEntry);
+                            if(isInCurrentSort(waypoint)){
+                                WaypointEntry waypointEntry = new WaypointEntry(waypoint, depth + 1);
+                                this.addEntry(waypointEntry);
+                            }
                         }
                     }
                 }
@@ -193,7 +193,7 @@ public class CListElementsScreen extends Screen{
                     setupEntries(folder, 0);
                 }
                 for(CListWaypoint waypoint : CListVariables.data.waypoints){
-                    if(waypoint.getDimensionString().equals(dropdown.getMessage().getString()) || dropdown.getMessage().getString().equals(dimensions.getFirst())){
+                    if(isInCurrentSort(waypoint)){
                         WaypointEntry entry = new WaypointEntry(waypoint, 0);
                         this.addEntry(entry);
                     }
@@ -202,7 +202,7 @@ public class CListElementsScreen extends Screen{
             else{
                 List<CListWaypoint> waypoints = CListVariables.data.getAllWaypoints(false);
                 for(CListWaypoint waypoint : waypoints){
-                    if(waypoint.name.toLowerCase(Locale.ROOT).contains(search.getValue().toLowerCase(Locale.ROOT)) && (waypoint.getDimensionString().equals(dropdown.getMessage().getString())|| dropdown.getMessage().getString().equals(dimensions.getFirst()))){
+                    if(waypoint.name.toLowerCase(Locale.ROOT).contains(search.getValue().toLowerCase(Locale.ROOT)) && isInCurrentSort(waypoint)){
                         WaypointEntry entry = new WaypointEntry(waypoint, 0);
                         this.addEntry(entry);
                     }
@@ -271,12 +271,18 @@ public class CListElementsScreen extends Screen{
                         if(selectedElement instanceof CListWaypoint waypoint){
                             CListClient.deleteElement(selectedElement);
                             waypoint.parent = folderEntry.folder;
+                            if(!folderEntry.folder.dimension.equals(CListElement.GLOBAL_DIMENSION)){
+                                waypoint.dimension = folderEntry.folder.dimension;
+                            }
                             folderEntry.folder.waypoints.addFirst(waypoint);
                         }
                         else if(selectedElement instanceof CListFolder folder){
                             if(folder != folderEntry.folder && !findFolder(folder, folderEntry.folder) && folderEntry.depth + maxNestingDepth(folder) < 15){
                                 CListClient.deleteElement(selectedElement);
                                 folder.parent = folderEntry.folder;
+                                if(!folderEntry.folder.dimension.equals(CListElement.GLOBAL_DIMENSION)){
+                                    folder.dimension = folderEntry.folder.dimension;
+                                }
                                 folderEntry.folder.folders.addFirst(folder);
                             }
                         }
@@ -299,6 +305,9 @@ public class CListElementsScreen extends Screen{
                                 if(pos != -1){
                                     CListClient.deleteElement(selectedElement);
                                     waypoint.parent = waypointEntry.waypoint.parent;
+                                    if(!waypointEntry.waypoint.parent.dimension.equals(CListElement.GLOBAL_DIMENSION)){
+                                        waypoint.dimension = waypointEntry.waypoint.parent.dimension;
+                                    }
                                     waypointEntry.waypoint.parent.waypoints.add(pos, waypoint);
                                 }
                             }
@@ -313,6 +322,9 @@ public class CListElementsScreen extends Screen{
                                 if(folder != waypointEntry.waypoint.parent && !findFolder(folder, waypointEntry.waypoint.parent) && waypointEntry.depth + maxNestingDepth(folder) < 15){
                                     CListClient.deleteElement(selectedElement);
                                     folder.parent = waypointEntry.waypoint.parent;
+                                    if(!waypointEntry.waypoint.parent.dimension.equals(CListElement.GLOBAL_DIMENSION)){
+                                        folder.dimension = waypointEntry.waypoint.parent.dimension;
+                                    }
                                     waypointEntry.waypoint.parent.folders.add(folder);
                                 }
                             }
@@ -478,7 +490,14 @@ public class CListElementsScreen extends Screen{
             }
 
             protected void displayConnectors(GuiGraphicsExtractor guiGraphics, CListFolder previousFolder, CListFolder folder, int extra){
-                if(folder.folders.getLast() != previousFolder || !folder.waypoints.isEmpty()){
+                boolean anotherWaypoint = false;
+                for(CListWaypoint waypoint : folder.waypoints){
+                    anotherWaypoint = isInCurrentSort(waypoint);
+                    if(anotherWaypoint){
+                        break;
+                    }
+                }
+                if((folder.folders.getLast() != previousFolder && isInCurrentSort(folder.folders.get(folder.folders.indexOf(previousFolder) + 1))) || anotherWaypoint){
                     int x = 10 * (depth - 2 - extra);
                     guiGraphics.text(CListVariables.minecraftClient.font, "│", this.getX() + 5 + x, this.getY() + 1, CONNECTOR_COLOR, false);
                 }
@@ -511,9 +530,13 @@ public class CListElementsScreen extends Screen{
             private int getChildren(CListFolder folder){
                 int children = 0;
                 if(folder.extended){
-                    children += folder.waypoints.size();
-                    if(!folder.folders.isEmpty()){
-                        for(CListFolder child : folder.folders){
+                    for(CListWaypoint waypoint : folder.waypoints){
+                        if(isInCurrentSort(waypoint)){
+                            children++;
+                        }
+                    }
+                    for(CListFolder child : folder.folders){
+                        if(isInCurrentSort(child)){
                             children += 1;
                             children += getChildren(child);
                         }
@@ -529,10 +552,16 @@ public class CListElementsScreen extends Screen{
                 if(ElementList.this.dropOffEntry == this && ElementList.this.getSelected() != this && ElementList.this.getSelected() != null){
                     int extra = 0;
                     if(folder.extended){
-                        extra += folder.waypoints.size();
-                        extra += folder.folders.size();
+                        for(CListWaypoint waypoint : folder.waypoints){
+                            if(isInCurrentSort(waypoint)){
+                                extra++;
+                            }
+                        }
                         for(CListFolder f : folder.folders){
-                            extra += getChildren(f);
+                            if(isInCurrentSort(f)){
+                                extra++;
+                                extra += getChildren(f);
+                            }
                         }
                     }
                     extra = 25 * extra;
@@ -543,9 +572,16 @@ public class CListElementsScreen extends Screen{
                 visibility.setX(x + 5);
                 visibility.setY(y + 6);
                 visibility.extractContents(guiGraphics, mouseX, mouseY, deltaTicks);
-                if(depth != 0){
+                if(depth != 0 && CListConfig.displayTreeVisualization){
                     String character = "└";
-                    if(folder.parent.folders.getLast() != folder || !folder.parent.waypoints.isEmpty()){
+                    boolean anotherWaypoint = false;
+                    for(CListWaypoint waypoint : folder.parent.waypoints){
+                        anotherWaypoint = isInCurrentSort(waypoint);
+                        if(anotherWaypoint){
+                            break;
+                        }
+                    }
+                    if((folder.parent.folders.getLast() != folder && isInCurrentSort(folder.parent.folders.get(folder.parent.folders.indexOf(folder) + 1))) || anotherWaypoint){
                         character = "├";
                     }
                     guiGraphics.pose().pushMatrix();
@@ -559,8 +595,14 @@ public class CListElementsScreen extends Screen{
                     }
                     guiGraphics.pose().popMatrix();
                 }
-                ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
-                collector.acceptScrolling(folder.getDimensionText(), x + 193 + fontWidth / 2, x + 193, x + 193 + fontWidth, y + 2, y + font.lineHeight + 12);
+                if(folder.parent == null || folder.parent.dimension.equals(CListElement.GLOBAL_DIMENSION)){
+                    ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
+                    Component dimension = folder.getDimensionText();
+                    if(folder.dimension.equals(CListElement.GLOBAL_DIMENSION)){
+                        dimension = Component.translatable("dimensions.global");
+                    }
+                    collector.acceptScrolling(dimension, x + 193 + fontWidth / 2, x + 193, x + 193 + fontWidth, y + 2, y + font.lineHeight + 12);
+                }
                 guiGraphics.text(CListVariables.minecraftClient.font, (folder.extended ? "▼" : "▶"), x + 25, y + 8, folder.color.getHex());
                 guiGraphics.text(CListVariables.minecraftClient.font, folder.name, x + 35, y + 8, folder.color.getHex());
                 if(this.isFocused() && ElementList.this.isDragging){
@@ -612,9 +654,9 @@ public class CListElementsScreen extends Screen{
                 visibility.setX(x + 5);
                 visibility.setY(y + 6);
                 visibility.extractContents(guiGraphics, mouseX, mouseY, deltaTicks);
-                if(depth != 0){
+                if(depth != 0 && CListConfig.displayTreeVisualization){
                     String character = "└";
-                    if(waypoint.parent.waypoints.getLast() != waypoint){
+                    if(waypoint.parent.waypoints.getLast() != waypoint && isInCurrentSort(waypoint.parent.waypoints.get(waypoint.parent.waypoints.indexOf(waypoint) + 1))){
                         character = "├";
                     }
                     guiGraphics.pose().pushMatrix();
@@ -628,8 +670,10 @@ public class CListElementsScreen extends Screen{
                     }
                     guiGraphics.pose().popMatrix();
                 }
-                ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
-                collector.acceptScrolling(waypoint.getDimensionText(), x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
+                if(waypoint.parent == null || waypoint.parent.dimension.equals(CListElement.GLOBAL_DIMENSION)){
+                    ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
+                    collector.acceptScrolling(waypoint.getDimensionText(), x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
+                }
                 guiGraphics.text(CListVariables.minecraftClient.font, waypoint.name, x + 25, y + 8, waypoint.color.getHex());
                 if(this.isFocused() && ElementList.this.isDragging){
                     guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight() - 1, 0x80535353);

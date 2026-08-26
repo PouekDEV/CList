@@ -14,6 +14,7 @@
   "coordinatelist.midnightconfig.deathpointLimit": "Maksymalna ilość zapisanych punktów śmierci (0 - nielimitowana)",
   "coordinatelist.midnightconfig.deleteDeathpointsWhenReached": "Usuń punkty śmierci po powrocie do nich",
   "coordinatelist.midnightconfig.defaultDimensionSort": "Domyślna opcja sortowania listy punktów orientacyjnych",
+  "coordinatelist.midnightconfig.displayTreeVisualization": "Wyświetlaj wizualizację połączeń folderów i punktów orientacyjnych",
   "modmenu.summaryTranslation.coordinatelist": "Prosty i minimalistyczny mod na Fabric'a do zapisywania swojej pozycji",
   "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (w skrócie CList) to prosty i minimalistyczny mod na Fabric'a do zapisywania swojej pozycji. Zero minimap. Tylko prosta lista z wyświetlanymi punktami orientacyjnymi w grze.",
   "waypoint.last.death": "Ostatnia śmierć",
@@ -26,5 +27,6 @@
   "tooltip.copy.waypoint.coordinates": "Kliknij, aby skopiować współrzędne wybranego punktu orientacyjnego.\n\nUżyj z CTRL, aby skopiować jako komendę teleportującą.",
   "chat.create.waypoint.message": "[Stwórz punkt orientacyjny]",
   "dimensions.all": "Wszystkie",
-  "dimensions.current": "Obecny wymiar"
+  "dimensions.current": "Obecny wymiar",
+  "dimensions.global": "Globalny"
 }

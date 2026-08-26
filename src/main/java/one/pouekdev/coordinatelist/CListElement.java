@@ -9,6 +9,7 @@ public abstract class CListElement{
     public CListElementColor color;
     public transient CListFolder parent;
     public boolean render;
+    public static final String GLOBAL_DIMENSION = ":global";
 
     public void toggleVisibility(){
         this.render = !this.render;
@@ -20,7 +21,11 @@ public abstract class CListElement{
     }
 
     public String getDimensionString(){
-        String s = this.dimension;
+        return dimensionNoRegistryName(this.dimension);
+    }
+
+    public static String dimensionNoRegistryName(String dimension){
+        String s = dimension;
         s = s.replace("minecraft:", "");
         s = s.replace("_", " ");
         s = s.replace(":", " ");

@@ -31,4 +31,5 @@ public class CListConfig extends MidnightConfig {
     @Entry(min=0) public static int deathpointLimit = 10;
     @Entry public static boolean deleteDeathpointsWhenReached = true;
     @Entry public static DefaultDimensionSort defaultDimensionSort = DefaultDimensionSort.CURRENT;
+    @Entry public static boolean displayTreeVisualization = true;
 }

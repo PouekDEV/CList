@@ -12,10 +12,12 @@ import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
+import org.apache.commons.compress.utils.Lists;
 import org.joml.Matrix3x2f;
 import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
+import java.util.List;
 
 public class CListElementConfig extends Screen{
     private final CListElement element;
@@ -23,33 +25,36 @@ public class CListElementConfig extends Screen{
     private boolean renderColorPicker = false;
     private final boolean viaKeybind;
     private boolean lockedDeathpoint = false;
-    private EditBox waypointName;
-    private CListDropdown waypointDimension;
-    private EditBox waypointColor;
+    private EditBox elementName;
+    private CListDropdown elementDimension;
+    private EditBox elementColor;
     private EditBox x, y, z;
-    private SpriteButton changeColor;
+    private SpriteButton toggleSlidersButton;
     private HSVSlider h, s, v;
     private float[] hsv;
-    private Button lockDeathpoint;
+    private Button lockDeathpointButton;
     private Button doneButton;
     private Button deleteButton;
+    private final List<String> dimensions = Lists.newArrayList();
 
     CListElementConfig(Component title, CListElement element, boolean viaKeybind){
         super(title);
         this.element = element;
         if(element instanceof CListFolder){
             this.waypoint = null;
+            this.dimensions.add(Component.translatable("dimensions.global").getString());
         }
         if(element instanceof CListWaypoint){
             this.waypoint = (CListWaypoint) element;
         }
         this.viaKeybind = viaKeybind;
+        this.dimensions.addAll(CListVariables.dimensions);
     }
 
     @Override
     protected void init(){
         hsv = element.color.getHSV();
-        doneButton = Button.builder(Component.translatable("selectWorld.delete"), _ -> {
+        deleteButton = Button.builder(Component.translatable("selectWorld.delete"), _ -> {
             CListClient.deleteElement(element);
             if(!viaKeybind){
                 CListVariables.minecraftClient.setScreen(new CListElementsScreen(Component.literal("Waypoints")));
@@ -58,8 +63,8 @@ public class CListElementConfig extends Screen{
                 onClose();
             }
         }).bounds((this.width / 2) - 155, this.height - 30, 150, 20).build();
-        addRenderableWidget(doneButton);
-        deleteButton = Button.builder(Component.translatable("gui.done"), _ -> {
+        addRenderableWidget(deleteButton);
+        doneButton = Button.builder(Component.translatable("gui.done"), _ -> {
             setValues();
             if(!viaKeybind){
                 CListVariables.minecraftClient.setScreen(new CListElementsScreen(Component.literal("Waypoints")));
@@ -68,22 +73,29 @@ public class CListElementConfig extends Screen{
                 onClose();
             }
         }).bounds((this.width / 2) + 5, this.height - 30, 150, 20).build();
-        addRenderableWidget(deleteButton);
+        addRenderableWidget(doneButton);
         int waypointNameY = (this.height - 20) / 2 - 100;
         int waypointDimensionY = (this.height - 20) / 2 - 75;
         if(waypoint == null){
             waypointNameY = (this.height - 20) / 2 - 75;
             waypointDimensionY = (this.height - 20) / 2 - 50;
         }
-        this.waypointName = new EditBox(font, (this.width - 150) / 2, waypointNameY, 150, 20, Component.literal(""));
-        this.waypointName.setCanLoseFocus(true);
-        this.waypointName.setMaxLength(25);
-        this.waypointName.setValue(element.name);
-        this.waypointDimension = new CListDropdown((this.width - 150) / 2, waypointDimensionY, 160, this.height / 2, 20, Component.literal(element.dimension), CListVariables.dimensions, null, false);
-        this.waypointColor = new EditBox(font, (this.width - 70) / 2, (this.height - 20) / 2 + 41, 70, 20, Component.literal(""));
-        this.waypointColor.setCanLoseFocus(true);
-        this.waypointColor.setMaxLength(6);
-        this.waypointColor.setValue(element.color.getHexNoAlpha());
+        this.elementName = new EditBox(font, (this.width - 150) / 2, waypointNameY, 150, 20, Component.literal(""));
+        this.elementName.setCanLoseFocus(true);
+        this.elementName.setMaxLength(25);
+        this.elementName.setValue(element.name);
+        Component selected = Component.literal(element.dimension);
+        if(element.dimension.equals(CListElement.GLOBAL_DIMENSION)){
+            selected = Component.translatable("dimensions.global");
+        }
+        this.elementDimension = new CListDropdown((this.width - 150) / 2, waypointDimensionY, 160, this.height / 2, 20, selected, dimensions, null, false);
+        if(element.parent != null && !element.parent.dimension.equals(CListElement.GLOBAL_DIMENSION)){
+            this.elementDimension.active = false;
+        }
+        this.elementColor = new EditBox(font, (this.width - 70) / 2, (this.height - 20) / 2 + 41, 70, 20, Component.literal(""));
+        this.elementColor.setCanLoseFocus(true);
+        this.elementColor.setMaxLength(6);
+        this.elementColor.setValue(element.color.getHexNoAlpha());
         if(waypoint != null){
             this.x = new EditBox(font, (this.width - 50) / 2 - 60, (this.height - 20) / 2 - 50, 50, 20, Component.literal(""));
             this.x.setCanLoseFocus(true);
@@ -95,21 +107,21 @@ public class CListElementConfig extends Screen{
             this.z.setCanLoseFocus(true);
             this.z.setValue(String.valueOf(waypoint.z));
         }
-        addRenderableWidget(this.waypointName);
-        addRenderableWidget(this.waypointColor);
+        addRenderableWidget(this.elementName);
+        addRenderableWidget(this.elementColor);
         if(waypoint != null){
             addRenderableWidget(this.x);
             addRenderableWidget(this.y);
             addRenderableWidget(this.z);
         }
-        this.changeColor = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 20, 12, 12, button -> renderColorPicker = !renderColorPicker);
+        this.toggleSlidersButton = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 20, 12, 12, button -> renderColorPicker = !renderColorPicker);
         this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 20, 110, 15, Component.literal("H: " + hsv[0]), hsv[0] / 360, 0);
         this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 2, 110, 15, Component.literal("S: " + hsv[1]), hsv[1] / 100, 1);
         this.v = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 16, 110, 15, Component.literal("V: " + hsv[2]), hsv[2] / 100, 2);
         this.h.visible = false;
         this.s.visible = false;
         this.v.visible = false;
-        addRenderableWidget(this.changeColor);
+        addRenderableWidget(this.toggleSlidersButton);
         addRenderableWidget(this.h);
         addRenderableWidget(this.s);
         addRenderableWidget(this.v);
@@ -119,9 +131,9 @@ public class CListElementConfig extends Screen{
                 lockedDeathpoint = !lockedDeathpoint;
                 button.setMessage(Component.literal(Component.translatable("buttons.lock.deathpoint").getString() + ": " + (lockedDeathpoint ? Component.translatable("gui.no").getString() : Component.translatable("gui.yes").getString())));
             }).bounds((this.width - 150) / 2, (this.height - 20) / 2 + 71, 150, 20).build();
-            lockDeathpoint = addRenderableWidget(newLockDeathpoint);
+            lockDeathpointButton = addRenderableWidget(newLockDeathpoint);
         }
-        addRenderableWidget(this.waypointDimension);
+        addRenderableWidget(this.elementDimension);
     }
 
     public class HSVSlider extends AbstractSliderButton{
@@ -153,7 +165,7 @@ public class CListElementConfig extends Screen{
             hsv[type] = this.trueValue;
             if(!this.force){
                 float[] convertedColor = CListColorHelper.HSVtoRGB(hsv);
-                waypointColor.setValue(CListColorHelper.HexNoAlpha(convertedColor));
+                elementColor.setValue(CListColorHelper.HexNoAlpha(convertedColor));
             }
             else{
                 this.force = false;
@@ -232,31 +244,31 @@ public class CListElementConfig extends Screen{
         int centerY = this.height / 2 - 5;
         if(renderColorPicker){
             centerX = width / 2 - 60;
-            changeColor.setX((this.width - 50) / 2 - 22);
+            toggleSlidersButton.setX((this.width - 50) / 2 - 22);
         }
         else{
-            changeColor.setX((this.width - 50) / 2 + 38);
+            toggleSlidersButton.setX((this.width - 50) / 2 + 38);
         }
         int left = centerX - SQUARE_SIZE / 2;
         int top = centerY - SQUARE_SIZE / 2;
         int right = centerX + SQUARE_SIZE / 2;
         int bottom = centerY + SQUARE_SIZE / 2 + 1;
         guiGraphics.fill(left, top, right, bottom, CListColorHelper.HSVtoRGB(hsv[0], hsv[1], hsv[2]));
-        changeColor.extractRenderState(guiGraphics, mouseX, mouseY, delta);
+        toggleSlidersButton.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
-        if(!this.waypointDimension.isClicked()){
+        if(!this.elementDimension.isClicked()){
             if(waypoint != null){
                 this.x.active = true;
                 this.y.active = true;
                 this.z.active = true;
             }
-            this.changeColor.active = true;
-            this.waypointColor.active = true;
+            this.toggleSlidersButton.active = true;
+            this.elementColor.active = true;
             this.h.active = true;
             this.s.active = true;
             this.v.active = true;
-            if(this.lockDeathpoint != null){
-                this.lockDeathpoint.active = true;
+            if(this.lockDeathpointButton != null){
+                this.lockDeathpointButton.active = true;
             }
             this.doneButton.active = true;
             this.deleteButton.active = true;
@@ -267,13 +279,13 @@ public class CListElementConfig extends Screen{
                 this.y.active = false;
                 this.z.active = false;
             }
-            this.changeColor.active = false;
-            this.waypointColor.active = false;
+            this.toggleSlidersButton.active = false;
+            this.elementColor.active = false;
             this.h.active = false;
             this.s.active = false;
             this.v.active = false;
-            if(this.lockDeathpoint != null){
-                this.lockDeathpoint.active = false;
+            if(this.lockDeathpointButton != null){
+                this.lockDeathpointButton.active = false;
             }
             this.doneButton.active = false;
             this.deleteButton.active = false;
@@ -301,8 +313,8 @@ public class CListElementConfig extends Screen{
     }
 
     private void setValues(){
-        element.name = waypointName.getValue();
-        element.color.set(waypointColor.getValue());
+        element.name = elementName.getValue();
+        element.color.set(elementColor.getValue());
         if(waypoint != null){
             if(isParsableToInt(x.getValue())){
                 waypoint.x = Integer.parseInt(x.getValue());
@@ -317,7 +329,11 @@ public class CListElementConfig extends Screen{
                 waypoint.locked = lockedDeathpoint;
             }
         }
-        element.dimension = waypointDimension.getMessage().getString();
+        String dimension = elementDimension.getMessage().getString();
+        if(dimension.equals(Component.translatable("dimensions.global").getString())){
+            dimension = ":global";
+        }
+        element.dimension = dimension;
         CListVariables.savedSinceLastUpdate = false;
     }
 }
