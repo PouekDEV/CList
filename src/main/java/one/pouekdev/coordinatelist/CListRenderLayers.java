@@ -1,5 +1,6 @@
 package one.pouekdev.coordinatelist;
 
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
@@ -19,7 +20,7 @@ public class CListRenderLayers{
             RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
                     .withLocation("pipeline/position_tex_color")
                     .withCull(false)
-                    .withColorTargetState(new ColorTargetState(Optional.empty(), ColorTargetState.WRITE_ALL))
+                    .withColorTargetState(new ColorTargetState(Optional.empty(), GpuFormat.RGBA8_UNORM, ColorTargetState.WRITE_ALL))
                     .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true))
                     .build()
     );
@@ -27,7 +28,7 @@ public class CListRenderLayers{
             texture -> RenderType.create(
                     "coordinatelist:pos_text_color",
                     RenderSetup.builder(POSITION_TEX_COLOR_PIPELINE)
-                        .bufferSize(1536)
+//                        .bufferSize(1536)
                         .setLayeringTransform(LayeringTransform.NO_LAYERING)
                         .withTexture("Sampler0", texture)
                         .createRenderSetup()

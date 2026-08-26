@@ -4,8 +4,7 @@
   "package": "one.pouekdev.coordinatelist.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
-    "CListChatGrabber",
-    "CListWaypointRenderer"
+    "CListChatGrabber"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -53,7 +53,7 @@ public class CListWaypointConfig extends Screen{
         rowHelper.addChild(Button.builder(Component.translatable("selectWorld.delete"), button -> {
             CListClient.deleteWaypoint(id);
             if(!viaKeybind){
-                CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
+                CListVariables.minecraftClient.setScreenAndShow(new CListWaypointScreen(Component.literal("Waypoints")));
             }
             else{
                 onClose();
@@ -62,7 +62,7 @@ public class CListWaypointConfig extends Screen{
         rowHelper.addChild(Button.builder(Component.translatable("gui.done"), button -> {
             CListClient.variables.savedSinceLastUpdate = false;
             if(!viaKeybind){
-                CListVariables.minecraftClient.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
+                CListVariables.minecraftClient.setScreenAndShow(new CListWaypointScreen(Component.literal("Waypoints")));
             }
             else{
                 onClose();
@@ -159,7 +159,7 @@ public class CListWaypointConfig extends Screen{
 
         @Override
         public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
-            GlStateManager._enableBlend();
+//            GlStateManager._enableBlend();
             GlStateManager._enableDepthTest();
             // consider the following https://github.com/0x3C50/Renderer
             int color = CListClient.variables.colors.get(id).getHex();
@@ -213,9 +213,9 @@ public class CListWaypointConfig extends Screen{
         @Override
         public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
             Identifier icon = Identifier.fromNamespaceAndPath("coordinatelist", "icon/change");
-            GlStateManager._enableBlend();
+//            GlStateManager._enableBlend();
             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, getX(), getY(), width, height);
-            GlStateManager._disableBlend();
+//            GlStateManager._disableBlend();
         }
     }
 

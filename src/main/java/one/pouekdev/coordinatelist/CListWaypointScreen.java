@@ -1,28 +1,30 @@
 package one.pouekdev.coordinatelist;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
-import net.minecraft.client.gui.ActiveTextCollector;
-import net.minecraft.client.gui.components.AbstractSelectionList;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.layouts.FrameLayout;
-import net.minecraft.client.gui.layouts.GridLayout;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.components.Tooltip;
-import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.network.chat.Component;
+import java.util.List;
+
 import org.apache.commons.compress.utils.Lists;
 import org.jspecify.annotations.NonNull;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.List;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
+
+import net.minecraft.client.gui.ActiveTextCollector;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 
 public class CListWaypointScreen extends Screen{
     private ScrollList list;
@@ -59,7 +61,7 @@ public class CListWaypointScreen extends Screen{
             }
         }).width(150).build();
         copyCoordinatesButton.setTooltip(Tooltip.create(Component.translatable("tooltip.copy.waypoint.coordinates")));
-        editWaypointButton = Button.builder(Component.translatable("selectWorld.edit"), button -> CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), selectedWaypointId, false))).width(100).build();
+        editWaypointButton = Button.builder(Component.translatable("selectWorld.edit"), button -> CListVariables.minecraftClient.setScreenAndShow(new CListWaypointConfig(Component.literal("Config"), selectedWaypointId, false))).width(100).build();
         deleteWaypointButton = Button.builder(Component.translatable("selectWorld.delete"), button -> {
             CListClient.deleteWaypoint(selectedWaypointId);
             list.refreshElements();
@@ -115,7 +117,7 @@ public class CListWaypointScreen extends Screen{
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
-    private class ScrollList extends AbstractSelectionList<ScrollList.ScrollListEntry>{
+    private class ScrollList extends ContainerObjectSelectionList<ScrollList.ScrollListEntry>{
         public ScrollList(){
             super(CListWaypointScreen.this.minecraft, CListWaypointScreen.this.width, CListWaypointScreen.this.height - 64, 32, 25);//32
         }
@@ -165,13 +167,11 @@ public class CListWaypointScreen extends Screen{
                 else{
                     eyeIcon = Identifier.fromNamespaceAndPath("coordinatelist", "icon/not_visible");
                 }
-                GlStateManager._enableBlend();
                 guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, eyeIcon, getX(), getY(), width, height);
-                GlStateManager._disableBlend();
             }
         }
 
-        private class ScrollListEntry extends AbstractSelectionList.Entry<ScrollListEntry>{
+        private class ScrollListEntry extends ContainerObjectSelectionList.Entry<ScrollListEntry>{
             private final Component waypointName;
             private final Component dimension;
             private final SpriteButton visibility;
@@ -213,6 +213,8 @@ public class CListWaypointScreen extends Screen{
                 ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
                 collector.acceptScrolling(dimension, x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
                 guiGraphics.text(CListVariables.minecraftClient.font, waypointName.getString(), x + 25, y + 8, CListClient.variables.colors.get(id).getHex());
+                if (isFocused())
+                	guiGraphics.outline(x, y, getWidth(), getHeight(), 0xFFFFFFFF);
             }
 
             @Override
@@ -239,6 +241,16 @@ public class CListWaypointScreen extends Screen{
                 }
                 return handled || super.mouseReleased(mouseButtonEvent);
             }
+
+			@Override
+			public List<? extends GuiEventListener> children() {
+				return children;
+			}
+
+			@Override
+			public List<? extends NarratableEntry> narratables() {
+				return List.of();
+			}
         }
     }
 }

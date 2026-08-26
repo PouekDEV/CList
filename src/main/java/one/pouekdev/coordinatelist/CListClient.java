@@ -56,10 +56,10 @@ public class CListClient implements ClientModInitializer{
                 }
             }
             while(openWaypointsKeybind.consumeClick()){
-                client.setScreen(new CListWaypointScreen(Component.literal("Waypoints")));
+                client.setScreenAndShow(new CListWaypointScreen(Component.literal("Waypoints")));
             }
             while(addAWaypoint.consumeClick()){
-                if(!Objects.equals(client.screen, new CListWaypointScreen(Component.literal("Waypoints")))){
+                if(!Objects.equals(client.gui.screen(), new CListWaypointScreen(Component.literal("Waypoints")))){
                     Player player = CListVariables.minecraftClient.player;
                     addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, true);
                 }
@@ -127,7 +127,7 @@ public class CListClient implements ClientModInitializer{
         variables.colors.add(new CListWaypointColor(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
         variables.savedSinceLastUpdate = false;
         if(!death){
-            CListVariables.minecraftClient.setScreen(new CListWaypointConfig(Component.literal("Config"), variables.waypoints.size() - 1, viaKeybind));
+            CListVariables.minecraftClient.setScreenAndShow(new CListWaypointConfig(Component.literal("Config"), variables.waypoints.size() - 1, viaKeybind));
         }
     }
 
