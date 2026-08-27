@@ -84,6 +84,7 @@ public class CListElementConfig extends Screen{
         this.elementName.setCanLoseFocus(true);
         this.elementName.setMaxLength(25);
         this.elementName.setValue(element.name);
+        this.elementName.setHint(Component.translatable("waypoint.new.waypoint"));
         Component selected = Component.literal(element.dimension);
         if(element.dimension.equals(CListElement.GLOBAL_DIMENSION)){
             selected = Component.translatable("dimensions.global");
@@ -96,16 +97,20 @@ public class CListElementConfig extends Screen{
         this.elementColor.setCanLoseFocus(true);
         this.elementColor.setMaxLength(6);
         this.elementColor.setValue(element.color.getHexNoAlpha());
+        this.elementColor.setHint(Component.literal("RRGGBB"));
         if(waypoint != null){
             this.x = new EditBox(font, (this.width - 50) / 2 - 60, (this.height - 20) / 2 - 50, 50, 20, Component.literal(""));
             this.x.setCanLoseFocus(true);
             this.x.setValue(String.valueOf(waypoint.x));
+            this.x.setHint(Component.literal("X"));
             this.y = new EditBox(font, (this.width - 50) / 2, (this.height - 20) / 2 - 50, 50, 20, Component.literal(""));
             this.y.setCanLoseFocus(true);
             this.y.setValue(String.valueOf(waypoint.y));
+            this.y.setHint(Component.literal("Y"));
             this.z = new EditBox(font, (this.width - 50) / 2 + 60, (this.height - 20) / 2 - 50, 50, 20, Component.literal(""));
             this.z.setCanLoseFocus(true);
             this.z.setValue(String.valueOf(waypoint.z));
+            this.z.setHint(Component.literal("Z"));
         }
         addRenderableWidget(this.elementName);
         addRenderableWidget(this.elementColor);

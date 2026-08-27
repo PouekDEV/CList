@@ -4,18 +4,27 @@ import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.TextAlignment;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
+import net.minecraft.client.renderer.state.gui.GuiTextRenderState;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.FormattedCharSequence;
+import org.joml.Matrix3x2f;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class CListDropdown extends AbstractWidget{
     private static final WidgetSprites SPRITES = new WidgetSprites(
@@ -46,7 +55,7 @@ public class CListDropdown extends AbstractWidget{
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a){
         Identifier sprite = SPRITES.get(this.isActive(), this.isFocused());
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, this.getX(), this.getY(), entryWidth, entryHeight);
-        ActiveTextCollector collector = graphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
+        ColoredTextCollector collector = new ColoredTextCollector(graphics.pose(), GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR, graphics.guiRenderState, null, null, this.active ? 0xFFE0E0E0 : 0xFFA0A0A0);
         collector.acceptScrolling(message, this.getX(), this.getX() + 4, this.getRight() - 14, this.getY(), this.getY() + entryHeight);
         if(clicked){
             optionList.extractWidgetRenderState(graphics, mouseX, mouseY, a);
@@ -145,6 +154,65 @@ public class CListDropdown extends AbstractWidget{
         return super.mouseScrolled(x, y, scrollX, scrollY);
     }
 
+    private static class ColoredTextCollector implements ActiveTextCollector, Consumer<Style>{
+        private ActiveTextCollector.Parameters defaultParameters;
+        private final GuiGraphicsExtractor.HoveredTextEffects hoveredTextEffects;
+        private final @Nullable Consumer<Style> additionalConsumer;
+        private double mouseX;
+        private double mouseY;
+        private final int color;
+        private final GuiRenderState guiRenderState;
+
+        private ColoredTextCollector(Matrix3x2f pose, GuiGraphicsExtractor.HoveredTextEffects hoveredTextEffects, GuiRenderState guiRenderState, @Nullable Consumer<Style> additonalConsumer, @Nullable ScreenRectangle scissor, int color){
+            this.defaultParameters = new ActiveTextCollector.Parameters(new Matrix3x2f(pose), 1.0f, scissor);
+            this.hoveredTextEffects = hoveredTextEffects;
+            this.guiRenderState = guiRenderState;
+            this.additionalConsumer = additonalConsumer;
+            this.color = color;
+        }
+
+        public void setMousePos(double mouseX, double mouseY){
+            this.mouseX = mouseX;
+            this.mouseY = mouseY;
+        }
+
+        @Override
+        public ActiveTextCollector.@NonNull Parameters defaultParameters(){
+            return this.defaultParameters;
+        }
+
+        @Override
+        public void defaultParameters(ActiveTextCollector.@NonNull Parameters newParameters){
+            this.defaultParameters = newParameters;
+        }
+
+        public void accept(Style style){
+            if(this.additionalConsumer != null){
+                this.additionalConsumer.accept(style);
+            }
+        }
+
+        @Override
+        public void accept(TextAlignment alignment, int anchorX, int y, ActiveTextCollector.Parameters parameters, @NonNull FormattedCharSequence text){
+            boolean needsFullStyleScan = this.hoveredTextEffects.allowCursorChanges || this.hoveredTextEffects.allowTooltip || this.additionalConsumer != null;
+            int leftX = alignment.calculateLeft(anchorX, CListVariables.minecraftClient.font, text);
+            GuiTextRenderState renderState = new GuiTextRenderState(CListVariables.minecraftClient.font, text, parameters.pose(), leftX, y, ARGB.color(parameters.opacity(), color), 0, true, needsFullStyleScan, parameters.scissor());
+            if(ARGB.as8BitChannel(parameters.opacity()) != 0){
+                guiRenderState.addText(renderState);
+            }
+            if(needsFullStyleScan){
+                ActiveTextCollector.findElementUnderCursor(renderState, (float) mouseX, (float) mouseY, this);
+            }
+        }
+
+        @Override
+        public void acceptScrolling(@NonNull Component message, int centerX, int left, int right, int top, int bottom, ActiveTextCollector.@NonNull Parameters parameters){
+            int lineWidth = CListVariables.minecraftClient.font.width(message);
+            int lineHeight = 9;
+            this.defaultScrollingHelper(message, centerX, left, right, top, bottom, lineWidth, lineHeight, parameters);
+        }
+    }
+
     private class OptionList extends AbstractSelectionList<OptionList.OptionListEntry>{
         private final int rowWidth;
 
@@ -216,7 +284,7 @@ public class CListDropdown extends AbstractWidget{
                     graphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight(), 0xFF323232);
                     graphics.requestCursor(CursorTypes.POINTING_HAND);
                 }
-                ActiveTextCollector collector = graphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
+                ColoredTextCollector collector = new ColoredTextCollector(graphics.pose(), GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR, graphics.guiRenderState, null, null, 0xFFE0E0E0);
                 collector.acceptScrolling(message, this.getX(), this.getX() + 4, this.getX() + this.getWidth() - 4, this.getY(), this.getY() + this.getHeight());
             }
         }

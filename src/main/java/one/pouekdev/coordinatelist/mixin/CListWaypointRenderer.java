@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 import com.mojang.math.Axis;
 import net.minecraft.world.phys.Vec3;
 import one.pouekdev.coordinatelist.*;
@@ -23,7 +22,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -40,31 +38,31 @@ public abstract class CListWaypointRenderer{
     }
 
     @Unique
-    private float distanceTo(CListWaypoint waypoint){
-        float f = (float) (CListVariables.minecraftClient.player.getX() - waypoint.x);
-        float g = (float) (CListVariables.minecraftClient.player.getY() - waypoint.y);
-        float h = (float) (CListVariables.minecraftClient.player.getZ() - waypoint.z);
-        return Mth.sqrt(f * f + g * g + h * h);
+    private double distanceTo(CListWaypoint waypoint){
+        double f = CListVariables.minecraftClient.player.getX() - waypoint.x - 0.5;
+        double g = CListVariables.minecraftClient.player.getY() - waypoint.y;
+        double h = CListVariables.minecraftClient.player.getZ() - waypoint.z - 0.5;
+        return Math.sqrt(f * f + g * g + h * h);
     }
 
     @Unique
-    private Vec3 calculateRenderCoords(CListWaypoint waypoint, Camera camera, float distance){
+    private Vec3 calculateRenderCoords(CListWaypoint waypoint, Camera camera, double distance){
         Vec3 cameraPos = camera.position();
-        float px = (float) cameraPos.x;
-        float py = (float) cameraPos.y;
-        float pz = (float) cameraPos.z;
-        float wx = waypoint.x;
-        float wy = waypoint.y;
-        float wz = waypoint.z;
-        float vx = wx - px;
-        float vy = wy - py;
-        float vz = wz - pz;
-        float vectorLen = (float) Math.sqrt((vx * vx) + (vy * vy) + (vz * vz));
-        float radius = 32;
-        float scx = radius / vectorLen * vx;
-        float scy = radius / vectorLen * vy;
-        float scz = radius / vectorLen * vz;
-        float prx, pry, prz;
+        double px = cameraPos.x;
+        double py = cameraPos.y;
+        double pz = cameraPos.z;
+        double wx = waypoint.x + 0.5;
+        double wy = waypoint.y + 1;
+        double wz = waypoint.z + 0.5;
+        double vx = wx - px;
+        double vy = wy - py;
+        double vz = wz - pz;
+        double vectorLen = Math.sqrt((vx * vx) + (vy * vy) + (vz * vz));
+        double radius = 32;
+        double scx = radius / vectorLen * vx;
+        double scy = radius / vectorLen * vy;
+        double scz = radius / vectorLen * vz;
+        double prx, pry, prz;
         if(distance > 32){
             prx = scx + px;
             pry = scy + py;
@@ -80,9 +78,9 @@ public abstract class CListWaypointRenderer{
 
     private static class WaypointWithDistance{
         public CListWaypoint waypoint;
-        public float distance;
+        public double distance;
 
-        public WaypointWithDistance(CListWaypoint waypoint, float distance){
+        public WaypointWithDistance(CListWaypoint waypoint, double distance){
             this.waypoint = waypoint;
             this.distance = distance;
         }
@@ -91,7 +89,7 @@ public abstract class CListWaypointRenderer{
     private static class DistanceComparator implements Comparator<WaypointWithDistance>{
         @Override
         public int compare(WaypointWithDistance o1, WaypointWithDistance o2){
-            return Float.compare(o2.distance, o1.distance);
+            return Double.compare(o2.distance, o1.distance);
         }
     }
 
@@ -101,17 +99,17 @@ public abstract class CListWaypointRenderer{
         List<CListWaypoint> waypoints = CListVariables.data.getAllWaypoints(true);
         if(!waypoints.isEmpty() && CListConfig.waypointsToggled && !CListVariables.minecraftClient.options.hideGui){
             List<WaypointWithDistance> waypointsWithDistance = Lists.newArrayList();
-            for(CListWaypoint waypoint: waypoints){
-                float distance = distanceTo(waypoint);
+            for(CListWaypoint waypoint : waypoints){
+                double distance = distanceTo(waypoint);
                 if(waypoint.getDimensionString().equals(CListElement.dimensionNoRegistryName(CListVariables.lastWorld.dimension().identifier().toString())) && waypoint.render && (CListConfig.renderDistance == 0 || CListConfig.renderDistance >= distance)){
                     WaypointWithDistance waypointWithDistance = new WaypointWithDistance(waypoint, distance);
                     waypointsWithDistance.add(waypointWithDistance);
                 }
             }
-            Collections.sort(waypointsWithDistance, new DistanceComparator());
+            waypointsWithDistance.sort(new DistanceComparator());
             for(WaypointWithDistance waypointWithDistance: waypointsWithDistance){
                 CListWaypoint waypoint = waypointWithDistance.waypoint;
-                int distanceWithoutDecimalPlaces = Math.round(waypointWithDistance.distance);
+                long distanceWithoutDecimalPlaces = Math.round(waypointWithDistance.distance);
                 if(CListVariables.minecraftClient.player.isAlive() && CListVariables.minecraftClient.screen == null && waypoint.deathpoint && !waypoint.locked && CListConfig.deleteDeathpointsWhenReached && distanceWithoutDecimalPlaces <= 4){
                     CListClient.deleteElement(waypointWithDistance.waypoint);
                     break;
@@ -119,8 +117,7 @@ public abstract class CListWaypointRenderer{
                 Camera camera = CListVariables.minecraftClient.gameRenderer.getMainCamera();
                 float size = calculateWaypointSize();
                 Vec3 renderCoords = calculateRenderCoords(waypoint, camera, distanceWithoutDecimalPlaces);
-                Vec3 targetPosition = new Vec3(renderCoords.x + 0.5, renderCoords.y + 1, renderCoords.z + 0.5);
-                Vec3 transformedPosition = targetPosition.subtract(camera.position());
+                Vec3 transformedPosition = renderCoords.subtract(camera.position());
                 // TODO: Wait for a new implementation of WorldRenderEvents and then use the PoseStack from guiGraphics instead of recalculating everything by ourselves
                 PoseStack poseStack = new PoseStack();
                 poseStack.translate(0.25, 0, 0.25);
@@ -158,7 +155,7 @@ public abstract class CListWaypointRenderer{
                 poseStack.scale((float) Math.log(size * 4), (float) Math.log(size * 4), (float) Math.log(size * 4));
                 poseStack.translate(0, -20, 0);
                 positionMatrix = poseStack.last().pose();
-                float h = (float) (-textWidth / 2);
+                float h = -textWidth / 2f;
                 MultiBufferSource.BufferSource b = CListVariables.minecraftClient.renderBuffers().bufferSource();
                 if(CListConfig.waypointTextBackground){
                     font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x90000000, LightCoordsUtil.FULL_BRIGHT);

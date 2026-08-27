@@ -88,6 +88,7 @@ public class CListElementsScreen extends Screen{
         list.setupEntries();
         addRenderableWidget(list);
         addRenderableWidget(dropdown);
+        setInitialFocus(search);
     }
 
     @Override
@@ -116,7 +117,7 @@ public class CListElementsScreen extends Screen{
         list.setScrollAmount(0);
     }
 
-    private class CallbackEditBox extends EditBox{
+    private static class CallbackEditBox extends EditBox{
         private final Runnable onEdit;
 
         public CallbackEditBox(Font font, int width, int height, int x, int y, Component narration, Runnable onEdit){
