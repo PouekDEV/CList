@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 public class CListData{
     private static final Path modDir = FabricLoader.getInstance().getConfigDir().resolve("coordinatelist");
@@ -45,6 +46,14 @@ public class CListData{
         }
         catch(IOException ignored){}
         return null;
+    }
+
+    public static List<String> getSavedData(){
+        List<String> list = Lists.newArrayList();
+        for(File file : Objects.requireNonNull(modDirFile.listFiles(file -> file.getName().endsWith(".json") && file.getName().startsWith("clist_")))){
+            list.add(file.getName());
+        }
+        return list;
     }
 
     public static void deleteLegacyFile(String fileName){

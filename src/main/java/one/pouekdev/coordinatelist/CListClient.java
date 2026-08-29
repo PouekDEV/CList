@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import eu.midnightdust.lib.config.MidnightConfig;
 
@@ -59,7 +60,7 @@ public class CListClient implements ClientModInitializer{
             while(addAWaypoint.consumeClick()){
                 if(!Objects.equals(client.screen, new CListElementsScreen(Component.literal("Waypoints")))){
                     Player player = CListVariables.minecraftClient.player;
-                    addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, true);
+                    addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, null, true);
                 }
             }
             while(toggleVisibility.consumeClick()){
@@ -118,7 +119,7 @@ public class CListClient implements ClientModInitializer{
                                 }
                             }
                             Player player = client.player;
-                            addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), true, false);
+                            addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), true, null, false);
                             CListVariables.hadDeathWaypointPlaced = true;
                         }
                         else if(client.player.isAlive() && CListVariables.hadDeathWaypointPlaced){
@@ -136,8 +137,12 @@ public class CListClient implements ClientModInitializer{
         CListVariables.loadedLastWorld = false;
     }
 
-    public static void addNewWaypoint(int x, int y, int z, boolean death, boolean viaKeybind){
-        CList.LOGGER.info("New waypoint for dimension: " + CListVariables.lastWorld.dimension().identifier());
+    public static void addNewWaypoint(int x, int y, int z, boolean death, @Nullable String dimension, boolean viaKeybind){
+        String dim = dimension;
+        if(dim == null){
+            dim = CListVariables.lastWorld.dimension().identifier().toString();
+        }
+        CList.LOGGER.info("New waypoint for dimension: " + dim);
         String waypointName;
         if(death){
             waypointName = Component.translatable("waypoint.last.death").getString();
@@ -145,7 +150,7 @@ public class CListClient implements ClientModInitializer{
         else{
             waypointName = Component.translatable("waypoint.new.waypoint").getString();
         }
-        CListWaypoint waypoint = new CListWaypoint(x, y, z, waypointName, CListVariables.lastWorld.dimension().identifier().toString(), new CListElementColor(), true, death);
+        CListWaypoint waypoint = new CListWaypoint(x, y, z, waypointName, dim, new CListElementColor(), true, death);
         CListVariables.data.waypoints.addFirst(waypoint);
         CListVariables.savedSinceLastUpdate = false;
         if(!death){

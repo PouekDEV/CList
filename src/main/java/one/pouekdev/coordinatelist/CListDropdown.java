@@ -9,7 +9,6 @@ import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
@@ -55,7 +54,7 @@ public class CListDropdown extends AbstractWidget{
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a){
         Identifier sprite = SPRITES.get(this.isActive(), this.isFocused());
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, this.getX(), this.getY(), entryWidth, entryHeight);
-        ColoredTextCollector collector = new ColoredTextCollector(graphics.pose(), GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR, graphics.guiRenderState, null, null, this.active ? 0xFFE0E0E0 : 0xFFA0A0A0);
+        ColoredTextCollector collector = new ColoredTextCollector(graphics, GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR, graphics.guiRenderState, null, this.active ? 0xFFE0E0E0 : 0xFFA0A0A0);
         collector.acceptScrolling(message, this.getX(), this.getX() + 4, this.getRight() - 14, this.getY(), this.getY() + entryHeight);
         if(clicked){
             optionList.extractWidgetRenderState(graphics, mouseX, mouseY, a);
@@ -163,8 +162,8 @@ public class CListDropdown extends AbstractWidget{
         private final int color;
         private final GuiRenderState guiRenderState;
 
-        private ColoredTextCollector(Matrix3x2f pose, GuiGraphicsExtractor.HoveredTextEffects hoveredTextEffects, GuiRenderState guiRenderState, @Nullable Consumer<Style> additonalConsumer, @Nullable ScreenRectangle scissor, int color){
-            this.defaultParameters = new ActiveTextCollector.Parameters(new Matrix3x2f(pose), 1.0f, scissor);
+        private ColoredTextCollector(GuiGraphicsExtractor guiGraphicsExtractor, GuiGraphicsExtractor.HoveredTextEffects hoveredTextEffects, GuiRenderState guiRenderState, @Nullable Consumer<Style> additonalConsumer, int color){
+            this.defaultParameters = new ActiveTextCollector.Parameters(new Matrix3x2f(guiGraphicsExtractor.pose()), 1.0f, guiGraphicsExtractor.scissorStack.peek());
             this.hoveredTextEffects = hoveredTextEffects;
             this.guiRenderState = guiRenderState;
             this.additionalConsumer = additonalConsumer;
@@ -284,7 +283,7 @@ public class CListDropdown extends AbstractWidget{
                     graphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight(), 0xFF323232);
                     graphics.requestCursor(CursorTypes.POINTING_HAND);
                 }
-                ColoredTextCollector collector = new ColoredTextCollector(graphics.pose(), GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR, graphics.guiRenderState, null, null, 0xFFE0E0E0);
+                ColoredTextCollector collector = new ColoredTextCollector(graphics, GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR, graphics.guiRenderState, null, 0xFFE0E0E0);
                 collector.acceptScrolling(message, this.getX(), this.getX() + 4, this.getX() + this.getWidth() - 4, this.getY(), this.getY() + this.getHeight());
             }
         }

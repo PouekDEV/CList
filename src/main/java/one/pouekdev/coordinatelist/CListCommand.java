@@ -19,7 +19,7 @@ public class CListCommand implements ClientCommandRegistrationCallback{
                                             int x = IntegerArgumentType.getInteger(ctx, "x");
                                             int y = IntegerArgumentType.getInteger(ctx, "y");
                                             int z = IntegerArgumentType.getInteger(ctx, "z");
-                                            CListClient.addNewWaypoint(x, y, z, false, true);
+                                            CListClient.addNewWaypoint(x, y, z, false, null, true);
                                             return 0;
                                         })
                                 )

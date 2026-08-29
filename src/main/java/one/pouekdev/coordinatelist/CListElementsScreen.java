@@ -35,6 +35,7 @@ public class CListElementsScreen extends Screen{
     private final String NOTHING_SELECTED = "---";
     private String copyCoordinatesButtonText = NOTHING_SELECTED;
     private final List<String> dimensions = Lists.newArrayList();
+    private final Window window = CListVariables.minecraftClient.getWindow();
 
     public CListElementsScreen(Component title){
         super(title);
@@ -58,7 +59,7 @@ public class CListElementsScreen extends Screen{
         addRenderableWidget(search);
         addRenderableWidget(Button.builder(Component.translatable("buttons.add.new.waypoint"), _ -> {
             Player player = CListVariables.minecraftClient.player;
-            CListClient.addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, false);
+            CListClient.addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, null, false);
         }).bounds(10 + upperRowElementWidth * 2 + 10, 5, upperRowElementWidth, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("buttons.add.new.folder"), _ -> {
             CListClient.addNewFolder();
@@ -70,7 +71,6 @@ public class CListElementsScreen extends Screen{
             list.refreshElements();
         }).bounds((this.width / 2) - 185, this.height - 25, 100, 20).build();
         copyCoordinatesButton = Button.builder(Component.literal(copyCoordinatesButtonText), _ -> {
-            Window window = CListVariables.minecraftClient.getWindow();
             CListWaypoint waypoint = (CListWaypoint) selectedElement;
             if(InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL)){
                 GLFW.glfwSetClipboardString(window.handle(), "/execute in " + waypoint.dimension + " run tp @s " + waypoint.x + " " + waypoint.y + " " + waypoint.z);
@@ -115,6 +115,32 @@ public class CListElementsScreen extends Screen{
     private void refreshAndRepositionList(){
         list.refreshElements();
         list.setScrollAmount(0);
+    }
+
+    @Override
+    public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick){
+        if(copyCoordinatesButton.isHovered() && copyCoordinatesButton.active && event.button() == 1){
+            CListWaypoint waypoint = (CListWaypoint) selectedElement;
+            if(waypoint.dimension.equals("minecraft:overworld")){
+                if(InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL)){
+                    CListClient.addNewWaypoint((int) Math.round(waypoint.x / 8.0), waypoint.y, (int) Math.round(waypoint.z / 8.0), false, "minecraft:the_nether", true);
+                }
+                else{
+                    GLFW.glfwSetClipboardString(window.handle(), Math.round(waypoint.x / 8.0) + " " + waypoint.y + " " + Math.round(waypoint.z / 8.0));
+                }
+            }
+            else if(waypoint.dimension.equals("minecraft:the_nether")){
+                if(InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL)){
+                    CListClient.addNewWaypoint(waypoint.x * 8, waypoint.y, waypoint.z * 8, false, "minecraft:overworld", true);
+                }
+                else{
+                    GLFW.glfwSetClipboardString(window.handle(), waypoint.x * 8 + " " + waypoint.y + " " + waypoint.z * 8);
+                }
+            }
+            copyCoordinatesButton.playDownSound(CListVariables.minecraftClient.getSoundManager());
+            return true;
+        }
+        return super.mouseClicked(event, doubleClick);
     }
 
     private static class CallbackEditBox extends EditBox{
@@ -179,7 +205,7 @@ public class CListElementsScreen extends Screen{
                     if(folder.waypoints != null && folder.extended){
                         for(CListWaypoint waypoint : folder.waypoints){
                             if(isInCurrentSort(waypoint)){
-                                WaypointEntry waypointEntry = new WaypointEntry(waypoint, depth + 1);
+                                WaypointEntry waypointEntry = new WaypointEntry(waypoint, depth + 1, false);
                                 this.addEntry(waypointEntry);
                             }
                         }
@@ -195,7 +221,7 @@ public class CListElementsScreen extends Screen{
                 }
                 for(CListWaypoint waypoint : CListVariables.data.waypoints){
                     if(isInCurrentSort(waypoint)){
-                        WaypointEntry entry = new WaypointEntry(waypoint, 0);
+                        WaypointEntry entry = new WaypointEntry(waypoint, 0, false);
                         this.addEntry(entry);
                     }
                 }
@@ -204,7 +230,7 @@ public class CListElementsScreen extends Screen{
                 List<CListWaypoint> waypoints = CListVariables.data.getAllWaypoints(false);
                 for(CListWaypoint waypoint : waypoints){
                     if(waypoint.name.toLowerCase(Locale.ROOT).contains(search.getValue().toLowerCase(Locale.ROOT)) && isInCurrentSort(waypoint)){
-                        WaypointEntry entry = new WaypointEntry(waypoint, 0);
+                        WaypointEntry entry = new WaypointEntry(waypoint, 0, true);
                         this.addEntry(entry);
                     }
                 }
@@ -631,14 +657,16 @@ public class CListElementsScreen extends Screen{
         private class WaypointEntry extends ElementListEntry{
             private final TextureButton visibility;
             public final CListWaypoint waypoint;
+            private final boolean viaSearch;
 
-            WaypointEntry(CListWaypoint waypoint, int depth){
+            WaypointEntry(CListWaypoint waypoint, int depth, boolean viaSearch){
                 super(depth);
                 this.visibility = new TextureButton(0, 0, 16, 12, _ -> {
                     updateCopyCoordinatesButtonText(waypoint.x + " " + waypoint.y + " " + waypoint.z);
                     waypoint.toggleVisibility();
                 }, waypoint, Identifier.fromNamespaceAndPath("coordinatelist", "icon/visible"), Identifier.fromNamespaceAndPath("coordinatelist", "icon/not_visible"));
                 this.waypoint = waypoint;
+                this.viaSearch = viaSearch;
             }
 
             public boolean mouseOverUpperHalf(double x, double y){
@@ -671,7 +699,7 @@ public class CListElementsScreen extends Screen{
                     }
                     guiGraphics.pose().popMatrix();
                 }
-                if(waypoint.parent == null || waypoint.parent.dimension.equals(CListElement.GLOBAL_DIMENSION)){
+                if(waypoint.parent == null || waypoint.parent.dimension.equals(CListElement.GLOBAL_DIMENSION) || viaSearch){
                     ActiveTextCollector collector = guiGraphics.textRenderer(GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
                     collector.acceptScrolling(waypoint.getDimensionText(), x + 183 + fontWidth / 2, x + 183, x + 183 + fontWidth, y + 2, y + font.lineHeight + 12);
                 }
