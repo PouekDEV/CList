@@ -37,8 +37,8 @@ public class CListElementsScreen extends Screen{
     private final List<String> dimensions = Lists.newArrayList();
     private final Window window = CListVariables.minecraftClient.getWindow();
 
-    public CListElementsScreen(Component title){
-        super(title);
+    public CListElementsScreen(){
+        super(Component.literal("Waypoints"));
         dimensions.add(Component.translatable("dimensions.all").getString());
         for(String dimension : CListVariables.dimensions){
             dimensions.add(CListElement.dimensionNoRegistryName(dimension));
@@ -80,7 +80,7 @@ public class CListElementsScreen extends Screen{
             }
         }).bounds((this.width / 2) - 75, this.height - 25, 150, 20).build();
         copyCoordinatesButton.setTooltip(Tooltip.create(Component.translatable("tooltip.copy.waypoint.coordinates")));
-        editWaypointButton = Button.builder(Component.translatable("selectWorld.edit"), _ -> CListVariables.minecraftClient.setScreen(new CListElementConfig(Component.literal("Config"), selectedElement, false))).bounds((this.width / 2) + 85, this.height - 25, 100, 20).build();
+        editWaypointButton = Button.builder(Component.translatable("selectWorld.edit"), _ -> CListVariables.minecraftClient.setScreen(new CListElementConfig(selectedElement, false))).bounds((this.width / 2) + 85, this.height - 25, 100, 20).build();
         addRenderableWidget(deleteWaypointButton);
         addRenderableWidget(copyCoordinatesButton);
         addRenderableWidget(editWaypointButton);
@@ -717,7 +717,7 @@ public class CListElementsScreen extends Screen{
                     return true;
                 }
                 if(doubled){
-                    CListVariables.minecraftClient.setScreen(new CListElementConfig(Component.literal("Config"), selectedElement, false));
+                    CListVariables.minecraftClient.setScreen(new CListElementConfig(selectedElement, false));
                 }
                 updateCopyCoordinatesButtonText(waypoint.x + " " + waypoint.y + " " + waypoint.z);
                 return super.mouseClicked(mouseButtonEvent, doubled);

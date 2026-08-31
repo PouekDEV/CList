@@ -117,6 +117,11 @@ public class CListDropdown extends AbstractWidget{
     }
 
     @Override
+    public boolean isHovered(){
+        return hoveringOverButton;
+    }
+
+    @Override
     public boolean isMouseOver(double mouseX, double mouseY){
         return this.isActive() && this.areCoordinatesInRectangle(mouseX, mouseY);
     }

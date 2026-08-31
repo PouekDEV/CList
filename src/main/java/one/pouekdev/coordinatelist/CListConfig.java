@@ -5,6 +5,7 @@ import eu.midnightdust.lib.config.MidnightConfig;
 import eu.midnightdust.lib.config.MidnightConfigListWidget;
 import eu.midnightdust.lib.config.MidnightConfigScreen;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import org.jspecify.annotations.NonNull;
@@ -42,8 +43,11 @@ public class CListConfig extends MidnightConfig {
 
     @Override
     public void onTabInit(String tabName, MidnightConfigListWidget list, MidnightConfigScreen screen){
-        Button button = Button.builder(Component.translatable("coordinatelist.midnightconfig.migrateSavefile.button"), _ -> CListVariables.minecraftClient.setScreen(new CListDataMigrationScreen(Component.literal("Waypoint migration")))).bounds(screen.width - 185, 0, 150, 20).build();
-        button.active = !CListVariables.loadedLastWorld;
+        Button button = Button.builder(Component.translatable("coordinatelist.midnightconfig.migrateSavefile.button"), _ -> CListVariables.minecraftClient.setScreen(new CListDataMigrationScreen())).bounds(screen.width - 185, 0, 150, 20).build();
+        if(CListVariables.loadedLastWorld){
+            button.active = false;
+            button.setTooltip(Tooltip.create(Component.translatable("coordinatelist.midnightconfig.migrateSavefile.button.tooltip")));
+        }
         list.addButton(List.of(button), Component.translatable("coordinatelist.midnightconfig.migrateSavefile"), new EntryInfo(null, screen.modid));
     }
 }

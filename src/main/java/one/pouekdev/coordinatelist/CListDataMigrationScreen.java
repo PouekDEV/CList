@@ -1,5 +1,6 @@
 package one.pouekdev.coordinatelist;
 
+import eu.midnightdust.core.screen.MidnightConfigOverviewScreen;
 import eu.midnightdust.lib.config.MidnightConfig;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -27,8 +28,8 @@ public class CListDataMigrationScreen extends Screen{
     private final List<String> saves = Lists.newArrayList();
     private final List<String> CListSaves = Lists.newArrayList();
 
-    public CListDataMigrationScreen(Component title){
-        super(title);
+    public CListDataMigrationScreen(){
+        super(Component.literal("Waypoint migration"));
         for(LevelStorageSource.LevelDirectory level : CListVariables.minecraftClient.getLevelSource().findLevelCandidates().levels()){
             saves.add(level.directoryName());
         }
@@ -69,7 +70,7 @@ public class CListDataMigrationScreen extends Screen{
             }
         }).bounds(this.width / 2 - 155, this.height - 30, 150, 20).build();
         addRenderableWidget(Button.builder(Component.translatable("gui.back"), _ -> {
-            CListVariables.minecraftClient.setScreen(MidnightConfig.getScreen(null, CList.MOD_ID));
+            onClose();
         }).bounds(this.width / 2 + 5, this.height - 30, 150, 20).build());
         if(!acknowledged){
             acknowledgeButton = addRenderableWidget(Button.builder(Component.translatable("data.migration.acknowledge"), _ -> {
@@ -112,7 +113,12 @@ public class CListDataMigrationScreen extends Screen{
     }
 
     @Override
-    public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+    public void onClose(){
+        CListVariables.minecraftClient.setScreen(MidnightConfig.getScreen(new MidnightConfigOverviewScreen(null), CList.MOD_ID));
+    }
+
+    @Override
+    public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a){
         super.extractRenderState(graphics, mouseX, mouseY, a);
         if(!acknowledged){
             graphics.centeredText(CListVariables.minecraftClient.font, Component.translatable("data.migration.warning"), this.width / 2, this.height / 2 - 60, 0xFFFF0000);

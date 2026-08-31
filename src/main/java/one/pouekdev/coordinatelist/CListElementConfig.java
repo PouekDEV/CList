@@ -1,9 +1,11 @@
 package one.pouekdev.coordinatelist;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -37,8 +39,8 @@ public class CListElementConfig extends Screen{
     private Button deleteButton;
     private final List<String> dimensions = Lists.newArrayList();
 
-    CListElementConfig(Component title, CListElement element, boolean viaKeybind){
-        super(title);
+    CListElementConfig(CListElement element, boolean viaKeybind){
+        super(Component.literal("Element config"));
         this.element = element;
         if(element instanceof CListFolder){
             this.waypoint = null;
@@ -57,22 +59,14 @@ public class CListElementConfig extends Screen{
         deleteButton = Button.builder(Component.translatable("selectWorld.delete"), _ -> {
             CListClient.deleteElement(element);
             if(!viaKeybind){
-                CListVariables.minecraftClient.setScreen(new CListElementsScreen(Component.literal("Waypoints")));
+                CListVariables.minecraftClient.setScreen(new CListElementsScreen());
             }
             else{
                 onClose();
             }
         }).bounds((this.width / 2) - 155, this.height - 30, 150, 20).build();
         addRenderableWidget(deleteButton);
-        doneButton = Button.builder(Component.translatable("gui.done"), _ -> {
-            setValues();
-            if(!viaKeybind){
-                CListVariables.minecraftClient.setScreen(new CListElementsScreen(Component.literal("Waypoints")));
-            }
-            else{
-                onClose();
-            }
-        }).bounds((this.width / 2) + 5, this.height - 30, 150, 20).build();
+        doneButton = Button.builder(Component.translatable("gui.done"), _ -> done()).bounds((this.width / 2) + 5, this.height - 30, 150, 20).build();
         addRenderableWidget(doneButton);
         int waypointNameY = (this.height - 20) / 2 - 100;
         int waypointDimensionY = (this.height - 20) / 2 - 75;
@@ -92,11 +86,12 @@ public class CListElementConfig extends Screen{
         this.elementDimension = new CListDropdown((this.width - 150) / 2, waypointDimensionY, 160, this.height / 2, 20, selected, dimensions, null, false);
         if(element.parent != null && !element.parent.dimension.equals(CListElement.GLOBAL_DIMENSION)){
             this.elementDimension.active = false;
+            this.elementDimension.setTooltip(Tooltip.create(Component.translatable("tooltip.dimension.changing.disabled")));
         }
         this.elementColor = new EditBox(font, (this.width - 70) / 2, (this.height - 20) / 2 + 41, 70, 20, Component.literal(""));
         this.elementColor.setCanLoseFocus(true);
         this.elementColor.setMaxLength(6);
-        this.elementColor.setValue(element.color.getHexNoAlpha());
+        this.elementColor.setValue(hexNoAlpha(element.color.getHex()));
         this.elementColor.setHint(Component.literal("RRGGBB"));
         if(waypoint != null){
             this.x = new EditBox(font, (this.width - 50) / 2 - 60, (this.height - 20) / 2 - 50, 50, 20, Component.literal(""));
@@ -119,10 +114,10 @@ public class CListElementConfig extends Screen{
             addRenderableWidget(this.y);
             addRenderableWidget(this.z);
         }
-        this.toggleSlidersButton = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 20, 12, 12, button -> renderColorPicker = !renderColorPicker);
-        this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 20, 110, 15, Component.literal("H: " + hsv[0]), hsv[0] / 360, 0);
-        this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 2, 110, 15, Component.literal("S: " + hsv[1]), hsv[1] / 100, 1);
-        this.v = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 16, 110, 15, Component.literal("V: " + hsv[2]), hsv[2] / 100, 2);
+        this.toggleSlidersButton = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 20, 12, 12, _ -> renderColorPicker = !renderColorPicker);
+        this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 20, 110, 15, Component.literal("H: " + Math.round(hsv[0] * 360)), hsv[0], 0);
+        this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 2, 110, 15, Component.literal("S: " + Math.round(hsv[1] * 100)), hsv[1], 1);
+        this.v = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 16, 110, 15, Component.literal("V: " + Math.round(hsv[2] * 100)), hsv[2], 2);
         this.h.visible = false;
         this.s.visible = false;
         this.v.visible = false;
@@ -141,6 +136,34 @@ public class CListElementConfig extends Screen{
         addRenderableWidget(this.elementDimension);
     }
 
+    private String hexNoAlpha(int rgb){
+        return String.format("%02X%02X%02X", (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
+    }
+
+    private void done(){
+        setValues();
+        onClose();
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event){
+        if(event.input() == InputConstants.KEY_RETURN){
+            done();
+            return true;
+        }
+        return super.keyPressed(event);
+    }
+
+    @Override
+    public void onClose(){
+        if(!viaKeybind){
+            CListVariables.minecraftClient.setScreen(new CListElementsScreen());
+        }
+        else{
+            super.onClose();
+        }
+    }
+
     public class HSVSlider extends AbstractSliderButton{
         private float trueValue;
         private final int max;
@@ -155,13 +178,13 @@ public class CListElementConfig extends Screen{
         public HSVSlider(int x, int y, int width, int height, Component text, float value, int type){
             super(x, y, width, height, text, value);
             this.type = type;
-            this.max = type == 0 ? 360 : 100;
+            this.max = 1;
             this.prefix = type == 0 ? "H: " : type == 1 ? "S: " : "V: ";
         }
 
         @Override
         protected void updateMessage(){
-            this.setMessage(Component.literal(prefix + trueValue));
+            this.setMessage(Component.literal(prefix + Math.round(trueValue * (type == 0 ? 360 : 100))));
         }
 
         @Override
@@ -169,8 +192,8 @@ public class CListElementConfig extends Screen{
             this.trueValue = (float) Math.round((this.value * (this.max)) * (double) ((float) 100)) / (float) 100;
             hsv[type] = this.trueValue;
             if(!this.force){
-                float[] convertedColor = CListColorHelper.HSVtoRGB(hsv);
-                elementColor.setValue(CListColorHelper.HexNoAlpha(convertedColor));
+                int convertedColor = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
+                elementColor.setValue(hexNoAlpha(convertedColor));
             }
             else{
                 this.force = false;
@@ -185,7 +208,7 @@ public class CListElementConfig extends Screen{
         public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
             GlStateManager._enableBlend();
             GlStateManager._enableDepthTest();
-            int color = CListColorHelper.HSVtoRGB(hsv[0], hsv[1], hsv[2]);
+            int color = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
             float[] colorFloat = Color.RGBtoHSB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, null);
             if(type == 0){
                 for(int i = 0; i < this.width; i++){
@@ -258,7 +281,7 @@ public class CListElementConfig extends Screen{
         int top = centerY - SQUARE_SIZE / 2;
         int right = centerX + SQUARE_SIZE / 2;
         int bottom = centerY + SQUARE_SIZE / 2 + 1;
-        guiGraphics.fill(left, top, right, bottom, CListColorHelper.HSVtoRGB(hsv[0], hsv[1], hsv[2]));
+        guiGraphics.fill(left, top, right, bottom, (255 << 24) | Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]));
         toggleSlidersButton.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         if(!this.elementDimension.isClicked()){
