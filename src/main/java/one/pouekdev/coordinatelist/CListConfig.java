@@ -14,17 +14,42 @@ import java.util.List;
 
 public class CListConfig extends MidnightConfig {
     public enum DefaultDimensionSort implements StringRepresentable{
-        CURRENT(0, "dimensions.current"),
-        ALL(1, "dimensions.all");
+        CURRENT("dimensions.current"),
+        ALL("dimensions.all");
 
         private final String translationKey;
 
-        DefaultDimensionSort(int id, String translationKey) {
+        DefaultDimensionSort(String translationKey) {
             this.translationKey = translationKey;
         }
 
         @Override
         public @NonNull String getSerializedName() {
+            return this.translationKey;
+        }
+    }
+    public enum KmConversion implements StringRepresentable{
+        OFF(0, "options.off"),
+        M100(100, "100 m"),
+        M1000(1000, "1000 m"),
+        M10000(10000, "10000 m"),
+        M100000(100000, "100000 m"),
+        M1000000(1000000, "1000000 m"),;
+
+        private final int divider;
+        private final String translationKey;
+
+        KmConversion(int divider, String translationKey){
+            this.divider = divider;
+            this.translationKey = translationKey;
+        }
+
+        public int getDivider(){
+            return this.divider;
+        }
+
+        @Override
+        public @NonNull String getSerializedName(){
             return this.translationKey;
         }
     }
@@ -40,6 +65,7 @@ public class CListConfig extends MidnightConfig {
     @Entry public static boolean deleteDeathpointsWhenReached = true;
     @Entry public static DefaultDimensionSort defaultDimensionSort = DefaultDimensionSort.CURRENT;
     @Entry public static boolean displayTreeVisualization = true;
+    @Entry public static KmConversion kmConversion = KmConversion.M1000;
 
     @Override
     public void onTabInit(String tabName, MidnightConfigListWidget list, MidnightConfigScreen screen){

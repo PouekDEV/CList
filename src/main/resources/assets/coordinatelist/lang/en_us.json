@@ -18,6 +18,7 @@
   "coordinatelist.midnightconfig.migrateSavefile": "Menu for migrating waypoints and folders from one server/world to another",
   "coordinatelist.midnightconfig.migrateSavefile.button": "Open",
   "coordinatelist.midnightconfig.migrateSavefile.button.tooltip": "Menu is disabled while in-game",
+  "coordinatelist.midnightconfig.kmConversion": "The length after which distance is converted to kilometers",
   "modmenu.summaryTranslation.coordinatelist": "A simple minimalistic Fabric mod for saving your coordinates.",
   "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (CList for short) is a simple minimalistic Fabric mod for saving your coordinates. No minimaps. Just a list with in-game waypoints.",
   "waypoint.last.death": "Last death",

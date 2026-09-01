@@ -93,6 +93,19 @@ public abstract class CListWaypointRenderer{
         }
     }
 
+    @Unique
+    private String formatName(String name, double distance){
+        String unit = "m";
+        if(CListConfig.kmConversion != CListConfig.KmConversion.OFF){
+            if(distance >= CListConfig.kmConversion.getDivider()){
+                distance = distance / 1000;
+                unit = "km";
+            }
+        }
+        double distanceRounded = Math.round(distance * 10) / 10.0;
+        return name + " (" + distanceRounded + unit + ")";
+    }
+
     // This is a temporary resolution to the WorldRenderEvents being removed. Honestly we'll just have to wait for a new implementation
     @Inject(method = "renderLevel", at = @At("RETURN"))
     private void afterRender(CallbackInfo ci){
@@ -107,16 +120,15 @@ public abstract class CListWaypointRenderer{
                 }
             }
             waypointsWithDistance.sort(new DistanceComparator());
-            for(WaypointWithDistance waypointWithDistance: waypointsWithDistance){
+            for(WaypointWithDistance waypointWithDistance : waypointsWithDistance){
                 CListWaypoint waypoint = waypointWithDistance.waypoint;
-                long distanceWithoutDecimalPlaces = Math.round(waypointWithDistance.distance);
-                if(CListVariables.minecraftClient.player.isAlive() && CListVariables.minecraftClient.screen == null && waypoint.deathpoint && !waypoint.locked && CListConfig.deleteDeathpointsWhenReached && distanceWithoutDecimalPlaces <= 4){
+                if(CListVariables.minecraftClient.player.isAlive() && CListVariables.minecraftClient.screen == null && waypoint.deathpoint && !waypoint.locked && CListConfig.deleteDeathpointsWhenReached && waypointWithDistance.distance <= 4){
                     CListClient.deleteElement(waypointWithDistance.waypoint);
                     break;
                 }
                 Camera camera = CListVariables.minecraftClient.gameRenderer.getMainCamera();
                 float size = calculateWaypointSize();
-                Vec3 renderCoords = calculateRenderCoords(waypoint, camera, distanceWithoutDecimalPlaces);
+                Vec3 renderCoords = calculateRenderCoords(waypoint, camera, waypointWithDistance.distance);
                 Vec3 transformedPosition = renderCoords.subtract(camera.position());
                 // TODO: Wait for a new implementation of WorldRenderEvents and then use the PoseStack from guiGraphics instead of recalculating everything by ourselves
                 PoseStack poseStack = new PoseStack();
@@ -148,7 +160,7 @@ public abstract class CListWaypointRenderer{
                 }
                 CListRenderLayers.POSITION_TEX_COLOR.apply(icon).draw(buffer.buildOrThrow());
                 Font font = CListVariables.minecraftClient.font;
-                String labelText = waypoint.name + " (" + distanceWithoutDecimalPlaces + " m)";
+                String labelText = formatName(waypoint.name, waypointWithDistance.distance);
                 int textWidth = font.width(labelText);
                 poseStack.scale(-0.025f, -0.025f, 0.025f);
                 size = calculateTextSize();

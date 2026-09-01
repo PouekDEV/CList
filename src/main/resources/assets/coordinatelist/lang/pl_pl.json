@@ -18,6 +18,7 @@
   "coordinatelist.midnightconfig.migrateSavefile": "Menu do przenoszenia punktów orientacyjnych i folderów z jednego świata/serwera na drugi",
   "coordinatelist.midnightconfig.migrateSavefile.button": "Otwórz",
   "coordinatelist.midnightconfig.migrateSavefile.button.tooltip": "Menu jest wyłączone podczas gry",
+  "coordinatelist.midnightconfig.kmConversion": "Odległość, po której dystans jest przeliczany na kilometry",
   "modmenu.summaryTranslation.coordinatelist": "Prosty i minimalistyczny mod na Fabric'a do zapisywania swojej pozycji",
   "modmenu.descriptionTranslation.coordinatelist": "Coordinate List (w skrócie CList) to prosty i minimalistyczny mod na Fabric'a do zapisywania swojej pozycji. Zero minimap. Tylko prosta lista z wyświetlanymi punktami orientacyjnymi w grze.",
   "waypoint.last.death": "Ostatnia śmierć",
