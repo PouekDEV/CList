@@ -21,7 +21,7 @@ import org.jspecify.annotations.NonNull;
 import java.awt.*;
 import java.util.List;
 
-public class CListElementConfig extends Screen{
+public class CListElementConfigScreen extends Screen{
     private final CListElement element;
     private CListWaypoint waypoint;
     private boolean renderColorPicker = false;
@@ -39,7 +39,7 @@ public class CListElementConfig extends Screen{
     private Button deleteButton;
     private final List<String> dimensions = Lists.newArrayList();
 
-    CListElementConfig(CListElement element, boolean viaKeybind){
+    CListElementConfigScreen(CListElement element, boolean viaKeybind){
         super(Component.literal("Element config"));
         this.element = element;
         if(element instanceof CListFolder){
@@ -115,9 +115,9 @@ public class CListElementConfig extends Screen{
             addRenderableWidget(this.z);
         }
         this.toggleSlidersButton = new SpriteButton((this.width - 50) / 2 + 38, (this.height - 20) / 2 - 20, 12, 12, _ -> renderColorPicker = !renderColorPicker);
-        this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 20, 110, 15, Component.literal("H: " + Math.round(hsv[0] * 360)), hsv[0], 0);
-        this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 2, 110, 15, Component.literal("S: " + Math.round(hsv[1] * 100)), hsv[1], 1);
-        this.v = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 16, 110, 15, Component.literal("V: " + Math.round(hsv[2] * 100)), hsv[2], 2);
+        this.h = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 20, 110, 15, Component.literal("H: " + Math.round(hsv[0] * 360)), hsv[0], HSVSlider.SliderType.H);
+        this.s = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 - 2, 110, 15, Component.literal("S: " + Math.round(hsv[1] * 100)), hsv[1], HSVSlider.SliderType.S);
+        this.v = new HSVSlider((this.width - 50) / 2, (this.height - 20) / 2 + 16, 110, 15, Component.literal("V: " + Math.round(hsv[2] * 100)), hsv[2], HSVSlider.SliderType.V);
         this.h.visible = false;
         this.s.visible = false;
         this.v.visible = false;
@@ -165,9 +165,23 @@ public class CListElementConfig extends Screen{
     }
 
     public class HSVSlider extends AbstractSliderButton{
+        public enum SliderType{
+            H(0), S(1), V(2);
+
+            private final int value;
+
+            SliderType(int value){
+                this.value = value;
+            }
+
+            public int getValue(){
+                return value;
+            }
+        }
+
         private float trueValue;
         private final int max;
-        private final int type;
+        private final SliderType type;
         private final String prefix;
         private boolean force = false;
         private static final Identifier SLIDER_HANDLE_SPRITE = Identifier.withDefaultNamespace("widget/slider_handle");
@@ -175,22 +189,22 @@ public class CListElementConfig extends Screen{
         protected boolean canChangeValue;
         private boolean dragging;
 
-        public HSVSlider(int x, int y, int width, int height, Component text, float value, int type){
+        public HSVSlider(int x, int y, int width, int height, Component text, float value, SliderType type){
             super(x, y, width, height, text, value);
             this.type = type;
             this.max = 1;
-            this.prefix = type == 0 ? "H: " : type == 1 ? "S: " : "V: ";
+            this.prefix = type == SliderType.H ? "H: " : type == SliderType.S ? "S: " : "V: ";
         }
 
         @Override
         protected void updateMessage(){
-            this.setMessage(Component.literal(prefix + Math.round(trueValue * (type == 0 ? 360 : 100))));
+            this.setMessage(Component.literal(prefix + Math.round(trueValue * (type == SliderType.H ? 360 : 100))));
         }
 
         @Override
         protected void applyValue(){
             this.trueValue = (float) Math.round((this.value * (this.max)) * (double) ((float) 100)) / (float) 100;
-            hsv[type] = this.trueValue;
+            hsv[type.getValue()] = this.trueValue;
             if(!this.force){
                 int convertedColor = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
                 elementColor.setValue(hexNoAlpha(convertedColor));
@@ -210,7 +224,7 @@ public class CListElementConfig extends Screen{
             GlStateManager._enableDepthTest();
             int color = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
             float[] colorFloat = Color.RGBtoHSB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, null);
-            if(type == 0){
+            if(type == SliderType.H){
                 for(int i = 0; i < this.width; i++){
                     float hue = i / (float) this.width;
                     int colorH = Color.HSBtoRGB(hue, colorFloat[1], colorFloat[2]);
@@ -219,7 +233,7 @@ public class CListElementConfig extends Screen{
             }
             else{
                 int colorStart, colorEnd;
-                if(type == 1){
+                if(type == SliderType.S){
                     colorStart = Color.HSBtoRGB(1.0f, 0.0f, colorFloat[2]);
                     colorEnd = Color.HSBtoRGB(colorFloat[0], 1.0f, colorFloat[2]);
                 }
@@ -267,7 +281,7 @@ public class CListElementConfig extends Screen{
 
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
-        int SQUARE_SIZE = 50;
+        int squareSize = 50;
         int centerX = this.width / 2;
         int centerY = this.height / 2 - 5;
         if(renderColorPicker){
@@ -277,57 +291,32 @@ public class CListElementConfig extends Screen{
         else{
             toggleSlidersButton.setX((this.width - 50) / 2 + 38);
         }
-        int left = centerX - SQUARE_SIZE / 2;
-        int top = centerY - SQUARE_SIZE / 2;
-        int right = centerX + SQUARE_SIZE / 2;
-        int bottom = centerY + SQUARE_SIZE / 2 + 1;
+        int left = centerX - squareSize / 2;
+        int top = centerY - squareSize / 2;
+        int right = centerX + squareSize / 2;
+        int bottom = centerY + squareSize / 2 + 1;
         guiGraphics.fill(left, top, right, bottom, (255 << 24) | Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]));
         toggleSlidersButton.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
-        if(!this.elementDimension.isClicked()){
-            if(waypoint != null){
-                this.x.active = true;
-                this.y.active = true;
-                this.z.active = true;
-            }
-            this.toggleSlidersButton.active = true;
-            this.elementColor.active = true;
-            this.h.active = true;
-            this.s.active = true;
-            this.v.active = true;
-            if(this.lockDeathpointButton != null){
-                this.lockDeathpointButton.active = true;
-            }
-            this.doneButton.active = true;
-            this.deleteButton.active = true;
+        boolean dropdownClicked = !this.elementDimension.isClicked();
+        if(waypoint != null){
+            this.x.active = dropdownClicked;
+            this.y.active = dropdownClicked;
+            this.z.active = dropdownClicked;
         }
-        else{
-            if(waypoint != null){
-                this.x.active = false;
-                this.y.active = false;
-                this.z.active = false;
-            }
-            this.toggleSlidersButton.active = false;
-            this.elementColor.active = false;
-            this.h.active = false;
-            this.s.active = false;
-            this.v.active = false;
-            if(this.lockDeathpointButton != null){
-                this.lockDeathpointButton.active = false;
-            }
-            this.doneButton.active = false;
-            this.deleteButton.active = false;
+        this.toggleSlidersButton.active = dropdownClicked;
+        this.elementColor.active = dropdownClicked;
+        this.h.active = dropdownClicked;
+        this.s.active = dropdownClicked;
+        this.v.active = dropdownClicked;
+        if(this.lockDeathpointButton != null){
+            this.lockDeathpointButton.active = dropdownClicked;
         }
-        if(renderColorPicker){
-            this.h.visible = true;
-            this.s.visible = true;
-            this.v.visible = true;
-        }
-        else{
-            this.h.visible = false;
-            this.s.visible = false;
-            this.v.visible = false;
-        }
+        this.doneButton.active = dropdownClicked;
+        this.deleteButton.active = dropdownClicked;
+        this.h.visible = renderColorPicker;
+        this.s.visible = renderColorPicker;
+        this.v.visible = renderColorPicker;
     }
 
     private static boolean isParsableToInt(String str){

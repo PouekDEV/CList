@@ -7,7 +7,7 @@ public class CListElementColor{
     public float r;
     public float g;
     public float b;
-    private final static Random rand = new Random();
+    private final static Random RAND = new Random();
 
     CListElementColor(float red, float green, float blue){
         r = red;
@@ -16,9 +16,9 @@ public class CListElementColor{
     }
 
     CListElementColor(){
-        r = rand.nextFloat();
-        g = rand.nextFloat();
-        b = rand.nextFloat();
+        r = RAND.nextFloat();
+        g = RAND.nextFloat();
+        b = RAND.nextFloat();
     }
 
     public float[] getHSV(){

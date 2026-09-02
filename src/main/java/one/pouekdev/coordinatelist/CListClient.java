@@ -22,7 +22,8 @@ public class CListClient implements ClientModInitializer{
     KeyMapping openWaypointsKeybind;
     KeyMapping addAWaypoint;
     KeyMapping toggleVisibility;
-    public static KeyMapping.Category MOD_CATEGORY = new KeyMapping.Category(Identifier.parse(CList.MOD_ID));
+    public final static KeyMapping.Category MOD_CATEGORY = new KeyMapping.Category(Identifier.parse(CList.MOD_ID));
+    public final static List<String> BASE_DIMENSIONS = List.of("minecraft:overworld", "minecraft:the_nether", "minecraft:the_end");
 
     @Override
     public void onInitializeClient(){
@@ -46,7 +47,7 @@ public class CListClient implements ClientModInitializer{
         ));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(!CListVariables.delayedEvents.isEmpty()){
-                for(CListDelayedEvent event: CListVariables.delayedEvents){
+                for(CListDelayedEvent event : CListVariables.delayedEvents){
                     boolean destroy = event.update();
                     if(destroy){
                         CListVariables.delayedEvents.remove(event);
@@ -81,9 +82,13 @@ public class CListClient implements ClientModInitializer{
                         if(CListVariables.dimensions.isEmpty()){
                             Set<ResourceKey<Level>> levels =  CListVariables.minecraftClient.getConnection().levels();
                             for(ResourceKey<Level> key : levels){
-                                CListVariables.dimensions.add(key.identifier().toString());
+                                String dimension = key.identifier().toString();
+                                if(!dimension.equals("minecraft:overworld") && !dimension.equals("minecraft:the_end") && !dimension.equals("minecraft:the_nether")){
+                                    CListVariables.dimensions.add(key.identifier().toString());
+                                }
                             }
                             Collections.sort(CListVariables.dimensions);
+                            CListVariables.dimensions.addAll(0, BASE_DIMENSIONS);
                         }
                         CListVariables.lastWorld = client.level;
                         checkForWorldChanges(CListVariables.lastWorld);
@@ -142,7 +147,7 @@ public class CListClient implements ClientModInitializer{
         if(dim == null){
             dim = CListVariables.lastWorld.dimension().identifier().toString();
         }
-        CList.LOGGER.info("New waypoint for dimension: " + dim);
+        CList.LOGGER.info("New waypoint for dimension: {}", dim);
         String waypointName;
         if(death){
             waypointName = Component.translatable("waypoint.last.death").getString();
@@ -154,16 +159,16 @@ public class CListClient implements ClientModInitializer{
         CListVariables.data.waypoints.addFirst(waypoint);
         CListVariables.savedSinceLastUpdate = false;
         if(!death){
-            CListVariables.minecraftClient.setScreen(new CListElementConfig(waypoint, viaKeybind));
+            CListVariables.minecraftClient.setScreen(new CListElementConfigScreen(waypoint, viaKeybind));
         }
     }
 
     public static void addNewFolder(){
-        CList.LOGGER.info("New folder for dimension: " + CListVariables.lastWorld.dimension().identifier());
+        CList.LOGGER.info("New folder for dimension: {}", CListVariables.lastWorld.dimension().identifier());
         CListFolder folder = new CListFolder(Component.translatable("folder.new.folder").getString(), CListVariables.lastWorld.dimension().identifier().toString(), new CListElementColor(), true, true);
         CListVariables.data.folders.addFirst(folder);
         CListVariables.savedSinceLastUpdate = false;
-        CListVariables.minecraftClient.setScreen(new CListElementConfig(folder, false));
+        CListVariables.minecraftClient.setScreen(new CListElementConfigScreen(folder, false));
     }
 
     public static void deleteElement(CListElement element){
@@ -188,13 +193,13 @@ public class CListClient implements ClientModInitializer{
 
     public static void checkForWorldChanges(ClientLevel currentWorld){
         if(!CListVariables.loadedLastWorld && CListVariables.worldName != null){
-            CList.LOGGER.info("New world: " + CListVariables.worldName);
+            CList.LOGGER.info("New world: {}", CListVariables.worldName);
             CListVariables.lastWorld = currentWorld;
             List<CListWaypoint> waypoints = CListData.loadListFromFileLegacy("clist_" + CListVariables.worldName);
             if(waypoints != null && !waypoints.isEmpty()){
                 CListVariables.data.waypoints = waypoints;
                 CListData.deleteLegacyFile("clist_" + CListVariables.worldName);
-                CList.LOGGER.info("Loaded pre 2.0 data for " + CListVariables.worldName);
+                CList.LOGGER.info("Loaded pre 2.0 data for {}", CListVariables.worldName);
                 checkIfSaveIsNeeded(true);
             }
             else{
@@ -202,10 +207,10 @@ public class CListClient implements ClientModInitializer{
                 if(dataContainer != null){
                     CListVariables.data = dataContainer;
                     CListVariables.data.assignParents();
-                    CList.LOGGER.info("Loaded data for " + CListVariables.worldName);
+                    CList.LOGGER.info("Loaded data for {}", CListVariables.worldName);
                 }
                 else{
-                    CList.LOGGER.info("The file for " + CListVariables.worldName + " doesn't exist");
+                    CList.LOGGER.info("The file for {} doesn't exist", CListVariables.worldName);
                 }
             }
             CListVariables.loadedLastWorld = true;
@@ -214,7 +219,7 @@ public class CListClient implements ClientModInitializer{
 
     public static void checkIfSaveIsNeeded(boolean force){
         if(!CListVariables.savedSinceLastUpdate || force){
-            CList.LOGGER.info("Saving data for " + CListVariables.worldName);
+            CList.LOGGER.info("Saving data for {}", CListVariables.worldName);
             CListData.saveListToFile("clist_" + CListVariables.worldName + ".json", CListVariables.data);
             CListVariables.savedSinceLastUpdate = true;
         }

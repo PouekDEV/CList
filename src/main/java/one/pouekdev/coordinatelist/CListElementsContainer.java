@@ -33,7 +33,7 @@ public class CListElementsContainer{
     public List<CListWaypoint> getAllWaypoints(boolean ignoreHidden){
         List<CListWaypoint> waypoints = Lists.newArrayList();
         waypoints.addAll(this.waypoints);
-        for(CListFolder folder: this.folders){
+        for(CListFolder folder : this.folders){
             getAllWaypoints(folder, waypoints, ignoreHidden);
         }
         return waypoints;
@@ -54,7 +54,7 @@ public class CListElementsContainer{
     }
 
     public void assignParents(){
-        for(CListFolder folder: this.folders){
+        for(CListFolder folder : this.folders){
             assignParents(null, folder, 0);
         }
     }

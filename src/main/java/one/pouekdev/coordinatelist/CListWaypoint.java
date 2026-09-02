@@ -12,15 +12,7 @@ public class CListWaypoint extends CListElement{
         s = s.replace("Z", "");
         s = s.replace(" ", "");
         String[] segments = s.split(":");
-        this.x = Integer.parseInt(segments[1]);
-        this.y = Integer.parseInt(segments[2]);
-        this.z = Integer.parseInt(segments[3]);
-        this.name = waypointName;
-        this.dimension = waypointDimension;
-        this.color = waypointColor;
-        this.render = isRendered;
-        this.deathpoint = isDeathpoint;
-        this.locked = false;
+        this(Integer.parseInt(segments[1]), Integer.parseInt(segments[2]), Integer.parseInt(segments[3]), waypointName, waypointDimension, waypointColor, isRendered, isDeathpoint);
     }
 
     CListWaypoint(int x, int y, int z, String waypointName, String waypointDimension, CListElementColor waypointColor, boolean isRendered, boolean isDeathpoint){

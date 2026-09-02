@@ -70,9 +70,7 @@ public class CListDataMigrationScreen extends Screen{
             }
             CListVariables.delayedEvents.add(new CListDelayedEvent(3f, () -> status = Status.NONE));
         }).bounds(this.width / 2 - 155, this.height - 30, 150, 20).build();
-        addRenderableWidget(Button.builder(Component.translatable("gui.back"), _ -> {
-            onClose();
-        }).bounds(this.width / 2 + 5, this.height - 30, 150, 20).build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.back"), _ -> onClose()).bounds(this.width / 2 + 5, this.height - 30, 150, 20).build());
         if(!acknowledged){
             acknowledgeButton = addRenderableWidget(Button.builder(Component.translatable("data.migration.acknowledge"), _ -> {
                 acknowledged = true;

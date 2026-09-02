@@ -34,7 +34,7 @@ public class CListConfig extends MidnightConfig {
         M1000(1000, "1000 m"),
         M10000(10000, "10000 m"),
         M100000(100000, "100000 m"),
-        M1000000(1000000, "1000000 m"),;
+        M1000000(1000000, "1000000 m");
 
         private final int divider;
         private final String translationKey;

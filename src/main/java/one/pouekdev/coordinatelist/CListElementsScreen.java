@@ -32,8 +32,8 @@ public class CListElementsScreen extends Screen{
     private Button deleteWaypointButton;
     private CListDropdown dropdown;
     private CallbackEditBox search;
-    private final String NOTHING_SELECTED = "---";
-    private String copyCoordinatesButtonText = NOTHING_SELECTED;
+    private final String nothingSelected = "---";
+    private String copyCoordinatesButtonText = nothingSelected;
     private final List<String> dimensions = Lists.newArrayList();
     private final Window window = CListVariables.minecraftClient.getWindow();
 
@@ -67,7 +67,7 @@ public class CListElementsScreen extends Screen{
         deleteWaypointButton = Button.builder(Component.translatable("selectWorld.delete"), _ -> {
             CListClient.deleteElement(selectedElement);
             selectedElement = null;
-            updateCopyCoordinatesButtonText(NOTHING_SELECTED);
+            updateCopyCoordinatesButtonText(nothingSelected);
             list.refreshElements();
         }).bounds((this.width / 2) - 185, this.height - 25, 100, 20).build();
         copyCoordinatesButton = Button.builder(Component.literal(copyCoordinatesButtonText), _ -> {
@@ -80,7 +80,7 @@ public class CListElementsScreen extends Screen{
             }
         }).bounds((this.width / 2) - 75, this.height - 25, 150, 20).build();
         copyCoordinatesButton.setTooltip(Tooltip.create(Component.translatable("tooltip.copy.waypoint.coordinates")));
-        editWaypointButton = Button.builder(Component.translatable("selectWorld.edit"), _ -> CListVariables.minecraftClient.setScreen(new CListElementConfig(selectedElement, false))).bounds((this.width / 2) + 85, this.height - 25, 100, 20).build();
+        editWaypointButton = Button.builder(Component.translatable("selectWorld.edit"), _ -> CListVariables.minecraftClient.setScreen(new CListElementConfigScreen(selectedElement, false))).bounds((this.width / 2) + 85, this.height - 25, 100, 20).build();
         addRenderableWidget(deleteWaypointButton);
         addRenderableWidget(copyCoordinatesButton);
         addRenderableWidget(editWaypointButton);
@@ -95,16 +95,10 @@ public class CListElementsScreen extends Screen{
     public void extractRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
         super.extractRenderState(guiGraphics, mouseX, mouseY, delta);
         list.active = !dropdown.isClicked();
-        if(selectedElement != null){
-            copyCoordinatesButton.active = selectedElement instanceof CListWaypoint;
-            editWaypointButton.active = true;
-            deleteWaypointButton.active = true;
-        }
-        else{
-            copyCoordinatesButton.active = false;
-            editWaypointButton.active = false;
-            deleteWaypointButton.active = false;
-        }
+        boolean selectedElementNotNull = selectedElement != null;
+        copyCoordinatesButton.active = selectedElement instanceof CListWaypoint;
+        editWaypointButton.active = selectedElementNotNull;
+        deleteWaypointButton.active = selectedElementNotNull;
     }
 
     private void updateCopyCoordinatesButtonText(String text){
@@ -447,7 +441,7 @@ public class CListElementsScreen extends Screen{
 
         public void deselectCurrentEntry(){
             selectedElement = null;
-            updateCopyCoordinatesButtonText(NOTHING_SELECTED);
+            updateCopyCoordinatesButtonText(nothingSelected);
             this.setSelected(null);
         }
 
@@ -470,19 +464,19 @@ public class CListElementsScreen extends Screen{
             }
 
             @Override
-            protected void updateWidgetNarration(NarrationElementOutput output){}
+            protected void updateWidgetNarration(@NonNull NarrationElementOutput output){}
         }
 
-        private static class TextureButton extends Button{
+        private static class SpriteButton extends Button{
             private final CListElement element;
             private final Identifier onTexture;
             private final Identifier offTexture;
 
-            public TextureButton(int x, int y, int width, int height, OnPress onPress, CListElement element, Identifier onTexture, Identifier offTexture){
+            public SpriteButton(int x, int y, int width, int height, OnPress onPress, CListElement element){
                 super(x, y, width, height, Component.literal(""), onPress, DEFAULT_NARRATION);
                 this.element = element;
-                this.onTexture = onTexture;
-                this.offTexture = offTexture;
+                this.onTexture = Identifier.fromNamespaceAndPath("coordinatelist", "icon/visible");
+                this.offTexture = Identifier.fromNamespaceAndPath("coordinatelist", "icon/not_visible");
             }
 
             private boolean areCoordinatesInRectangle(final double x, final double y) {
@@ -542,15 +536,15 @@ public class CListElementsScreen extends Screen{
         }
 
         private class FolderEntry extends ElementListEntry{
-            private final TextureButton visibility;
+            private final SpriteButton visibility;
             public final CListFolder folder;
 
             FolderEntry(CListFolder folder, int depth){
                 super(depth);
-                this.visibility = new TextureButton(0, 0, 16, 12, button -> {
-                    updateCopyCoordinatesButtonText(NOTHING_SELECTED);
+                this.visibility = new SpriteButton(0, 0, 16, 12, button -> {
+                    updateCopyCoordinatesButtonText(nothingSelected);
                     folder.toggleVisibility();
-                }, folder, Identifier.fromNamespaceAndPath("coordinatelist", "icon/visible"), Identifier.fromNamespaceAndPath("coordinatelist", "icon/not_visible"));
+                }, folder);
                 this.folder = folder;
             }
 
@@ -644,7 +638,7 @@ public class CListElementsScreen extends Screen{
                 if(visibilityClicked){
                     return true;
                 }
-                updateCopyCoordinatesButtonText(NOTHING_SELECTED);
+                updateCopyCoordinatesButtonText(nothingSelected);
                 if(doubled){
                     folder.toggleExtended();
                     refreshElements();
@@ -655,16 +649,16 @@ public class CListElementsScreen extends Screen{
         }
 
         private class WaypointEntry extends ElementListEntry{
-            private final TextureButton visibility;
+            private final SpriteButton visibility;
             public final CListWaypoint waypoint;
             private final boolean viaSearch;
 
             WaypointEntry(CListWaypoint waypoint, int depth, boolean viaSearch){
                 super(depth);
-                this.visibility = new TextureButton(0, 0, 16, 12, _ -> {
+                this.visibility = new SpriteButton(0, 0, 16, 12, _ -> {
                     updateCopyCoordinatesButtonText(waypoint.x + " " + waypoint.y + " " + waypoint.z);
                     waypoint.toggleVisibility();
-                }, waypoint, Identifier.fromNamespaceAndPath("coordinatelist", "icon/visible"), Identifier.fromNamespaceAndPath("coordinatelist", "icon/not_visible"));
+                }, waypoint);
                 this.waypoint = waypoint;
                 this.viaSearch = viaSearch;
             }
@@ -717,7 +711,7 @@ public class CListElementsScreen extends Screen{
                     return true;
                 }
                 if(doubled){
-                    CListVariables.minecraftClient.setScreen(new CListElementConfig(selectedElement, false));
+                    CListVariables.minecraftClient.setScreen(new CListElementConfigScreen(selectedElement, false));
                 }
                 updateCopyCoordinatesButtonText(waypoint.x + " " + waypoint.y + " " + waypoint.z);
                 return super.mouseClicked(mouseButtonEvent, doubled);

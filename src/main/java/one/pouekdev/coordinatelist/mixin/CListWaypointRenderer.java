@@ -110,8 +110,8 @@ public abstract class CListWaypointRenderer{
     @Unique
     private double getAngle(Vec3 v1, Vec3 v2){
         double dot = v1.dot(v2);
-        double magnitudeV1 = Math.abs(Math.sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z));
-        double magnitudeV2 = Math.abs(Math.sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z));
+        double magnitudeV1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
+        double magnitudeV2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z);
         return Math.toDegrees(Math.acos(dot / (magnitudeV1 * magnitudeV2)));
     }
 

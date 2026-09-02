@@ -85,7 +85,7 @@ public class CListDropdown extends AbstractWidget{
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput output){}
+    protected void updateWidgetNarration(@NonNull NarrationElementOutput output){}
 
     @Override
     public void onClick(@NonNull MouseButtonEvent event, boolean doubleClick){
@@ -254,7 +254,7 @@ public class CListDropdown extends AbstractWidget{
         }
 
         @Override
-        protected void updateWidgetNarration(NarrationElementOutput output){}
+        protected void updateWidgetNarration(@NonNull NarrationElementOutput output){}
 
         private class OptionListEntry extends AbstractSelectionList.Entry<OptionListEntry>{
             public final Component message;
