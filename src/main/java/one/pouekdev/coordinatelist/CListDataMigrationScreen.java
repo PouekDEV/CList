@@ -68,6 +68,7 @@ public class CListDataMigrationScreen extends Screen{
             else{
                 status = Status.DUPLICATE;
             }
+            CListVariables.delayedEvents.add(new CListDelayedEvent(3f, () -> status = Status.NONE));
         }).bounds(this.width / 2 - 155, this.height - 30, 150, 20).build();
         addRenderableWidget(Button.builder(Component.translatable("gui.back"), _ -> {
             onClose();
@@ -143,7 +144,7 @@ public class CListDataMigrationScreen extends Screen{
                 }
             }
             if(status != Status.NONE){
-                graphics.centeredText(CListVariables.minecraftClient.font, message, this.width / 2, this.height / 2 + 30, color);
+                graphics.centeredText(CListVariables.minecraftClient.font, message, this.width / 2, this.height / 2 - 60, color);
             }
         }
     }

@@ -66,6 +66,7 @@ public class CListConfig extends MidnightConfig {
     @Entry public static DefaultDimensionSort defaultDimensionSort = DefaultDimensionSort.CURRENT;
     @Entry public static boolean displayTreeVisualization = true;
     @Entry public static KmConversion kmConversion = KmConversion.M1000;
+    @Entry public static boolean hideWaypointNameWhenNotLookedAt = false;
 
     @Override
     public void onTabInit(String tabName, MidnightConfigListWidget list, MidnightConfigScreen screen){

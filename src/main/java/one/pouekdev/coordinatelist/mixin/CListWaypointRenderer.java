@@ -16,6 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import one.pouekdev.coordinatelist.*;
 import org.apache.commons.compress.utils.Lists;
 import org.joml.Matrix4f;
+import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -106,9 +107,18 @@ public abstract class CListWaypointRenderer{
         return name + " (" + distanceRounded + unit + ")";
     }
 
+    @Unique
+    private double getAngle(Vec3 v1, Vec3 v2){
+        double dot = v1.dot(v2);
+        double magnitudeV1 = Math.abs(Math.sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z));
+        double magnitudeV2 = Math.abs(Math.sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z));
+        return Math.toDegrees(Math.acos(dot / (magnitudeV1 * magnitudeV2)));
+    }
+
     // This is a temporary resolution to the WorldRenderEvents being removed. Honestly we'll just have to wait for a new implementation
     @Inject(method = "renderLevel", at = @At("RETURN"))
     private void afterRender(CallbackInfo ci){
+        Camera camera = CListVariables.minecraftClient.gameRenderer.getMainCamera();
         List<CListWaypoint> waypoints = CListVariables.data.getAllWaypoints(true);
         if(!waypoints.isEmpty() && CListConfig.waypointsToggled && !CListVariables.minecraftClient.options.hideGui){
             List<WaypointWithDistance> waypointsWithDistance = Lists.newArrayList();
@@ -126,10 +136,15 @@ public abstract class CListWaypointRenderer{
                     CListClient.deleteElement(waypointWithDistance.waypoint);
                     break;
                 }
-                Camera camera = CListVariables.minecraftClient.gameRenderer.getMainCamera();
                 float size = calculateWaypointSize();
                 Vec3 renderCoords = calculateRenderCoords(waypoint, camera, waypointWithDistance.distance);
                 Vec3 transformedPosition = renderCoords.subtract(camera.position());
+                boolean lookedAt = false;
+                if(CListConfig.hideWaypointNameWhenNotLookedAt){
+                    Vector3fc forwardVector = camera.forwardVector();
+                    double angle = getAngle(transformedPosition, new Vec3(forwardVector.x(), forwardVector.y(), forwardVector.z()));
+                    lookedAt = Math.round(angle) < Math.round(30 / Math.log(waypointWithDistance.distance > 1 ? waypointWithDistance.distance : 1.1));
+                }
                 // TODO: Wait for a new implementation of WorldRenderEvents and then use the PoseStack from guiGraphics instead of recalculating everything by ourselves
                 PoseStack poseStack = new PoseStack();
                 poseStack.translate(0.25, 0, 0.25);
@@ -169,11 +184,13 @@ public abstract class CListWaypointRenderer{
                 positionMatrix = poseStack.last().pose();
                 float h = -textWidth / 2f;
                 MultiBufferSource.BufferSource b = CListVariables.minecraftClient.renderBuffers().bufferSource();
-                if(CListConfig.waypointTextBackground){
-                    font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x90000000, LightCoordsUtil.FULL_BRIGHT);
-                }
-                else{
-                    font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x00000000, LightCoordsUtil.FULL_BRIGHT);
+                if(lookedAt || !CListConfig.hideWaypointNameWhenNotLookedAt){
+                    if(CListConfig.waypointTextBackground){
+                        font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x90000000, LightCoordsUtil.FULL_BRIGHT);
+                    }
+                    else{
+                        font.drawInBatch(labelText, h, 0, 0xFFFFFFFF, false, positionMatrix, b, Font.DisplayMode.SEE_THROUGH, 0x00000000, LightCoordsUtil.FULL_BRIGHT);
+                    }
                 }
                 b.endBatch();
             }
