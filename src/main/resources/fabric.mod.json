@@ -3,7 +3,7 @@
   "id": "coordinatelist",
   "version": "${version}",
   "name": "CList",
-  "description": "Coordinate List (CList for short) is a simple minimalistic fabric mod for saving your coordinates. No minimaps. Just a list with in-game waypoints.",
+  "description": "Coordinate List (CList for short) is a simple minimalistic Fabric mod for saving your coordinates. No minimaps. Just a list with in-game waypoints.",
   "authors": [
     "PouekDEV"
   ],

@@ -7,14 +7,14 @@ import org.apache.commons.compress.utils.Lists;
 import java.util.List;
 
 public class CListVariables{
-    public List<CListWaypoint> waypoints = Lists.newArrayList();
-    public List<CListWaypointColor> colors = Lists.newArrayList();
+    public static CListElementsContainer data;
     public static List<CListDelayedEvent> delayedEvents = Lists.newArrayList();
-    public String worldName;
-    public ClientLevel lastWorld;
+    public static List<String> dimensions = Lists.newArrayList();
+    public static String worldName;
+    public static ClientLevel lastWorld;
     public static Minecraft minecraftClient = Minecraft.getInstance();
-    public boolean savedSinceLastUpdate;
-    public boolean loadedLastWorld;
-    public boolean hadDeathWaypointPlaced;
-    public boolean isWorldError;
+    public static boolean savedSinceLastUpdate;
+    public static boolean loadedLastWorld;
+    public static boolean hadDeathWaypointPlaced;
+    public static boolean isWorldError;
 }
