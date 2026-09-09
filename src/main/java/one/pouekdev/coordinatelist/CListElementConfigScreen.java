@@ -59,7 +59,7 @@ public class CListElementConfigScreen extends Screen{
         deleteButton = Button.builder(Component.translatable("selectWorld.delete"), _ -> {
             CListClient.deleteElement(element);
             if(!viaKeybind){
-                CListVariables.minecraftClient.setScreen(new CListElementsScreen());
+                CListVariables.minecraftClient.gui.setScreen(new CListElementsScreen());
             }
             else{
                 onClose();
@@ -157,7 +157,7 @@ public class CListElementConfigScreen extends Screen{
     @Override
     public void onClose(){
         if(!viaKeybind){
-            CListVariables.minecraftClient.setScreen(new CListElementsScreen());
+            CListVariables.minecraftClient.gui.setScreen(new CListElementsScreen());
         }
         else{
             super.onClose();
@@ -220,7 +220,6 @@ public class CListElementConfigScreen extends Screen{
 
         @Override
         public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
-            GlStateManager._enableBlend();
             GlStateManager._enableDepthTest();
             int color = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
             float[] colorFloat = Color.RGBtoHSB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, null);
@@ -273,9 +272,7 @@ public class CListElementConfigScreen extends Screen{
         @Override
         public void extractContents(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
             Identifier icon = Identifier.fromNamespaceAndPath("coordinatelist", "icon/change");
-            GlStateManager._enableBlend();
             guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, getX(), getY(), width, height);
-            GlStateManager._disableBlend();
         }
     }
 
