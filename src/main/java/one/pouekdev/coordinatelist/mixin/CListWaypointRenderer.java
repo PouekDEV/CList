@@ -1,10 +1,13 @@
 package one.pouekdev.coordinatelist.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.feature.CustomFeatureRenderer;
+import net.minecraft.client.renderer.feature.TextFeatureRenderer;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.LightCoordsUtil;
@@ -12,6 +15,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import one.pouekdev.coordinatelist.*;
 import org.apache.commons.compress.utils.Lists;
+import org.joml.Matrix4f;
 import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -133,6 +137,10 @@ public abstract class CListWaypointRenderer{
                     break;
                 }
 
+                if(CListVariables.minecraftClient.gui.hud.isHidden()){
+                    continue;
+                }
+
                 float size = calculateWaypointSize();
                 Vec3 renderCoords = calculateRenderCoords(waypoint, camera, waypointWithDistance.distance);
                 Vec3 transformedPosition = renderCoords.subtract(camera.position());
@@ -152,16 +160,16 @@ public abstract class CListWaypointRenderer{
                 CListElementColor color = waypoint.color;
                 Identifier icon = waypoint.deathpoint ? Identifier.fromNamespaceAndPath("coordinatelist", "skull.png") : Identifier.fromNamespaceAndPath("coordinatelist", CListConfig.squareWaypoints ? "waypoint_icon_square.png" : "waypoint_icon.png");
 
-                submitNodeCollector.submitCustomGeometry(
-                        poseStack,
+                submitNodeCollector.submitCustom(SubmitRenderPhases.ALWAYS_ON_TOP, new CustomFeatureRenderer.Submit(
+                        poseStack.last().copy(),
                         CListRenderLayers.POSITION_TEX_COLOR.apply(icon),
                         (pose, buffer) -> {
-                            buffer.addVertex(pose, 0f, 1f, 0f).setColor(color.r, color.g, color.b, 1f).setUv(0f, 0f);
-                            buffer.addVertex(pose, 0f, 0f, 0f).setColor(color.r, color.g, color.b, 1f).setUv(0f, 1f);
-                            buffer.addVertex(pose, 1f, 0f, 0f).setColor(color.r, color.g, color.b, 1f).setUv(1f, 1f);
-                            buffer.addVertex(pose, 1f, 1f, 0f).setColor(color.r, color.g, color.b, 1f).setUv(1f, 0f);
+                            buffer.addVertex(pose, -0.5f, 1f, 0f).setColor(color.r, color.g, color.b, 1f).setUv(0f, 0f);
+                            buffer.addVertex(pose, -0.5f, 0f, 0f).setColor(color.r, color.g, color.b, 1f).setUv(0f, 1f);
+                            buffer.addVertex(pose, 0.5f, 0f, 0f).setColor(color.r, color.g, color.b, 1f).setUv(1f, 1f);
+                            buffer.addVertex(pose, 0.5f, 1f, 0f).setColor(color.r, color.g, color.b, 1f).setUv(1f, 0f);
                         }
-                );
+                ));
 
                 Font font = CListVariables.minecraftClient.font;
                 String labelText = formatName(waypoint.name, waypointWithDistance.distance);
@@ -176,8 +184,8 @@ public abstract class CListWaypointRenderer{
                 if(lookedAt || !CListConfig.hideWaypointNameWhenNotLookedAt){
                     int bgColor = CListConfig.waypointTextBackground ? 0x90000000 : 0x00000000;
 
-                    submitNodeCollector.submitText(
-                            poseStack,
+                    submitNodeCollector.order(1).submitCustom(SubmitRenderPhases.ALWAYS_ON_TOP, new TextFeatureRenderer.Submit(
+                            new Matrix4f(poseStack.last().pose()),
                             h,
                             0.0f,
                             Component.literal(labelText).getVisualOrderText(),
@@ -187,7 +195,7 @@ public abstract class CListWaypointRenderer{
                             0xFFFFFFFF,
                             bgColor,
                             0
-                    );
+                    ));
                 }
             }
         }
