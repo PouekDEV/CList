@@ -113,7 +113,8 @@ public class CListDataMigrationScreen extends Screen{
 
     @Override
     public void onClose(){
-        CListVariables.minecraftClient.setScreen(MidnightConfig.getScreen(new MidnightConfigOverviewScreen(null), CList.MOD_ID));
+        CListVariables.minecraftClient.gui.setScreen(MidnightConfig.getScreen(new MidnightConfigOverviewScreen(null),
+                CList.MOD_ID));
     }
 
     @Override

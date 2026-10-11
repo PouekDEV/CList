@@ -70,7 +70,9 @@ public class CListConfig extends MidnightConfig {
 
     @Override
     public void onTabInit(String tabName, MidnightConfigListWidget list, MidnightConfigScreen screen){
-        Button button = Button.builder(Component.translatable("coordinatelist.midnightconfig.migrateSavefile.button"), _ -> CListVariables.minecraftClient.setScreen(new CListDataMigrationScreen())).bounds(screen.width - 185, 0, 150, 20).build();
+        Button button = Button.builder(Component.translatable("coordinatelist.midnightconfig.migrateSavefile.button"),
+                _ -> CListVariables.minecraftClient.gui.setScreen(new CListDataMigrationScreen())).bounds(screen.width - 185
+                , 0, 150, 20).build();
         if(CListVariables.loadedLastWorld){
             button.active = false;
             button.setTooltip(Tooltip.create(Component.translatable("coordinatelist.midnightconfig.migrateSavefile.button.tooltip")));

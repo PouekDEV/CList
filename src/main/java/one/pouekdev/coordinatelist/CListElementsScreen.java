@@ -1,6 +1,5 @@
 package one.pouekdev.coordinatelist;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
@@ -80,7 +79,8 @@ public class CListElementsScreen extends Screen{
             }
         }).bounds((this.width / 2) - 75, this.height - 25, 150, 20).build();
         copyCoordinatesButton.setTooltip(Tooltip.create(Component.translatable("tooltip.copy.waypoint.coordinates")));
-        editWaypointButton = Button.builder(Component.translatable("selectWorld.edit"), _ -> CListVariables.minecraftClient.setScreen(new CListElementConfigScreen(selectedElement, false))).bounds((this.width / 2) + 85, this.height - 25, 100, 20).build();
+        editWaypointButton = Button.builder(Component.translatable("selectWorld.edit"),
+                _ -> CListVariables.minecraftClient.gui.setScreen(new CListElementConfigScreen(selectedElement, false))).bounds((this.width / 2) + 85, this.height - 25, 100, 20).build();
         addRenderableWidget(deleteWaypointButton);
         addRenderableWidget(copyCoordinatesButton);
         addRenderableWidget(editWaypointButton);
@@ -492,9 +492,7 @@ public class CListElementsScreen extends Screen{
                 else{
                     texture = offTexture;
                 }
-                GlStateManager._enableBlend();
                 guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, getX(), getY(), width, height);
-                GlStateManager._disableBlend();
                 if(this.areCoordinatesInRectangle(mouseX, mouseY)){
                     guiGraphics.requestCursor(this.isActive() ? CursorTypes.POINTING_HAND : CursorTypes.NOT_ALLOWED);
                 }
@@ -711,7 +709,7 @@ public class CListElementsScreen extends Screen{
                     return true;
                 }
                 if(doubled){
-                    CListVariables.minecraftClient.setScreen(new CListElementConfigScreen(selectedElement, false));
+                    CListVariables.minecraftClient.gui.setScreen(new CListElementConfigScreen(selectedElement, false));
                 }
                 updateCopyCoordinatesButtonText(waypoint.x + " " + waypoint.y + " " + waypoint.z);
                 return super.mouseClicked(mouseButtonEvent, doubled);

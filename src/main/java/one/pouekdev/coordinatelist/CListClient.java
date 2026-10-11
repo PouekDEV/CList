@@ -56,10 +56,10 @@ public class CListClient implements ClientModInitializer{
                 }
             }
             while(openWaypointsKeybind.consumeClick()){
-                client.setScreen(new CListElementsScreen());
+                client.gui.setScreen(new CListElementsScreen());
             }
             while(addAWaypoint.consumeClick()){
-                if(!Objects.equals(client.screen, new CListElementsScreen())){
+                if(!Objects.equals(client.gui.screen(), new CListElementsScreen())){
                     Player player = CListVariables.minecraftClient.player;
                     addNewWaypoint((int) Math.floor(player.getX()), (int) Math.floor(player.getY()), (int) Math.floor(player.getZ()), false, null, true);
                 }
@@ -159,7 +159,7 @@ public class CListClient implements ClientModInitializer{
         CListVariables.data.waypoints.addFirst(waypoint);
         CListVariables.savedSinceLastUpdate = false;
         if(!death){
-            CListVariables.minecraftClient.setScreen(new CListElementConfigScreen(waypoint, viaKeybind));
+            CListVariables.minecraftClient.gui.setScreen(new CListElementConfigScreen(waypoint, viaKeybind));
         }
     }
 
@@ -168,7 +168,7 @@ public class CListClient implements ClientModInitializer{
         CListFolder folder = new CListFolder(Component.translatable("folder.new.folder").getString(), CListVariables.lastWorld.dimension().identifier().toString(), new CListElementColor(), true, true);
         CListVariables.data.folders.addFirst(folder);
         CListVariables.savedSinceLastUpdate = false;
-        CListVariables.minecraftClient.setScreen(new CListElementConfigScreen(folder, false));
+        CListVariables.minecraftClient.gui.setScreen(new CListElementConfigScreen(folder, false));
     }
 
     public static void deleteElement(CListElement element){
