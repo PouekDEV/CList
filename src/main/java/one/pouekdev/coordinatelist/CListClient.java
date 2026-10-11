@@ -13,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 import eu.midnightdust.lib.config.MidnightConfig;
 
 import java.util.*;
@@ -29,20 +28,17 @@ public class CListClient implements ClientModInitializer{
     public void onInitializeClient(){
         openWaypointsKeybind = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "keybinds.waypoints.menu",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_M,
+                InputConstants.KEY_M,
                 MOD_CATEGORY
         ));
         addAWaypoint = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "keybinds.waypoint.add",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_B,
+                InputConstants.KEY_B,
                 MOD_CATEGORY
         ));
         toggleVisibility = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "keybinds.waypoints.toggle",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_J,
+                InputConstants.KEY_J,
                 MOD_CATEGORY
         ));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

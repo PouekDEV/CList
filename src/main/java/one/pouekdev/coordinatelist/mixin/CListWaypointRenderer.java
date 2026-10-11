@@ -154,7 +154,7 @@ public abstract class CListWaypointRenderer{
 
                 PoseStack poseStack = new PoseStack();
                 poseStack.translate(transformedPosition.x, transformedPosition.y, transformedPosition.z);
-                poseStack.mulPose(camera.rotation());
+                poseStack.rotate(camera.rotation());
                 poseStack.scale(-size, size, size);
 
                 CListElementColor color = waypoint.color;
@@ -186,15 +186,17 @@ public abstract class CListWaypointRenderer{
 
                     submitNodeCollector.order(1).submitCustom(SubmitRenderPhases.ALWAYS_ON_TOP, new TextFeatureRenderer.Submit(
                             new Matrix4f(poseStack.last().pose()),
-                            h,
-                            0.0f,
-                            Component.literal(labelText).getVisualOrderText(),
-                            false,
                             Font.DisplayMode.SEE_THROUGH,
                             LightCoordsUtil.FULL_BRIGHT,
-                            0xFFFFFFFF,
-                            bgColor,
-                            0
+                            new TextFeatureRenderer.Content.Text(
+                                    h,
+                                    0,
+                                    Component.literal(labelText).getVisualOrderText(),
+                                    false,
+                                    0xFFFFFFFF,
+                                    bgColor,
+                                    0
+                            )
                     ));
                 }
             }

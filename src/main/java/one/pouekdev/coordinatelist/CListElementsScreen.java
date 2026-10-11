@@ -1,5 +1,6 @@
 package one.pouekdev.coordinatelist;
 
+import com.mojang.blaze3d.platform.ClipboardManager;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
@@ -12,13 +13,11 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.compress.utils.Lists;
 import org.jspecify.annotations.NonNull;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.Locale;
@@ -34,7 +33,7 @@ public class CListElementsScreen extends Screen{
     private final String nothingSelected = "---";
     private String copyCoordinatesButtonText = nothingSelected;
     private final List<String> dimensions = Lists.newArrayList();
-    private final Window window = CListVariables.minecraftClient.getWindow();
+    private final ClipboardManager clipboardManager = new ClipboardManager();
 
     public CListElementsScreen(){
         super(Component.literal("Waypoints"));
@@ -71,11 +70,11 @@ public class CListElementsScreen extends Screen{
         }).bounds((this.width / 2) - 185, this.height - 25, 100, 20).build();
         copyCoordinatesButton = Button.builder(Component.literal(copyCoordinatesButtonText), _ -> {
             CListWaypoint waypoint = (CListWaypoint) selectedElement;
-            if(InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL)){
-                GLFW.glfwSetClipboardString(window.handle(), "/execute in " + waypoint.dimension + " run tp @s " + waypoint.x + " " + waypoint.y + " " + waypoint.z);
+            if(InputConstants.isKeyDown(InputConstants.KEY_LCONTROL)){
+                clipboardManager.setClipboard("/execute in " + waypoint.dimension + " run tp @s " + waypoint.x + " " + waypoint.y + " " + waypoint.z);
             }
             else{
-                GLFW.glfwSetClipboardString(window.handle(), waypoint.x + " " + waypoint.y + " " + waypoint.z);
+                clipboardManager.setClipboard(waypoint.x + " " + waypoint.y + " " + waypoint.z);
             }
         }).bounds((this.width / 2) - 75, this.height - 25, 150, 20).build();
         copyCoordinatesButton.setTooltip(Tooltip.create(Component.translatable("tooltip.copy.waypoint.coordinates")));
@@ -113,22 +112,22 @@ public class CListElementsScreen extends Screen{
 
     @Override
     public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick){
-        if(copyCoordinatesButton.isHovered() && copyCoordinatesButton.active && event.button() == 1){
+        if(copyCoordinatesButton.isHovered() && copyCoordinatesButton.active && event.button() == InputConstants.MOUSE_BUTTON_RIGHT){
             CListWaypoint waypoint = (CListWaypoint) selectedElement;
             if(waypoint.dimension.equals("minecraft:overworld")){
-                if(InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL)){
+                if(InputConstants.isKeyDown(InputConstants.KEY_LCONTROL)){
                     CListClient.addNewWaypoint((int) Math.round(waypoint.x / 8.0), waypoint.y, (int) Math.round(waypoint.z / 8.0), false, "minecraft:the_nether", true);
                 }
                 else{
-                    GLFW.glfwSetClipboardString(window.handle(), Math.round(waypoint.x / 8.0) + " " + waypoint.y + " " + Math.round(waypoint.z / 8.0));
+                    clipboardManager.setClipboard(Math.round(waypoint.x / 8.0) + " " + waypoint.y + " " + Math.round(waypoint.z / 8.0));
                 }
             }
             else if(waypoint.dimension.equals("minecraft:the_nether")){
-                if(InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL)){
+                if(InputConstants.isKeyDown(InputConstants.KEY_LCONTROL)){
                     CListClient.addNewWaypoint(waypoint.x * 8, waypoint.y, waypoint.z * 8, false, "minecraft:overworld", true);
                 }
                 else{
-                    GLFW.glfwSetClipboardString(window.handle(), waypoint.x * 8 + " " + waypoint.y + " " + waypoint.z * 8);
+                    clipboardManager.setClipboard(waypoint.x * 8 + " " + waypoint.y + " " + waypoint.z * 8);
                 }
             }
             copyCoordinatesButton.playDownSound(CListVariables.minecraftClient.getSoundManager());
@@ -245,7 +244,7 @@ public class CListElementsScreen extends Screen{
 
         @Override
         public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick){
-            if(event.button() == 0){
+            if(event.button() == InputConstants.MOUSE_BUTTON_LEFT){
                 isDragging = false;
                 dropOffEntry = null;
                 ghostFollower = null;
@@ -379,7 +378,7 @@ public class CListElementsScreen extends Screen{
 
         @Override
         public boolean mouseDragged(MouseButtonEvent event, double dx, double dy){
-            if(event.button() == 0){
+            if(event.button() == InputConstants.MOUSE_BUTTON_LEFT){
                 if(this.isOverScrollbar(event.x(), event.y()) && !isDragging){
                     startedFromScrollbar = true;
                 }

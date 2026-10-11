@@ -1,6 +1,5 @@
 package one.pouekdev.coordinatelist;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import net.minecraft.client.gui.components.*;
@@ -220,7 +219,6 @@ public class CListElementConfigScreen extends Screen{
 
         @Override
         public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta){
-            GlStateManager._enableDepthTest();
             int color = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
             float[] colorFloat = Color.RGBtoHSB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, null);
             if(type == SliderType.H){
